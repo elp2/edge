@@ -9,6 +9,12 @@ MMU::MMU() {
     // Initialize memory to random values.
 }
 
+uint8_t MMU::ByteAt(uint16_t address) {
+    assert(address < romSize);
+    uint8_t byte = (uint8_t)rom[address];
+    return byte;
+}
+
 std::string MMU::GameTitle() {
     int TITLE_START = 0x134;
     int TITLE_MAX_LENGTH = 16;
@@ -32,11 +38,11 @@ bool MMU::LoadRom() {
     }
 
     file.seekg(0, ios::end);
-    streampos size = file.tellg();
+    romSize = file.tellg();
     file.seekg(0, ios::beg);
-    rom = new char[size];
+    rom = new char[romSize];
     file.seekg(0, ios::beg);
-    file.read(rom, size);
+    file.read(rom, romSize);
     file.close();
 
     Validate();

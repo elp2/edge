@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "CPU.hpp"
 #include "MMU.hpp"
 
 int main() {
@@ -14,4 +15,7 @@ int main() {
     cout << endl;
 
     cout << "Title: " << mmu.GameTitle() << endl;
+
+    CPU cpu = CPU(mmu);
+    cpu.Debugger();    
 }
