@@ -34,7 +34,7 @@ class CPU {
     CPU(MMU mmu);
     ~CPU();
 
-    Command *CommandForCommand(uint8_t opcode);
+    Command *CommandForOpcode(uint8_t opcode);
 
     // Resets the CPU to base state.
     void Reset();
@@ -42,7 +42,7 @@ class CPU {
     // Prints debugger info.
     void Debugger();
 
-    uint8_t ReadCommandAtPC();
+    uint8_t ReadOpcodeAtPC();
     void AdvancePC();
     void Step();
 
@@ -70,7 +70,6 @@ class CPU {
 private:
     MMU mmu;
     Command *opcodes[256];
-
 
     void RegisterCommands();
     bool interruptsEnabled;

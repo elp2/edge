@@ -41,7 +41,7 @@ void MiscCommand::Run(CPU *cpu, MMU *mmu) {
         break;
     case 0x10:
         cpu->stopRequested = true;
-        nextPCByte = cpu->ReadCommandAtPC();
+        nextPCByte = cpu->ReadOpcodeAtPC();
         assert(nextPCByte == 0x00);
         cpu->AdvancePC();
         break;

@@ -41,7 +41,7 @@ void CPU::RegisterCommands() {
     registerMiscCommands(this);
 }
 
-Command *CPU::CommandForCommand(uint8_t opcode) {
+Command *CPU::CommandForOpcode(uint8_t opcode) {
     if (opcodes[opcode] == NULL) {
         cout << "No opcode for " << unsigned(opcode) << endl;
         assert(false);
@@ -65,10 +65,10 @@ void CPU::Step() {
         assert(false); // TODO!
     }
 
-    uint8_t opcode = ReadCommandAtPC();
+    uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
 
-    Command *command = CommandForCommand(opcode);
+    Command *command = CommandForOpcode(opcode);
     cout << "Command: " << command->description << endl;
     command->Run(this, &mmu);
     // Time instruction takes
@@ -235,7 +235,7 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
 
 
 
-uint8_t CPU::ReadCommandAtPC() {
+uint8_t CPU::ReadOpcodeAtPC() {
     return mmu.ByteAt(pc);
 }
 
