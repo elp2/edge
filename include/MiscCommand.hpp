@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Opcode.hpp"
+#include "Command.hpp"
 
-class MiscCommand : public Opcode {
+class MiscCommand : public Command {
 
 public:
     MiscCommand(uint8_t opcode, string description, int cycles);

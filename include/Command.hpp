@@ -6,9 +6,9 @@
 #include "CPU.hpp"
 #include "MMU.hpp"
 
-class Opcode {
+class Command {
  public:
-    virtual ~Opcode() = default;
+    virtual ~Command() = default;
  
     virtual void Run(CPU *cpu, MMU *mmu) {(void)cpu; (void)mmu;};
 

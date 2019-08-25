@@ -3,15 +3,15 @@
 #include <ios>
 #include <iostream>
 
-#include "Opcode.hpp"
-#include "JumpOpcode.hpp"
+#include "Command.hpp"
+#include "JumpCommand.hpp"
 #include "MiscCommand.hpp"
-#include "NopOpcode.hpp"
+#include "NopCommand.hpp"
 
 CPU::CPU(MMU mmu) {
     this->mmu = mmu;
 
-    RegisterOpcodes();
+    RegisterCommands();
 
     Reset();
 }
@@ -20,8 +20,8 @@ CPU::~CPU() {
 
 }
 
-void CPU::RegisterOpcode(Opcode *command) {
-    Opcode *existingCommand = opcodes[command->opcode];
+void CPU::RegisterCommand(Command *command) {
+    Command *existingCommand = opcodes[command->opcode];
 
     cout << unsigned(command->opcode) << endl;
     if (existingCommand != NULL) {
@@ -32,16 +32,16 @@ void CPU::RegisterOpcode(Opcode *command) {
     cout << "Registered 0x" << hex << unsigned(command->opcode) << " : " << command->description << endl;
 }
 
-void CPU::RegisterOpcodes() {
+void CPU::RegisterCommands() {
     
-    RegisterOpcode(new NopOpcode(0x00));
+    RegisterCommand(new NopCommand(0x00));
 
-    RegisterOpcode(new JumpOpcode(0xC3, "JP nn", 12));
+    RegisterCommand(new JumpCommand(0xC3, "JP nn", 12));
 
     registerMiscCommands(this);
 }
 
-Opcode *CPU::CommandForOpcode(uint8_t opcode) {
+Command *CPU::CommandForCommand(uint8_t opcode) {
     if (opcodes[opcode] == NULL) {
         cout << "No opcode for " << unsigned(opcode) << endl;
         assert(false);
@@ -65,11 +65,11 @@ void CPU::Step() {
         assert(false); // TODO!
     }
 
-    uint8_t opcode = ReadOpcodeAtPC();
+    uint8_t opcode = ReadCommandAtPC();
     AdvancePC();
 
-    Opcode *command = CommandForOpcode(opcode);
-    cout << "Opcode: " << command->description << endl;
+    Command *command = CommandForCommand(opcode);
+    cout << "Command: " << command->description << endl;
     command->Run(this, &mmu);
     // Time instruction takes
     // Directly updates - MMU, CPU
@@ -235,7 +235,7 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
 
 
 
-uint8_t CPU::ReadOpcodeAtPC() {
+uint8_t CPU::ReadCommandAtPC() {
     return mmu.ByteAt(pc);
 }
 

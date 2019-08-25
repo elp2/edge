@@ -1,10 +1,9 @@
-#include "Opcodes.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
 
 #include <iostream>
 
-class Opcode {
+class Command {
  public:
     int cycles;
     uint8_t opcode;
@@ -14,30 +13,9 @@ class Opcode {
 
 };
 
-Opcodes::Opcodes(CPU *cpu) {
-    this->cpu = cpu;
-}
-
-Opcodes::~Opcodes() {
-
-}
-
-void Opcodes::RunOpcode(uint8_t opcode) {
-    switch (opcode)
-    {
-    case 0x00:
-        
-        break;
-    case 0xCB:
-        cout << "Can't handle CB opcode!" << endl;
-    default:
-        break;
-    }
-}
-
-class PushOpcode : public Opcode {
+class PushCommand : public Command {
  public:
-    PushOpcode(uint8_t opcode, string description, Destination from, int cycles) {
+    PushCommand(uint8_t opcode, string description, Destination from, int cycles) {
         this->opcode = opcode;
         this->description = description;
         this->cycles = cycles;

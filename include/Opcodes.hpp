@@ -4,14 +4,14 @@
 
 using namespace std;
 
-// Holds Opcodes logic so we don't have to put them all in the CPU.
-class Opcodes {
+// Holds Commands logic so we don't have to put them all in the CPU.
+class Commands {
 
 public:
-    Opcodes(CPU *cpu);
-    ~Opcodes();
+    Commands(CPU *cpu);
+    ~Commands();
 
-    void RunOpcode(uint8_t opcode);
+    void RunCommand(uint8_t opcode);
 
 private:
     CPU *cpu;

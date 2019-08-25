@@ -1,16 +1,16 @@
-#include "JumpOpcode.hpp"
+#include "JumpCommand.hpp"
 
-JumpOpcode::JumpOpcode(uint8_t opcode, string description, int cycles) {
+JumpCommand::JumpCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
     this->description = description;
     this->cycles = cycles;
 }
 
-JumpOpcode::~JumpOpcode() {
+JumpCommand::~JumpCommand() {
 
 }
 
-void JumpOpcode::Run(CPU *cpu, MMU *mmu) {
+void JumpCommand::Run(CPU *cpu, MMU *mmu) {
     bool jump = false;
     uint16_t jumpAddress;
     switch (this->opcode)
@@ -34,10 +34,10 @@ void JumpOpcode::Run(CPU *cpu, MMU *mmu) {
 // JP (HL) E9 4
 
     // case // 
-//     ction Parameters Opcode Cycles
+//     ction Parameters Command Cycles
 //  JR n 18 8
 
-// uction Parameters Opcode Cycles
+// uction Parameters Command Cycles
 //  JR NZ,* 20 8
 //  JR Z,* 28 8
 //  JR NC,* 30 8

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-class Opcode;
+class Command;
 
 enum Destination {Register_A, Register_B, Register_C, Register_D, Register_E, Register_F, Register_H, Register_L, Register_BC, Register_DE, Register_HL, Register_SP, Register_PC, Eat_PC_Byte, Eat_PC_Word};
 
@@ -34,7 +34,7 @@ class CPU {
     CPU(MMU mmu);
     ~CPU();
 
-    Opcode *CommandForOpcode(uint8_t opcode);
+    Command *CommandForCommand(uint8_t opcode);
 
     // Resets the CPU to base state.
     void Reset();
@@ -42,7 +42,7 @@ class CPU {
     // Prints debugger info.
     void Debugger();
 
-    uint8_t ReadOpcodeAtPC();
+    uint8_t ReadCommandAtPC();
     void AdvancePC();
     void Step();
 
@@ -56,7 +56,7 @@ class CPU {
     void Set8Bit(Destination d, uint8_t value);
     void Set16Bit(Destination d, uint16_t value);
 
-    void RegisterOpcode(Opcode *command);
+    void RegisterCommand(Command *command);
 
     // Special Actions.
     bool haltRequested;
@@ -69,9 +69,9 @@ class CPU {
 
 private:
     MMU mmu;
-    Opcode *opcodes[256];
+    Command *opcodes[256];
 
 
-    void RegisterOpcodes();
+    void RegisterCommands();
     bool interruptsEnabled;
 };

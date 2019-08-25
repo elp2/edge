@@ -41,7 +41,7 @@ void MiscCommand::Run(CPU *cpu, MMU *mmu) {
         break;
     case 0x10:
         cpu->stopRequested = true;
-        nextPCByte = cpu->ReadOpcodeAtPC();
+        nextPCByte = cpu->ReadCommandAtPC();
         assert(nextPCByte == 0x00);
         cpu->AdvancePC();
         break;
@@ -61,12 +61,12 @@ void MiscCommand::Run(CPU *cpu, MMU *mmu) {
 }
 
 void registerMiscCommands(CPU *cpu) {
-    cpu->RegisterOpcode(new MiscCommand(0x27, "DAA", 4));
-    cpu->RegisterOpcode(new MiscCommand(0x2F, "CPL", 4));
-    cpu->RegisterOpcode(new MiscCommand(0x3F, "CCF", 4));
-    cpu->RegisterOpcode(new MiscCommand(0x37, "SCF", 4));
-    cpu->RegisterOpcode(new MiscCommand(0x76, "HALT", 4));
-    cpu->RegisterOpcode(new MiscCommand(0x10, "STOP", 4));
-    cpu->RegisterOpcode(new MiscCommand(0xF3, "DI", 4));
-    cpu->RegisterOpcode(new MiscCommand(0xFB, "EI", 4));
+    cpu->RegisterCommand(new MiscCommand(0x27, "DAA", 4));
+    cpu->RegisterCommand(new MiscCommand(0x2F, "CPL", 4));
+    cpu->RegisterCommand(new MiscCommand(0x3F, "CCF", 4));
+    cpu->RegisterCommand(new MiscCommand(0x37, "SCF", 4));
+    cpu->RegisterCommand(new MiscCommand(0x76, "HALT", 4));
+    cpu->RegisterCommand(new MiscCommand(0x10, "STOP", 4));
+    cpu->RegisterCommand(new MiscCommand(0xF3, "DI", 4));
+    cpu->RegisterCommand(new MiscCommand(0xFB, "EI", 4));
 }
