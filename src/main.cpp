@@ -17,5 +17,8 @@ int main() {
     cout << "Title: " << mmu.GameTitle() << endl;
 
     CPU cpu = CPU(mmu);
-    cpu.Debugger();    
+    cpu.Debugger();
+    for (int i = 0; i < 10; i++){
+        cpu.Step();
+    }    
 }

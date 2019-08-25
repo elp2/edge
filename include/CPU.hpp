@@ -5,6 +5,10 @@
 
 using namespace std;
 
+class Opcode;
+
+enum Destination {Register_A, Register_B, Register_C, Register_D, Register_E, Register_F, Register_H, Register_L, Register_BC, Register_DE, Register_HL, Register_SP, Register_PC, Eat_PC_Byte, Eat_PC_Word};
+
 struct flags_t {
     bool z;
     bool n;
@@ -12,10 +16,12 @@ struct flags_t {
     bool c;
 };
 
-enum Register {Register_A, Register_B, Register_C, Register_D, Register_E, Register_F, Register_H, Register_L, Register_BC, Register_DE, Register_HL, Register_SP};
-
 class CPU {
     public:
+
+    uint8_t a,b,c,d,e,f,h,l;
+
+    // uint16_t ReadHL();
 
     // Points to the next command to be executed.
     uint16_t pc;
@@ -23,12 +29,12 @@ class CPU {
     // Points to the stack position.
     uint16_t sp;
 
-    uint8_t a;
-
     flags_t flags;
 
     CPU(MMU mmu);
     ~CPU();
+
+    Opcode *CommandForOpcode(uint8_t opcode);
 
     // Resets the CPU to base state.
     void Reset();
@@ -36,18 +42,36 @@ class CPU {
     // Prints debugger info.
     void Debugger();
 
-    // 8 bit loads.
+    uint8_t ReadOpcodeAtPC();
+    void AdvancePC();
+    void Step();
 
-    // 16 bit loads.
+    void StackDelta(int delta);
 
-    // --push/pop count as 16 bit loads.
 
-    // 8 bit arithmetic
+    bool Requires16Bits(Destination d);
+    uint8_t Read8Bit(Destination d);
+    uint16_t Read16Bit(Destination d);
 
-    // 16 bit arithmetic
+    void Set8Bit(Destination d, uint8_t value);
+    void Set16Bit(Destination d, uint16_t value);
 
-    // Misc
-        // Swap nibbles.
+    void RegisterOpcode(Opcode *command);
+
+    // Special Actions.
+    bool haltRequested;
+    bool stopRequested;
+    bool disableInterruptsRequested;
+    bool enableInterruptsRequested;
+
+    // Checks the state of interrupts.
+    bool InterruptsEnabled();
+
 private:
     MMU mmu;
+    Opcode *opcodes[256];
+
+
+    void RegisterOpcodes();
+    bool interruptsEnabled;
 };

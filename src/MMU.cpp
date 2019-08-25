@@ -15,6 +15,12 @@ uint8_t MMU::ByteAt(uint16_t address) {
     return byte;
 }
 
+uint16_t MMU::WordAt(uint16_t address) {
+    uint8_t lsb = ByteAt(address);
+    uint16_t result = (ByteAt(address+1) << 8)|lsb;
+    return result;
+}
+
 std::string MMU::GameTitle() {
     int TITLE_START = 0x134;
     int TITLE_MAX_LENGTH = 16;
@@ -40,9 +46,13 @@ bool MMU::LoadRom() {
     file.seekg(0, ios::end);
     romSize = file.tellg();
     file.seekg(0, ios::beg);
-    rom = new char[romSize];
+    rom = new uint8_t[romSize];
     file.seekg(0, ios::beg);
-    file.read(rom, romSize);
+    char *unsignedContents = new char[romSize];
+    file.read(unsignedContents, romSize);
+    for (uint32_t i=0; i < romSize; i++) {
+        rom[i] = unsignedContents[i];    
+    }
     file.close();
 
     Validate();

@@ -13,6 +13,8 @@ public:
     ~MMU();
 
     uint8_t ByteAt(uint16_t address);
+    // LS Byte First.
+    uint16_t WordAt(uint16_t address);
 
     // Returns the max 16 character upper case game title.
     std::string GameTitle();
@@ -26,6 +28,6 @@ public:
     void Validate();
 
 private:
-    char * rom;
+    uint8_t *rom;
     uint32_t romSize;
 };
