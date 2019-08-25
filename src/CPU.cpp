@@ -22,7 +22,6 @@ CPU::~CPU() {
 }
 
 void CPU::RegisterCommand(Command *command) {
-    cout << unsigned(command->opcode) << endl;
     Command *existingCommand = commands[command->opcode];
     if (existingCommand != NULL) {
         cout << "Already have an opcode at 0x" << hex << unsigned(existingCommand->opcode) << ": " << existingCommand->description << " : New = " << command->description << endl;
@@ -38,6 +37,16 @@ void CPU::RegisterCommands() {
     registerJumpCommands(this);
     registerLoadCommands(this);
     registerMiscCommands(this);
+
+    int implementedCommands = 0;
+    for (int i = 0; i < 256; i++) {
+        if (commands[i] != NULL) {
+            implementedCommands++;
+        }
+    }
+    cout << implementedCommands << " / " << "256 commands implemented!" << endl;
+
+    cout << "and 0 CB opcodes (0%)" << endl;
 }
 
 Command *CPU::CommandForOpcode(uint8_t opcode) {
@@ -95,8 +104,8 @@ bool CPU::Requires16Bits(Destination d) {
     case Register_F:
     case Register_H:
     case Register_L:
+    case Eat_PC_Byte:
         return false;
-    
     default:
         return true;
     }
@@ -144,23 +153,31 @@ uint16_t CPU::Read16Bit(Destination d) {
     case Register_H:
     case Register_L:
     case Eat_PC_Byte:
+        cout << "Tried reading 0x" << hex << unsigned(d) << " as a 16 bit value." << endl;
         assert(false);
+    case Address_BC:
     case Register_BC:
+    case Address_DE:
     case Register_DE:
+    case Address_HL:
     case Register_HL:
+        cout << "Time to write 16 bit reg reading!" << endl;
+        assert(false);
         // TODO: 16 bit registers.
         return 0xDEAD;
-        break;
+    case Address_SP:
     case Register_SP:
         return sp;
     case Register_PC:
         return pc;
+    case Address_nn:
     case Eat_PC_Word:
         word = mmu.WordAt(pc);
         AdvancePC();
         AdvancePC();
         return word;
     default:
+        cout << "Unknown desination for get: " << d << endl;
         assert(false);
     }
     return 0xDEAD;
@@ -200,10 +217,13 @@ void CPU::Set8Bit(Destination d, uint8_t value) {
         // return pcByte;
         break;
     default:
+        cout << "Can't read 8 bit: " << d << endl;
         assert(false);
     }
 }
+
 void CPU::Set16Bit(Destination d, uint16_t value) {
+    uint16_t address;
     switch (d)
     {
     case Register_A:
@@ -227,12 +247,24 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
     case Register_SP:
         sp = value;
         break;
+    case Eat_PC_Word:
+        mmu.SetWordAt(pc, value);
+        //NOP for now.
+        // TODO ???
+        break;
+    case Address_BC:
+    case Address_DE:
+    case Address_HL:
+    case Address_SP:
+    case Address_nn:
+        address = Read16Bit(d);
+        mmu.SetWordAt(address, value);
+        break;
     default:
+        cout << "Unknown 16 bit set: " << d << endl;
         assert(false);
     }
 }
-
-
 
 uint8_t CPU::ReadOpcodeAtPC() {
     return mmu.ByteAt(pc);

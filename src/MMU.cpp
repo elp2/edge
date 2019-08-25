@@ -21,6 +21,16 @@ uint16_t MMU::WordAt(uint16_t address) {
     return result;
 }
 
+void MMU::SetByteAt(uint16_t address, uint8_t byte) {
+    // TODO: Probably shouldn't be setting the ROM, how does RAM work?
+    rom[address] = byte;
+}
+
+void MMU::SetWordAt(uint16_t address, uint16_t word) {
+    SetByteAt(address, word & 0xff);
+    SetByteAt(address + 1, word >> 8);
+}
+
 std::string MMU::GameTitle() {
     int TITLE_START = 0x134;
     int TITLE_MAX_LENGTH = 16;
