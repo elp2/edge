@@ -5,6 +5,7 @@
 
 #include "Command.hpp"
 #include "JumpCommand.hpp"
+#include "LoadCommand.hpp"
 #include "MiscCommand.hpp"
 #include "NopCommand.hpp"
 
@@ -21,32 +22,30 @@ CPU::~CPU() {
 }
 
 void CPU::RegisterCommand(Command *command) {
-    Command *existingCommand = opcodes[command->opcode];
-
     cout << unsigned(command->opcode) << endl;
+    Command *existingCommand = commands[command->opcode];
     if (existingCommand != NULL) {
         cout << "Already have an opcode at 0x" << hex << unsigned(existingCommand->opcode) << ": " << existingCommand->description << " : New = " << command->description << endl;
         assert(false);
     }
-    opcodes[command->opcode] = command;
+    commands[command->opcode] = command;
     cout << "Registered 0x" << hex << unsigned(command->opcode) << " : " << command->description << endl;
 }
 
 void CPU::RegisterCommands() {
-    
-    RegisterCommand(new NopCommand(0x00));
-
-    RegisterCommand(new JumpCommand(0xC3, "JP nn", 12));
-
+    commands = array<Command *, 256>();
+    registerNopCommands(this);
+    registerJumpCommands(this);
+    registerLoadCommands(this);
     registerMiscCommands(this);
 }
 
 Command *CPU::CommandForOpcode(uint8_t opcode) {
-    if (opcodes[opcode] == NULL) {
+    if (commands[opcode] == NULL) {
         cout << "No opcode for " << unsigned(opcode) << endl;
         assert(false);
     }
-    return opcodes[opcode];
+    return commands[opcode];
 }
 
 void CPU::Step() {

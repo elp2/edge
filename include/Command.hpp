@@ -2,9 +2,12 @@
 
 #include <cstdint>
 #include <iostream>
+#include <string>
 
-#include "CPU.hpp"
-#include "MMU.hpp"
+using namespace std;
+
+class CPU;
+class MMU;
 
 class Command {
  public:

@@ -1,5 +1,8 @@
 #include "MiscCommand.hpp"
 
+#include "CPU.hpp"
+#include "MMU.hpp"
+
 MiscCommand::MiscCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
     this->description = description;
@@ -41,7 +44,7 @@ void MiscCommand::Run(CPU *cpu, MMU *mmu) {
         break;
     case 0x10:
         cpu->stopRequested = true;
-        nextPCByte = cpu->ReadOpcodeAtPC();
+        nextPCByte = cpu->Read8Bit(Eat_PC_Byte);
         assert(nextPCByte == 0x00);
         cpu->AdvancePC();
         break;

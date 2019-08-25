@@ -1,5 +1,8 @@
 #include "JumpCommand.hpp"
 
+#include "CPU.hpp"
+#include "MMU.hpp"
+
 JumpCommand::JumpCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
     this->description = description;
@@ -11,6 +14,7 @@ JumpCommand::~JumpCommand() {
 }
 
 void JumpCommand::Run(CPU *cpu, MMU *mmu) {
+    (void)mmu; // TODO remove - temporarily silencing warning.
     bool jump = false;
     uint16_t jumpAddress;
     switch (this->opcode)
@@ -52,4 +56,8 @@ void JumpCommand::Run(CPU *cpu, MMU *mmu) {
 
     cout << "Jumping to 0x" << hex << unsigned(jumpAddress) << endl;
     cpu->Set16Bit(Register_PC, jumpAddress);
+}
+
+void registerJumpCommands(CPU *cpu) {
+     cpu->RegisterCommand(new JumpCommand(0xC3, "JP nn", 12));
 }

@@ -1,13 +1,13 @@
 #pragma once
 
+
+#include <array>
 #include <cstdint>
+#include "Command.hpp"
+#include "Destination.hpp"
 #include "MMU.hpp"
 
 using namespace std;
-
-class Command;
-
-enum Destination {Register_A, Register_B, Register_C, Register_D, Register_E, Register_F, Register_H, Register_L, Register_BC, Register_DE, Register_HL, Register_SP, Register_PC, Eat_PC_Byte, Eat_PC_Word};
 
 struct flags_t {
     bool z;
@@ -69,7 +69,7 @@ class CPU {
 
 private:
     MMU mmu;
-    Command *opcodes[256];
+    array<Command *, 256> commands;
 
     void RegisterCommands();
     bool interruptsEnabled;

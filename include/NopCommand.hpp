@@ -9,3 +9,5 @@ public:
     ~NopCommand();
     void Run(CPU *cpu, MMU *mmu);
 };
+
+void registerNopCommands(CPU *cpu);

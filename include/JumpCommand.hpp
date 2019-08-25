@@ -10,3 +10,5 @@ public:
 
     void Run(CPU *cpu, MMU *mmu);    
 };
+
+void registerJumpCommands(CPU *cpu);
