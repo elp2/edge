@@ -40,6 +40,10 @@ void JumpCommand::Run(CPU *cpu, MMU *mmu) {
     // case // 
 //     ction Parameters Command Cycles
 //  JR n 18 8
+    case 0x18:
+        jump=true;
+        jumpAddress = cpu->pc + cpu->Read8Bit(Eat_PC_Byte);
+        break;
 
 // uction Parameters Command Cycles
 //  JR NZ,* 20 8
@@ -47,6 +51,7 @@ void JumpCommand::Run(CPU *cpu, MMU *mmu) {
 //  JR NC,* 30 8
 //  JR C,* 38 8
     default:
+        cout << "un-implemented Jump: " << hex << unsigned(opcode) << endl;
         break;
     }
 
@@ -60,4 +65,5 @@ void JumpCommand::Run(CPU *cpu, MMU *mmu) {
 
 void registerJumpCommands(CPU *cpu) {
      cpu->RegisterCommand(new JumpCommand(0xC3, "JP nn", 12));
+     cpu->RegisterCommand(new JumpCommand(0x18, "JR n", 8));
 }

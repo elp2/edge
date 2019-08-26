@@ -56,6 +56,9 @@ class CPU {
     void Set8Bit(Destination d, uint8_t value);
     void Set16Bit(Destination d, uint16_t value);
 
+    void Push8Bit(uint8_t byte);
+    void Push16Bit(uint16_t word);
+
     void RegisterCommand(Command *command);
 
     // Special Actions.

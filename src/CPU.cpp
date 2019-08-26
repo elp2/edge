@@ -4,10 +4,14 @@
 #include <iostream>
 
 #include "Command.hpp"
+#include "CallCommand.hpp"
 #include "JumpCommand.hpp"
 #include "LoadCommand.hpp"
 #include "MiscCommand.hpp"
 #include "NopCommand.hpp"
+
+#define HIGHER8(word) (word >> 8) & 0xff
+#define LOWER8(word) word & 0xff
 
 CPU::CPU(MMU mmu) {
     this->mmu = mmu;
@@ -37,6 +41,7 @@ void CPU::RegisterCommands() {
     registerJumpCommands(this);
     registerLoadCommands(this);
     registerMiscCommands(this);
+    registerCallCommands(this);
 
     int implementedCommands = 0;
     for (int i = 0; i < 256; i++) {
@@ -276,10 +281,19 @@ uint8_t CPU::ReadOpcodeAtPC() {
     return mmu.ByteAt(pc);
 }
 
+void CPU::Push8Bit(uint8_t byte) {
+    // Stack pointer grows down before anything is pushed.
+    sp -= 1;
+    mmu.SetByteAt(sp, byte);
+}
+void CPU::Push16Bit(uint16_t word) {
+    // TODO is this the right order???
+    Push8Bit(HIGHER8(word));
+    Push8Bit(LOWER8(word));
+}
+
 void CPU::StackDelta(int delta) {
     assert(delta == 1 || delta == -1);
-
-
 }
 
 void CPU::AdvancePC() {
