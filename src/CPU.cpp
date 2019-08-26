@@ -235,11 +235,17 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
     case Register_H:
     case Register_L:
     case Eat_PC_Byte:
+        cout << "0x" << hex << unsigned(d) << " is not 16 bits." << endl;
         assert(false);
     case Register_BC:
+        b = (value >> 8) & 0xff;
+        c = value & 0xff;
     case Register_DE:
+        this->d = (value >> 8) & 0xff;
+        e = value & 0xff;
     case Register_HL:
-        assert(false);
+        h = (value >> 8) & 0xff;
+        l = value & 0xff;
         break;
     case Register_PC:
         pc = value;
