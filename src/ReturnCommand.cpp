@@ -18,7 +18,6 @@ void ReturnCommand::Run(CPU *cpu, MMU *mmu) {
 
     // TODO - when we take a branch it eats 12 more cycles?
 
-    uint64_t address;
     switch (this->opcode)
     {  
         case 0xc9:

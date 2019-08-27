@@ -23,7 +23,7 @@ void MiscCommand::Run(CPU *cpu, MMU *mmu) {
         assert(false); // TODO!
         break;
     case 0x2F:
-        cpu->a = ~cpu->a;
+        cpu->Set8Bit(Register_A, ~cpu->Read8Bit(Register_A));
         // TODO: n, h
         assert(false); // TODO!
         break;

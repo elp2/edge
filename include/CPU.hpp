@@ -19,16 +19,6 @@ struct flags_t {
 class CPU {
     public:
 
-    uint8_t a,b,c,d,e,f,h,l;
-
-    // uint16_t ReadHL();
-
-    // Points to the next command to be executed.
-    uint16_t pc;
-
-    // Points to the stack position.
-    uint16_t sp;
-
     flags_t flags;
 
     CPU(MMU mmu);
@@ -82,4 +72,13 @@ private:
 
     void RegisterCommands();
     bool interruptsEnabled;
+
+    uint8_t a,b,c,d,e,f,h,l;
+
+    // Points to the next command to be executed.
+    uint16_t pc;
+
+    // Points to the stack position.
+    uint16_t sp;
+
 };
