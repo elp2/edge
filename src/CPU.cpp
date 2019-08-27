@@ -100,6 +100,8 @@ uint8_t CPU::Get8Bit(Destination d) {
     case Register_E:
         return e;
     case Register_F:
+        // TODO Remove F - it should be covered by flags variable instead.
+        assert(false);
         return f;
     case Register_H:
         return h;

@@ -14,3 +14,38 @@ uint16_t build16(uint8_t lsb, uint8_t msb) {
 
     return word;
 }
+
+Destination destinationForColumn(uint8_t column) {
+    switch (column)
+    {
+    case 0x00:
+    case 0x08:
+        return Register_B;
+    case 0x01:
+    case 0x09:
+        return Register_C;
+    case 0x02:
+    case 0x0a:
+        return Register_D;
+    case 0x03:
+    case 0x0b:
+        return Register_E;
+    case 0x04:
+    case 0x0c:
+        return Register_H;
+    case 0x05:
+    case 0x0d:
+        return Register_L;
+    case 0x06:
+    case 0x0e:
+        return Address_HL;
+    case 0x07:
+    case 0x0f:
+        return Register_A;
+    
+    default:
+        cout << "Unexpected destination for column: 0x" << hex << column << endl;
+        assert(false);
+        break;
+    }
+}

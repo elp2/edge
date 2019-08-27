@@ -2,6 +2,7 @@
 
 #include "BitCommand.hpp"
 #include "CallCommand.hpp"
+#include "CBCommand.hpp"
 #include "JumpCommand.hpp"
 #include "LoadCommand.hpp"
 #include "MiscCommand.hpp"
@@ -59,6 +60,10 @@ CommandFactory::~CommandFactory() {
 CBCommandFactory::CBCommandFactory() {
     name = "CB";
     cout << name << " created!" << endl;
+
+    for (int i = 0; i < 256; i++) {
+        RegisterCommand(new CBCommand(i));
+    }
 }
 
 CBCommandFactory::~CBCommandFactory() {
