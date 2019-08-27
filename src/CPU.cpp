@@ -123,7 +123,7 @@ bool CPU::Requires16Bits(Destination d) {
     }
 }
 
-uint8_t CPU::Read8Bit(Destination d) {
+uint8_t CPU::Get8Bit(Destination d) {
     uint8_t pcByte;
     uint8_t word;
     switch (d)
@@ -349,10 +349,6 @@ uint16_t CPU::Pop16Bit() {
     uint8_t lsb = Pop8Bit();
     uint8_t msb = Pop8Bit();
     return build16(lsb, msb);
-}
-
-void CPU::StackDelta(int delta) {
-    assert(delta == 1 || delta == -1);
 }
 
 void CPU::JumpAddress(uint16_t address) {

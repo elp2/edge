@@ -23,7 +23,7 @@ void MiscCommand::Run(CPU *cpu, MMU *mmu) {
         assert(false); // TODO!
         break;
     case 0x2F:
-        cpu->Set8Bit(Register_A, ~cpu->Read8Bit(Register_A));
+        cpu->Set8Bit(Register_A, ~cpu->Get8Bit(Register_A));
         // TODO: n, h
         assert(false); // TODO!
         break;
@@ -44,7 +44,7 @@ void MiscCommand::Run(CPU *cpu, MMU *mmu) {
         break;
     case 0x10:
         cpu->stopRequested = true;
-        nextPCByte = cpu->Read8Bit(Eat_PC_Byte);
+        nextPCByte = cpu->Get8Bit(Eat_PC_Byte);
         assert(nextPCByte == 0x00);
         cpu->AdvancePC();
         break;

@@ -36,11 +36,8 @@ class CPU {
     void AdvancePC();
     void Step();
 
-    void StackDelta(int delta);
-
-
     bool Requires16Bits(Destination d);
-    uint8_t Read8Bit(Destination d);
+    uint8_t Get8Bit(Destination d);
     uint16_t Read16Bit(Destination d);
 
     void Set8Bit(Destination d, uint8_t value);

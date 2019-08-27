@@ -26,9 +26,9 @@ void LoadCommand::Run(CPU *cpu, MMU *mmu) {
         }
     } else {
         if (to16Bit) {
-            cpu->Set16Bit(to, cpu->Read8Bit(from));
+            cpu->Set16Bit(to, cpu->Get8Bit(from));
         } else {
-            cpu->Set8Bit(to, cpu->Read8Bit(from));
+            cpu->Set8Bit(to, cpu->Get8Bit(from));
         }
         
     }
@@ -47,7 +47,7 @@ class SpecialLoadCommand : public Command {
 
     void Run(CPU *cpu, MMU *mmu) {
         if (opcode == 0xF8) {
-            uint8_t offset = cpu->Read8Bit(Eat_PC_Byte);
+            uint8_t offset = cpu->Get8Bit(Eat_PC_Byte);
             cpu->Set16Bit(Register_SP, 0xff00 + offset);
             cpu->flags.z = false;
             cpu->flags.n = false;
@@ -62,23 +62,23 @@ class SpecialLoadCommand : public Command {
         switch (opcode)
         {
         case 0xf2:
-            address = 0xff00 + cpu->Read8Bit(Register_C);
+            address = 0xff00 + cpu->Get8Bit(Register_C);
             value = mmu->ByteAt(address);
             cpu->Set8Bit(Register_A, value);
             break;
         case 0xf0:
             // LD A,($FF00+n) F0 12
-            address = 0xff00 + cpu->Read8Bit(Eat_PC_Byte);
+            address = 0xff00 + cpu->Get8Bit(Eat_PC_Byte);
             value = mmu->ByteAt(address);
             cpu->Set8Bit(Register_A, value);
             break;
         case 0xe2:
-            address = 0xff00 + cpu->Read8Bit(Register_C);
-            mmu->SetByteAt(address, cpu->Read8Bit(Register_A));
+            address = 0xff00 + cpu->Get8Bit(Register_C);
+            mmu->SetByteAt(address, cpu->Get8Bit(Register_A));
             break;
         case 0xe0:
-            address = 0xff00 + cpu->Read8Bit(Eat_PC_Byte);
-            mmu->SetByteAt(address, cpu->Read8Bit(Register_A));
+            address = 0xff00 + cpu->Get8Bit(Eat_PC_Byte);
+            mmu->SetByteAt(address, cpu->Get8Bit(Register_A));
             break;
 
         case 0x3a:
@@ -92,11 +92,11 @@ class SpecialLoadCommand : public Command {
             cpu->Set16Bit(Register_HL, address + 1);
             break;
         case 0x32:
-            mmu->SetByteAt(cpu->Read16Bit(Register_HL), cpu->Read8Bit(Register_A));
+            mmu->SetByteAt(cpu->Read16Bit(Register_HL), cpu->Get8Bit(Register_A));
             cpu->Set16Bit(Register_HL, cpu->Read16Bit(Register_HL) - 1);
             break;
         case 0x22:
-            mmu->SetByteAt(cpu->Read16Bit(Register_HL), cpu->Read8Bit(Register_A));
+            mmu->SetByteAt(cpu->Read16Bit(Register_HL), cpu->Get8Bit(Register_A));
             cpu->Set16Bit(Register_HL, cpu->Read16Bit(Register_HL) + 1);
             break;
 

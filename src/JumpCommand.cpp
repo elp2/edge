@@ -48,22 +48,22 @@ void JumpCommand::Run(CPU *cpu, MMU *mmu) {
         jumpCondition(cpu, true, cpu->Read16Bit(Register_HL));
         return;
     case 0x18:
-        jumpConditionRelative(cpu, true, cpu->Read8Bit(Eat_PC_Byte));
+        jumpConditionRelative(cpu, true, cpu->Get8Bit(Eat_PC_Byte));
         return;
     case 0x20:
-        jumpConditionRelative(cpu, !cpu->flags.z, cpu->Read8Bit(Eat_PC_Byte));
+        jumpConditionRelative(cpu, !cpu->flags.z, cpu->Get8Bit(Eat_PC_Byte));
         //  JR NZ,* 20 8
         return;
     case 0x28:
-        jumpConditionRelative(cpu, cpu->flags.z, cpu->Read8Bit(Eat_PC_Byte));
+        jumpConditionRelative(cpu, cpu->flags.z, cpu->Get8Bit(Eat_PC_Byte));
         //  JR Z,* 28 8
         return;
     case 0x30:
-        jumpConditionRelative(cpu, !cpu->flags.c, cpu->Read8Bit(Eat_PC_Byte));
+        jumpConditionRelative(cpu, !cpu->flags.c, cpu->Get8Bit(Eat_PC_Byte));
         //  JR NC,* 30 8
         return;
     case 0x38:
-        jumpConditionRelative(cpu, cpu->flags.c, cpu->Read8Bit(Eat_PC_Byte));
+        jumpConditionRelative(cpu, cpu->flags.c, cpu->Get8Bit(Eat_PC_Byte));
         //  JR C,* 38 8
         return;
     default:
