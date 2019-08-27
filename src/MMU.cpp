@@ -15,7 +15,7 @@ uint8_t MMU::GetByteAt(uint16_t address) {
     return byte;
 }
 
-uint16_t MMU::WordAt(uint16_t address) {
+uint16_t MMU::GetWordAt(uint16_t address) {
     uint8_t lsb = GetByteAt(address);
     uint16_t result = (GetByteAt(address+1) << 8)|lsb;
     return result;

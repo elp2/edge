@@ -158,7 +158,7 @@ uint8_t CPU::Get8Bit(Destination d) {
         return mmu.GetByteAt(Read16Bit(Register_HL));
         break;
     case Address_nn:
-        word = mmu.WordAt(pc);
+        word = mmu.GetWordAt(pc);
         AdvancePC();
         AdvancePC();
         return mmu.GetByteAt(word);
@@ -210,7 +210,7 @@ uint16_t CPU::Read16Bit(Destination d) {
     case Register_PC:
         return pc;
     case Eat_PC_Word:
-        word = mmu.WordAt(pc);
+        word = mmu.GetWordAt(pc);
         AdvancePC();
         AdvancePC();
         return word;

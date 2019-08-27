@@ -15,7 +15,7 @@ public:
     uint8_t GetByteAt(uint16_t address);
     void SetByteAt(uint16_t address, uint8_t byte);
     // LS Byte First.
-    uint16_t WordAt(uint16_t address);
+    uint16_t GetWordAt(uint16_t address);
     void SetWordAt(uint16_t address, uint16_t word);
 
     // Returns the max 16 character upper case game title.
