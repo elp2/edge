@@ -1,8 +1,8 @@
 #include "RestartCommand.hpp"
 
+#include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
-
 RestartCommand::RestartCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
     this->description = description;
@@ -14,6 +14,7 @@ RestartCommand::~RestartCommand() {
 }
 
 void RestartCommand::Run(CPU *cpu, MMU *mmu) {
+    (void)cpu;
     (void)mmu; // TODO remove - temporarily silencing warning.
     switch (this->opcode)
     {
@@ -26,6 +27,6 @@ void RestartCommand::Run(CPU *cpu, MMU *mmu) {
     }
 }
 
-void registerRestartCommands(CPU *cpu) {
-
+void registerRestartCommands(AbstractCommandFactory *factory) {
+    (void)factory;
 }

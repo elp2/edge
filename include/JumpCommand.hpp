@@ -2,6 +2,8 @@
 
 #include "Command.hpp"
 
+class AbstractCommandFactory;
+
 class JumpCommand : public Command {
 
 public:
@@ -11,4 +13,4 @@ public:
     void Run(CPU *cpu, MMU *mmu);    
 };
 
-void registerJumpCommands(CPU *cpu);
+void registerJumpCommands(AbstractCommandFactory *factory);

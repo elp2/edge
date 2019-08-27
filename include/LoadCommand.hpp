@@ -3,6 +3,8 @@
 #include "Command.hpp"
 #include "Destination.hpp"
 
+class AbstractCommandFactory;
+
 class LoadCommand : public Command {
 
  public:
@@ -16,4 +18,4 @@ class LoadCommand : public Command {
     Destination to;
 };
 
-void registerLoadCommands(CPU *cpu);
+void registerLoadCommands(AbstractCommandFactory *factory);

@@ -1,8 +1,8 @@
 #include "JumpCommand.hpp"
 
+#include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
-
 JumpCommand::JumpCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
     this->description = description;
@@ -75,20 +75,20 @@ void JumpCommand::Run(CPU *cpu, MMU *mmu) {
     assert(false);
 }
 
-void registerJumpCommands(CPU *cpu) {
-     cpu->RegisterCommand(new JumpCommand(0xC3, "JP nn", 12));
+void registerJumpCommands(AbstractCommandFactory *factory) {
+     factory->RegisterCommand(new JumpCommand(0xC3, "JP nn", 12));
 
-     cpu->RegisterCommand(new JumpCommand(0xC2, "JP NZ,nn", 12));
-     cpu->RegisterCommand(new JumpCommand(0xCA, "JP Z,nn", 12));
-     cpu->RegisterCommand(new JumpCommand(0xD2, "JP NC,nn", 12));
-     cpu->RegisterCommand(new JumpCommand(0xDA, "JP C,nn", 12));
+     factory->RegisterCommand(new JumpCommand(0xC2, "JP NZ,nn", 12));
+     factory->RegisterCommand(new JumpCommand(0xCA, "JP Z,nn", 12));
+     factory->RegisterCommand(new JumpCommand(0xD2, "JP NC,nn", 12));
+     factory->RegisterCommand(new JumpCommand(0xDA, "JP C,nn", 12));
 
-     cpu->RegisterCommand(new JumpCommand(0xE9, "JP (HL)", 4));
+     factory->RegisterCommand(new JumpCommand(0xE9, "JP (HL)", 4));
 
-     cpu->RegisterCommand(new JumpCommand(0x18, "JR n", 8));
+     factory->RegisterCommand(new JumpCommand(0x18, "JR n", 8));
 
-     cpu->RegisterCommand(new JumpCommand(0x20, "JR NZ,*", 8));
-     cpu->RegisterCommand(new JumpCommand(0x28, "JR Z,*", 8));
-     cpu->RegisterCommand(new JumpCommand(0x30, "JR NC,*", 8));
-     cpu->RegisterCommand(new JumpCommand(0x38, "JR C,*", 8));
+     factory->RegisterCommand(new JumpCommand(0x20, "JR NZ,*", 8));
+     factory->RegisterCommand(new JumpCommand(0x28, "JR Z,*", 8));
+     factory->RegisterCommand(new JumpCommand(0x30, "JR NC,*", 8));
+     factory->RegisterCommand(new JumpCommand(0x38, "JR C,*", 8));
 }

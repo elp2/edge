@@ -1,8 +1,8 @@
 #include <iostream>
 
+#include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
-
 int main() {
     cout << "Loading MMU";
     MMU mmu = MMU();

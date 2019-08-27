@@ -1,8 +1,8 @@
 #include "MiscCommand.hpp"
 
+#include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
-
 MiscCommand::MiscCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
     this->description = description;
@@ -63,13 +63,13 @@ void MiscCommand::Run(CPU *cpu, MMU *mmu) {
     }
 }
 
-void registerMiscCommands(CPU *cpu) {
-    cpu->RegisterCommand(new MiscCommand(0x27, "DAA", 4));
-    cpu->RegisterCommand(new MiscCommand(0x2F, "CPL", 4));
-    cpu->RegisterCommand(new MiscCommand(0x3F, "CCF", 4));
-    cpu->RegisterCommand(new MiscCommand(0x37, "SCF", 4));
-    cpu->RegisterCommand(new MiscCommand(0x76, "HALT", 4));
-    cpu->RegisterCommand(new MiscCommand(0x10, "STOP", 4));
-    cpu->RegisterCommand(new MiscCommand(0xF3, "DI", 4));
-    cpu->RegisterCommand(new MiscCommand(0xFB, "EI", 4));
+void registerMiscCommands(AbstractCommandFactory *factory) {
+    factory->RegisterCommand(new MiscCommand(0x27, "DAA", 4));
+    factory->RegisterCommand(new MiscCommand(0x2F, "CPL", 4));
+    factory->RegisterCommand(new MiscCommand(0x3F, "CCF", 4));
+    factory->RegisterCommand(new MiscCommand(0x37, "SCF", 4));
+    factory->RegisterCommand(new MiscCommand(0x76, "HALT", 4));
+    factory->RegisterCommand(new MiscCommand(0x10, "STOP", 4));
+    factory->RegisterCommand(new MiscCommand(0xF3, "DI", 4));
+    factory->RegisterCommand(new MiscCommand(0xFB, "EI", 4));
 }

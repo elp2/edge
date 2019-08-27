@@ -2,6 +2,8 @@
 
 #include "Command.hpp"
 
+class AbstractCommandFactory;
+
 class BitCommand : public Command {
 
 public:
@@ -10,4 +12,4 @@ public:
     void Run(CPU *cpu, MMU *mmu);
 };
 
-void registerBitCommands(CPU *cpu);
+void registerBitCommands(AbstractCommandFactory *factory);

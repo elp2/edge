@@ -1,5 +1,6 @@
 #include "BitCommand.hpp"
 
+#include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
 
@@ -102,24 +103,24 @@ void BitCommand::Run(CPU *cpu, MMU *mmu) {
     }
 }
 
-void registerBitCommands(CPU *cpu) {
-    cpu->RegisterCommand(new BitCommand(0xa7, "AND A", 4));
-    cpu->RegisterCommand(new BitCommand(0xa0, "AND B", 4));
-    cpu->RegisterCommand(new BitCommand(0xa1, "AND C", 4));
-    cpu->RegisterCommand(new BitCommand(0xa2, "AND D", 4));
-    cpu->RegisterCommand(new BitCommand(0xa3, "AND E", 4));
-    cpu->RegisterCommand(new BitCommand(0xa4, "AND H", 4));
-    cpu->RegisterCommand(new BitCommand(0xa5, "AND L", 4));
-    cpu->RegisterCommand(new BitCommand(0xa6, "AND (HL)", 8));
-    cpu->RegisterCommand(new BitCommand(0xe6, "AND #", 8));
+void registerBitCommands(AbstractCommandFactory *factory) {
+    factory->RegisterCommand(new BitCommand(0xa7, "AND A", 4));
+    factory->RegisterCommand(new BitCommand(0xa0, "AND B", 4));
+    factory->RegisterCommand(new BitCommand(0xa1, "AND C", 4));
+    factory->RegisterCommand(new BitCommand(0xa2, "AND D", 4));
+    factory->RegisterCommand(new BitCommand(0xa3, "AND E", 4));
+    factory->RegisterCommand(new BitCommand(0xa4, "AND H", 4));
+    factory->RegisterCommand(new BitCommand(0xa5, "AND L", 4));
+    factory->RegisterCommand(new BitCommand(0xa6, "AND (HL)", 8));
+    factory->RegisterCommand(new BitCommand(0xe6, "AND #", 8));
 
-    cpu->RegisterCommand(new BitCommand(0xaf, "XOR A", 4));
-    cpu->RegisterCommand(new BitCommand(0xa8, "XOR B", 4));
-    cpu->RegisterCommand(new BitCommand(0xa9, "XOR C", 4));
-    cpu->RegisterCommand(new BitCommand(0xaa, "XOR D", 4));
-    cpu->RegisterCommand(new BitCommand(0xab, "XOR E", 4));
-    cpu->RegisterCommand(new BitCommand(0xac, "XOR H", 4));
-    cpu->RegisterCommand(new BitCommand(0xad, "XOR L", 4));
-    cpu->RegisterCommand(new BitCommand(0xae, "XOR (HL)", 8));
-    cpu->RegisterCommand(new BitCommand(0xee, "XOR #", 8));
+    factory->RegisterCommand(new BitCommand(0xaf, "XOR A", 4));
+    factory->RegisterCommand(new BitCommand(0xa8, "XOR B", 4));
+    factory->RegisterCommand(new BitCommand(0xa9, "XOR C", 4));
+    factory->RegisterCommand(new BitCommand(0xaa, "XOR D", 4));
+    factory->RegisterCommand(new BitCommand(0xab, "XOR E", 4));
+    factory->RegisterCommand(new BitCommand(0xac, "XOR H", 4));
+    factory->RegisterCommand(new BitCommand(0xad, "XOR L", 4));
+    factory->RegisterCommand(new BitCommand(0xae, "XOR (HL)", 8));
+    factory->RegisterCommand(new BitCommand(0xee, "XOR #", 8));
 }

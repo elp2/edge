@@ -1,5 +1,6 @@
 #include "NopCommand.hpp"
 
+#include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
 
@@ -19,6 +20,6 @@ void NopCommand::Run(CPU *cpu, MMU *mmu) {
     (void)mmu;
 }
 
-void registerNopCommands(CPU *cpu) {
-    cpu->RegisterCommand(new NopCommand(0x00));
+void registerNopCommands(AbstractCommandFactory *factory) {
+    factory->RegisterCommand(new NopCommand(0x00));
 }

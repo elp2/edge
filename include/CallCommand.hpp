@@ -2,4 +2,6 @@
 
 #include "Command.hpp"
 
-void registerCallCommands(CPU *cpu);
+class AbstractCommandFactory;
+
+void registerCallCommands(AbstractCommandFactory *factory);

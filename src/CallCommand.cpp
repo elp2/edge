@@ -1,8 +1,8 @@
 #include "CallCommand.hpp"
 
+#include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
-
 class CallCommand : public Command {
  public:
     CallCommand(uint8_t opcode, string description, int cycles) {
@@ -34,8 +34,8 @@ class CallCommand : public Command {
     }
 };
 
-void registerCallCommands(CPU *cpu) {
-    cpu->RegisterCommand(new CallCommand(0xCD, "CALL nn", 12));
+void registerCallCommands(AbstractCommandFactory *factory) {
+    factory->RegisterCommand(new CallCommand(0xCD, "CALL nn", 12));
 //     CALL NZ,nn C4 12
 //  CALL Z,nn CC 12
 //  CALL NC,nn D4 12

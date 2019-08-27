@@ -2,6 +2,8 @@
 
 #include "Command.hpp"
 
+class AbstractCommandFactory;
+
 class RestartCommand : public Command {
 
 public:
@@ -11,4 +13,4 @@ public:
     void Run(CPU *cpu, MMU *mmu);    
 };
 
-void registerRestartCommands(CPU *cpu);
+void registerRestartCommands(AbstractCommandFactory *factory);

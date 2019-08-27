@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include "Command.hpp"
+#include "CommandFactory.hpp"
 #include "Destination.hpp"
 #include "MMU.hpp"
 
@@ -67,10 +68,10 @@ class CPU {
     bool InterruptsEnabled();
 
 private:
-    MMU mmu;
-    array<Command *, 256> commands;
+    CommandFactory *commandFactory;
+    CBCommandFactory *cbCommandFactory;
 
-    void RegisterCommands();
+    MMU mmu;
     bool interruptsEnabled;
 
     uint8_t a,b,c,d,e,f,h,l;

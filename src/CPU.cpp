@@ -3,21 +3,13 @@
 #include <ios>
 #include <iostream>
 
-#include "BitCommand.hpp"
 #include "Command.hpp"
-#include "CallCommand.hpp"
-#include "JumpCommand.hpp"
-#include "LoadCommand.hpp"
-#include "MiscCommand.hpp"
-#include "NopCommand.hpp"
-#include "RestartCommand.hpp"
-#include "ReturnCommand.hpp"
 #include "Utils.hpp"
 
 CPU::CPU(MMU mmu) {
     this->mmu = mmu;
-
-    RegisterCommands();
+    commandFactory = new CommandFactory();
+    cbCommandFactory = new CBCommandFactory();
 
     Reset();
 }
@@ -26,44 +18,13 @@ CPU::~CPU() {
 
 }
 
-void CPU::RegisterCommand(Command *command) {
-    Command *existingCommand = commands[command->opcode];
-    if (existingCommand != NULL) {
-        cout << "Already have an opcode at 0x" << hex << unsigned(existingCommand->opcode) << ": " << existingCommand->description << " : New = " << command->description << endl;
-        assert(false);
-    }
-    commands[command->opcode] = command;
-    cout << "Registered 0x" << hex << unsigned(command->opcode) << " : " << command->description << endl;
-}
-
-void CPU::RegisterCommands() {
-    commands = array<Command *, 256>();
-    registerNopCommands(this);
-    registerJumpCommands(this);
-    registerLoadCommands(this);
-    registerMiscCommands(this);
-    registerCallCommands(this);
-    registerRestartCommands(this);
-    registerReturnCommands(this);
-    registerBitCommands(this);
-
-    int implementedCommands = 0;
-    for (int i = 0; i < 256; i++) {
-        if (commands[i] != NULL) {
-            implementedCommands++;
-        }
-    }
-    cout << implementedCommands << " / " << "256 commands implemented!" << endl;
-
-    cout << "and 0 CB opcodes (0%)" << endl;
-}
-
 Command *CPU::CommandForOpcode(uint8_t opcode) {
-    if (commands[opcode] == NULL) {
-        cout << "No opcode for " << unsigned(opcode) << endl;
-        assert(false);
+    if (opcode == 0xCB) {
+        opcode = Get8Bit(Eat_PC_Byte);
+        return cbCommandFactory->CommandForOpcode(opcode);
+    } else {
+        return commandFactory->CommandForOpcode(opcode);
     }
-    return commands[opcode];
 }
 
 void CPU::Step() {

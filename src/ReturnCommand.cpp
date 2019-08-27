@@ -1,5 +1,6 @@
 #include "ReturnCommand.hpp"
 
+#include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
 
@@ -55,13 +56,13 @@ void ReturnCommand::Run(CPU *cpu, MMU *mmu) {
     }
 }
 
-void registerReturnCommands(CPU *cpu) {
-    cpu->RegisterCommand(new ReturnCommand(0xc9, "RET", 8));
+void registerReturnCommands(AbstractCommandFactory *factory) {
+    factory->RegisterCommand(new ReturnCommand(0xc9, "RET", 8));
 
-    cpu->RegisterCommand(new ReturnCommand(0xc0, "RET NZ", 8));
-    cpu->RegisterCommand(new ReturnCommand(0xc8, "RET Z", 8));
-    cpu->RegisterCommand(new ReturnCommand(0xd0, "RET CZ", 8));
-    cpu->RegisterCommand(new ReturnCommand(0xd8, "RET C", 8));
+    factory->RegisterCommand(new ReturnCommand(0xc0, "RET NZ", 8));
+    factory->RegisterCommand(new ReturnCommand(0xc8, "RET Z", 8));
+    factory->RegisterCommand(new ReturnCommand(0xd0, "RET CZ", 8));
+    factory->RegisterCommand(new ReturnCommand(0xd8, "RET C", 8));
 
-    cpu->RegisterCommand(new ReturnCommand(0xd9, "RETI", 8));
+    factory->RegisterCommand(new ReturnCommand(0xd9, "RETI", 8));
 }
