@@ -11,9 +11,7 @@
 #include "NopCommand.hpp"
 #include "RestartCommand.hpp"
 #include "ReturnCommand.hpp"
-
-#define HIGHER8(word) (word >> 8) & 0xff
-#define LOWER8(word) word & 0xff
+#include "Utils.hpp"
 
 CPU::CPU(MMU mmu) {
     this->mmu = mmu;
@@ -172,13 +170,6 @@ uint8_t CPU::Get8Bit(Destination d) {
     }
 }
 
-uint16_t build16(uint8_t lsb, uint8_t msb) {
-    uint16_t word = msb;
-    word = word << 8;
-    word |= lsb;
-    return word;
-}
-
 uint16_t CPU::Read16Bit(Destination d) {
     uint16_t word;
     switch (d)
@@ -291,14 +282,14 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
         cout << "0x" << hex << unsigned(d) << " is not 16 bits." << endl;
         assert(false);
     case Register_BC:
-        b = (value >> 8) & 0xff;
-        c = value & 0xff;
+        b = LOWER8(value);
+        c = HIGHER8(value);
     case Register_DE:
-        this->d = (value >> 8) & 0xff;
-        e = value & 0xff;
+        this->d = LOWER8(value);
+        e = HIGHER8(value);
     case Register_HL:
-        h = (value >> 8) & 0xff;
-        l = value & 0xff;
+        h = LOWER8(value);
+        l = HIGHER8(value);
         break;
     case Register_PC:
         pc = value;

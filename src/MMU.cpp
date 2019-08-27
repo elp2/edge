@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "Utils.hpp"
+
 using namespace std;
 
 MMU::MMU() {
@@ -27,8 +29,8 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
 }
 
 void MMU::SetWordAt(uint16_t address, uint16_t word) {
-    SetByteAt(address, word & 0xff);
-    SetByteAt(address + 1, word >> 8);
+    SetByteAt(address, HIGHER8(word));
+    SetByteAt(address + 1, LOWER8(word));
 }
 
 std::string MMU::GameTitle() {
