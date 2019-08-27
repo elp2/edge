@@ -49,6 +49,9 @@ class CPU {
     uint8_t Pop8Bit();
     uint16_t Pop16Bit();
 
+    // Hack that prevents jumps, so we can simulate a disassembler.
+    void PreventJumpsDisassembler(bool preventJumps);
+    
     void JumpAddress(uint16_t address);
     void JumpRelative(uint8_t relative);
 
@@ -78,4 +81,5 @@ private:
     // Points to the stack position.
     uint16_t sp;
 
+    bool hackPreventJumps;
 };

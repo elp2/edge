@@ -3,6 +3,7 @@
 #include <ios>
 #include <iostream>
 
+#include "BitCommand.hpp"
 #include "Command.hpp"
 #include "CallCommand.hpp"
 #include "JumpCommand.hpp"
@@ -44,6 +45,7 @@ void CPU::RegisterCommands() {
     registerCallCommands(this);
     registerRestartCommands(this);
     registerReturnCommands(this);
+    registerBitCommands(this);
 
     int implementedCommands = 0;
     for (int i = 0; i < 256; i++) {
@@ -342,12 +344,29 @@ uint16_t CPU::Pop16Bit() {
     return build16(lsb, msb);
 }
 
+void CPU::PreventJumpsDisassembler(bool preventJumps) {
+    assert(preventJumps);
+
+    hackPreventJumps = preventJumps;
+    cout << "HACK!!!!! Disassembler mode" << endl;
+}
+
 void CPU::JumpAddress(uint16_t address) {
+    if (hackPreventJumps) {
+        cout << "Skipping jump!" << endl;
+        return;
+    }
+
     cout << "Jumping to 0x" << hex << unsigned(address) << endl;
     Set16Bit(Register_PC, address);
 }
 
 void CPU::JumpRelative(uint8_t relative) {
+    if (hackPreventJumps) {
+        cout << "Skipping jump!" << endl;
+        return;
+    }
+
     uint16_t originalAddress = Read16Bit(Register_PC);
     uint16_t newAddress = originalAddress + relative;
     cout << "Jumping 0x" << hex << unsigned(relative);

@@ -48,7 +48,7 @@ std::string MMU::GameTitle() {
 }
 
 bool MMU::LoadRom() {
-    ifstream file ("/Users/edwardpalmer/Desktop/gb-test-roms/cpu_instrs/cpu_instrs.gb",
+    ifstream file ("/Users/edwardpalmer/Desktop/gb-test-roms/oam_bug/oam_bug.gb",
                    ios::in | ios::binary);
     if (!file.is_open()) {
         cout << "Could not open file!";
@@ -72,8 +72,9 @@ bool MMU::LoadRom() {
 }
 
 void MMU::Validate() {
-    assert(CartridgeType() != CartridgeType_Unsupported);
-    assert(ROMSize() != ROMSize_Unsupported);
+    // TODO: Validate Cartridge and ROMs.
+    // assert(CartridgeType() != CartridgeType_Unsupported);
+    // assert(ROMSize() != ROMSize_Unsupported);
 }
 
 CartridgeType MMU::CartridgeType() {

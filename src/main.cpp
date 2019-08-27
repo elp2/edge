@@ -17,6 +17,10 @@ int main() {
     cout << "Title: " << mmu.GameTitle() << endl;
 
     CPU cpu = CPU(mmu);
+
+    cpu.JumpAddress(0x00);
+    cpu.PreventJumpsDisassembler(true);
+
     cpu.Debugger();
     for (int i = 0; i < 50; i++) {
         cout << i << " ";
