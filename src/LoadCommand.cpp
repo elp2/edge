@@ -63,13 +63,13 @@ class SpecialLoadCommand : public Command {
         {
         case 0xf2:
             address = 0xff00 + cpu->Get8Bit(Register_C);
-            value = mmu->ByteAt(address);
+            value = mmu->GetByteAt(address);
             cpu->Set8Bit(Register_A, value);
             break;
         case 0xf0:
             // LD A,($FF00+n) F0 12
             address = 0xff00 + cpu->Get8Bit(Eat_PC_Byte);
-            value = mmu->ByteAt(address);
+            value = mmu->GetByteAt(address);
             cpu->Set8Bit(Register_A, value);
             break;
         case 0xe2:
@@ -83,12 +83,12 @@ class SpecialLoadCommand : public Command {
 
         case 0x3a:
             address = cpu->Read16Bit(Register_HL);
-            cpu->Set8Bit(Register_A, mmu->ByteAt(address));
+            cpu->Set8Bit(Register_A, mmu->GetByteAt(address));
             cpu->Set16Bit(Register_HL, address - 1);
             break;
         case 0x2a:
             address = cpu->Read16Bit(Register_HL);
-            cpu->Set8Bit(Register_A, mmu->ByteAt(address));
+            cpu->Set8Bit(Register_A, mmu->GetByteAt(address));
             cpu->Set16Bit(Register_HL, address + 1);
             break;
         case 0x32:

@@ -12,7 +12,7 @@ public:
     MMU();
     ~MMU();
 
-    uint8_t ByteAt(uint16_t address);
+    uint8_t GetByteAt(uint16_t address);
     void SetByteAt(uint16_t address, uint8_t byte);
     // LS Byte First.
     uint16_t WordAt(uint16_t address);

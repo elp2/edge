@@ -145,25 +145,25 @@ uint8_t CPU::Get8Bit(Destination d) {
     case Register_L:
         return l;
     case Eat_PC_Byte: {
-        pcByte = mmu.ByteAt(pc);
+        pcByte = mmu.GetByteAt(pc);
         AdvancePC();
         return pcByte;
     case Address_BC:
-        return mmu.ByteAt(Read16Bit(Register_BC));
+        return mmu.GetByteAt(Read16Bit(Register_BC));
         break;
     case Address_DE:
-        return mmu.ByteAt(Read16Bit(Register_DE));
+        return mmu.GetByteAt(Read16Bit(Register_DE));
         break;
     case Address_HL:
-        return mmu.ByteAt(Read16Bit(Register_HL));
+        return mmu.GetByteAt(Read16Bit(Register_HL));
         break;
     case Address_nn:
         word = mmu.WordAt(pc);
         AdvancePC();
         AdvancePC();
-        return mmu.ByteAt(word);
+        return mmu.GetByteAt(word);
     case Address_SP:
-        return mmu.ByteAt(Read16Bit(Register_SP));
+        return mmu.GetByteAt(Read16Bit(Register_SP));
         break;
     }
     default:
@@ -326,7 +326,7 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
 }
 
 uint8_t CPU::ReadOpcodeAtPC() {
-    return mmu.ByteAt(pc);
+    return mmu.GetByteAt(pc);
 }
 
 void CPU::Push8Bit(uint8_t byte) {
@@ -342,7 +342,7 @@ void CPU::Push16Bit(uint16_t word) {
 
 uint8_t CPU::Pop8Bit() {
     sp += 1;
-    return mmu.ByteAt(sp);
+    return mmu.GetByteAt(sp);
 }
 
 uint16_t CPU::Pop16Bit() {
@@ -383,7 +383,7 @@ void CPU::Reset() {
 void CPU::Debugger() {
     cout << "A: " << hex << unsigned(a) << endl;
     cout << "SP: " << hex << sp << endl;
-    cout << "PC: " << hex << pc << "[" << hex << unsigned(mmu.ByteAt(pc)) << "]" << endl;
+    cout << "PC: " << hex << pc << "[" << hex << unsigned(mmu.GetByteAt(pc)) << "]" << endl;
     cout << "Flags:" << endl;
     cout << "   Z: " << hex << flags.z << endl;
     cout << "   C: " << hex << flags.c << endl;

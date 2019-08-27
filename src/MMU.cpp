@@ -9,15 +9,15 @@ MMU::MMU() {
     // Initialize memory to random values.
 }
 
-uint8_t MMU::ByteAt(uint16_t address) {
+uint8_t MMU::GetByteAt(uint16_t address) {
     assert(address < romSize);
     uint8_t byte = (uint8_t)rom[address];
     return byte;
 }
 
 uint16_t MMU::WordAt(uint16_t address) {
-    uint8_t lsb = ByteAt(address);
-    uint16_t result = (ByteAt(address+1) << 8)|lsb;
+    uint8_t lsb = GetByteAt(address);
+    uint16_t result = (GetByteAt(address+1) << 8)|lsb;
     return result;
 }
 
