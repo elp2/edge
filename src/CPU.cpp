@@ -9,6 +9,8 @@
 #include "LoadCommand.hpp"
 #include "MiscCommand.hpp"
 #include "NopCommand.hpp"
+#include "RestartCommand.hpp"
+#include "ReturnCommand.hpp"
 
 #define HIGHER8(word) (word >> 8) & 0xff
 #define LOWER8(word) word & 0xff
@@ -42,6 +44,8 @@ void CPU::RegisterCommands() {
     registerLoadCommands(this);
     registerMiscCommands(this);
     registerCallCommands(this);
+    registerRestartCommands(this);
+    registerReturnCommands(this);
 
     int implementedCommands = 0;
     for (int i = 0; i < 256; i++) {
@@ -96,27 +100,32 @@ void CPU::Step() {
 
 }
 
-
-
 bool CPU::Requires16Bits(Destination d) {
     switch (d)
     {
-    case Register_A:
-    case Register_B:
-    case Register_C:
-    case Register_D:
-    case Register_E:
-    case Register_F:
-    case Register_H:
-    case Register_L:
-    case Eat_PC_Byte:
-        return false;
-    default:
-        return true;
+        case Register_A:
+        case Register_B:
+        case Register_C:
+        case Register_D:
+        case Register_E:
+        case Register_F:
+        case Register_H:
+        case Register_L:
+        case Address_BC:
+        case Address_DE:
+        case Address_HL:
+        case Address_nn:
+        case Address_SP:
+        case Eat_PC_Byte:
+            return false;
+        default:
+            return true;
     }
 }
+
 uint8_t CPU::Read8Bit(Destination d) {
     uint8_t pcByte;
+    uint8_t word;
     switch (d)
     {
     case Register_A:
@@ -139,10 +148,35 @@ uint8_t CPU::Read8Bit(Destination d) {
         pcByte = mmu.ByteAt(pc);
         AdvancePC();
         return pcByte;
+    case Address_BC:
+        return mmu.ByteAt(Read16Bit(Register_BC));
+        break;
+    case Address_DE:
+        return mmu.ByteAt(Read16Bit(Register_DE));
+        break;
+    case Address_HL:
+        return mmu.ByteAt(Read16Bit(Register_HL));
+        break;
+    case Address_nn:
+        word = mmu.WordAt(pc);
+        AdvancePC();
+        AdvancePC();
+        return mmu.ByteAt(word);
+    case Address_SP:
+        return mmu.ByteAt(Read16Bit(Register_SP));
+        break;
     }
     default:
+        cout << "Unknown 8 bit destination: 0x" << hex << unsigned(d) << endl;
         assert(false);
     }
+}
+
+uint16_t build16(uint8_t lsb, uint8_t msb) {
+    uint16_t word = msb;
+    word = word << 8;
+    word |= lsb;
+    return word;
 }
 
 uint16_t CPU::Read16Bit(Destination d) {
@@ -158,24 +192,23 @@ uint16_t CPU::Read16Bit(Destination d) {
     case Register_H:
     case Register_L:
     case Eat_PC_Byte:
+    case Address_BC:
+    case Address_DE:
+    case Address_HL:
+    case Address_SP:
+    case Address_nn:
         cout << "Tried reading 0x" << hex << unsigned(d) << " as a 16 bit value." << endl;
         assert(false);
-    case Address_BC:
     case Register_BC:
-    case Address_DE:
+        return build16(b,c);
     case Register_DE:
-    case Address_HL:
+        return build16(this->d, e);
     case Register_HL:
-        cout << "Time to write 16 bit reg reading!" << endl;
-        assert(false);
-        // TODO: 16 bit registers.
-        return 0xDEAD;
-    case Address_SP:
+        return build16(h, l);
     case Register_SP:
         return sp;
     case Register_PC:
         return pc;
-    case Address_nn:
     case Eat_PC_Word:
         word = mmu.WordAt(pc);
         AdvancePC();
@@ -215,14 +248,29 @@ void CPU::Set8Bit(Destination d, uint8_t value) {
     case Register_L:
         l = value;
         break;
-    case Eat_PC_Byte:
+    case Address_BC:
+        mmu.SetByteAt(Read16Bit(Register_BC), value);
+        break;
+    case Address_DE:
+        mmu.SetByteAt(Read16Bit(Register_DE), value);
+        break;
+    case Address_HL:
+        mmu.SetByteAt(Read16Bit(Register_HL), value);
+        break;
+    case Address_SP:
+        cout << "Consider moving the SP on set? How is it happening elsewhere?" << endl;
         assert(false);
-        //uint8_t pcByte = mmu.ByteAt(pc);
-        //AdvancePC();
-        // return pcByte;
+        mmu.SetByteAt(Read16Bit(Register_SP), value);
+        break;
+    case Address_nn:
+        mmu.SetByteAt(Read16Bit(Eat_PC_Word), value);
+        break;
+    case Eat_PC_Byte:
+        // TODO: Is this even valid/necessary?
+        assert(false);
         break;
     default:
-        cout << "Can't read 8 bit: " << d << endl;
+        cout << "Unknown 8 bit destination: 0x" << hex << unsigned(d) << endl;
         assert(false);
     }
 }
@@ -292,8 +340,33 @@ void CPU::Push16Bit(uint16_t word) {
     Push8Bit(LOWER8(word));
 }
 
+uint8_t CPU::Pop8Bit() {
+    sp += 1;
+    return mmu.ByteAt(sp);
+}
+
+uint16_t CPU::Pop16Bit() {
+    uint8_t lsb = Pop8Bit();
+    uint8_t msb = Pop8Bit();
+    return build16(lsb, msb);
+}
+
 void CPU::StackDelta(int delta) {
     assert(delta == 1 || delta == -1);
+}
+
+void CPU::JumpAddress(uint16_t address) {
+    cout << "Jumping to 0x" << hex << unsigned(address) << endl;
+    Set16Bit(Register_PC, address);
+}
+
+void CPU::JumpRelative(uint8_t relative) {
+    uint16_t originalAddress = Read16Bit(Register_PC);
+    uint16_t newAddress = originalAddress + relative;
+    cout << "Jumping 0x" << hex << unsigned(relative);
+    cout << " relative to 0x" << hex << unsigned(originalAddress);
+    cout << " to 0x" << hex << unsigned(newAddress) << endl;
+    Set16Bit(Register_PC, newAddress);    
 }
 
 void CPU::AdvancePC() {
@@ -310,7 +383,6 @@ void CPU::Reset() {
     flags.c = 0;
     interruptsEnabled = true;
 }
-
 
 void CPU::Debugger() {
     cout << "A: " << hex << unsigned(a) << endl;

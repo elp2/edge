@@ -59,6 +59,12 @@ class CPU {
     void Push8Bit(uint8_t byte);
     void Push16Bit(uint16_t word);
 
+    uint8_t Pop8Bit();
+    uint16_t Pop16Bit();
+
+    void JumpAddress(uint16_t address);
+    void JumpRelative(uint8_t relative);
+
     void RegisterCommand(Command *command);
 
     // Special Actions.
