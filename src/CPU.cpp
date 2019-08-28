@@ -308,15 +308,15 @@ uint16_t CPU::Pop16Bit() {
     return build16(lsb, msb);
 }
 
-void CPU::PreventJumpsDisassembler(bool preventJumps) {
-    assert(preventJumps);
+void CPU::SetDisassemblerMode(bool disasemblerMode) {
+    assert(disasemblerMode);
 
-    hackPreventJumps = preventJumps;
+    this->disasemblerMode = disasemblerMode;
     cout << "HACK!!!!! Disassembler mode" << endl;
 }
 
 void CPU::JumpAddress(uint16_t address) {
-    if (hackPreventJumps) {
+    if (disasemblerMode) {
         cout << "Skipping jump!" << endl;
         return;
     }
@@ -326,7 +326,7 @@ void CPU::JumpAddress(uint16_t address) {
 }
 
 void CPU::JumpRelative(uint8_t relative) {
-    if (hackPreventJumps) {
+    if (disasemblerMode) {
         cout << "Skipping jump!" << endl;
         return;
     }

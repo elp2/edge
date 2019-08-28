@@ -5,6 +5,7 @@
 #include "CBCommand.hpp"
 #include "JumpCommand.hpp"
 #include "LoadCommand.hpp"
+#include "MathCommand.hpp"
 #include "MiscCommand.hpp"
 #include "NopCommand.hpp"
 #include "RestartCommand.hpp"
@@ -43,6 +44,7 @@ CommandFactory::CommandFactory() {
     registerRestartCommands(this);
     registerReturnCommands(this);
     registerBitCommands(this);
+    registerMathCommands(this);
 
     int implementedCommands = 0;
     for (int i = 0; i < 256; i++) {

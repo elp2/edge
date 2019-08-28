@@ -19,7 +19,7 @@ int main() {
     CPU cpu = CPU(mmu);
 
     cpu.JumpAddress(0x00);
-    cpu.PreventJumpsDisassembler(true);
+    cpu.SetDisassemblerMode(true);
 
     cpu.Debugger();
     for (int i = 0; i < 500; i++) {
