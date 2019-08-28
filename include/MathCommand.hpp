@@ -12,6 +12,7 @@ public:
     void Run(CPU *cpu, MMU *mmu);
  private:
     void Inc(CPU *cpu);
+    void Dec(CPU *cpu);
 };
 
 void registerMathCommands(AbstractCommandFactory *factory);

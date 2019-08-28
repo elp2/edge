@@ -88,6 +88,79 @@ void MathCommand::Inc(CPU *cpu) {
     }
 }
 
+void MathCommand::Dec(CPU *cpu) {
+    Destination d;
+    switch (opcode)
+    {
+    case 0x3d:
+        d = Register_A;
+        break;
+    case 0x05:
+        d = Register_B;
+        break;
+    case 0x0d:
+        d = Register_C;
+        break;
+    case 0x15:
+        d = Register_D;
+        break;
+    case 0x1d:
+        d = Register_E;
+        break;
+    case 0x25:
+        d = Register_H;
+        break;
+    case 0x2d:
+        d = Register_L;
+        break;
+    case 0x35:
+        d = Address_HL;
+        break;
+    case 0x0b:
+        d = Register_BC;
+        break;
+    case 0x1b:
+        d = Register_DE;
+        break;
+    case 0x2b:
+        d = Register_HL;
+        break;
+    case 0x3b:
+        d = Register_SP;
+        break;
+    
+    default:
+        cout << "Unknown dec command: 0x" << hex << unsigned(opcode) << endl;
+        assert(false);
+        break;
+    }
+
+    if (d == Address_HL) {
+        cycles = 12;
+    } else {
+        cycles = cpu->Requires16Bits(d) ? 8 : 4;
+    }
+    stringstream stream;
+    stream << "DEC " << destinationToString(d);
+    description = stream.str();
+
+    if (cpu->Requires16Bits(d)) {
+        uint16_t orig = cpu->Get16Bit(d);
+        uint16_t dec = orig - 1;
+        cpu->Set16Bit(d, dec);
+        // TODO: Test overflow.
+    } else {
+        uint8_t orig = cpu->Get8Bit(d);
+        uint8_t dec = orig - 1;
+        // TODO: Test overflow2.
+        cpu->flags.z = (dec == 0);
+        cpu->flags.n = false;
+        cpu->flags.h = NIBBLELOW(orig) == 0x00; // TODO test set if carry2.
+        // c not affected.
+        cpu->Set8Bit(d, dec);
+    }
+}
+
 void MathCommand::Run(CPU *cpu, MMU *mmu) {
     // Nop.
     (void)mmu;
@@ -108,7 +181,22 @@ void MathCommand::Run(CPU *cpu, MMU *mmu) {
     case 0x33:  
         Inc(cpu);
         break;
-    
+
+    case 0x3d:
+    case 0x05:
+    case 0x0d:
+    case 0x15:
+    case 0x1d:
+    case 0x25:
+    case 0x2d:
+    case 0x35:
+    case 0x0b:
+    case 0x1b:
+    case 0x2b:
+    case 0x3b:  
+        Dec(cpu);
+        break;
+
     default:
         cout << "Unknown math command: 0x" << hex << unsigned(opcode) << endl;
         assert(false);
@@ -133,4 +221,19 @@ void registerMathCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new MathCommand(0x23));
     factory->RegisterCommand(new MathCommand(0x33));
 
+    // DEC A->(HL).
+    factory->RegisterCommand(new MathCommand(0x3d));
+    factory->RegisterCommand(new MathCommand(0x05));
+    factory->RegisterCommand(new MathCommand(0x0d));
+    factory->RegisterCommand(new MathCommand(0x15));
+    factory->RegisterCommand(new MathCommand(0x1d));
+    factory->RegisterCommand(new MathCommand(0x25));
+    factory->RegisterCommand(new MathCommand(0x2d));
+    factory->RegisterCommand(new MathCommand(0x35));
+
+    // 16 bit DEC.
+    factory->RegisterCommand(new MathCommand(0x0b));
+    factory->RegisterCommand(new MathCommand(0x1b));
+    factory->RegisterCommand(new MathCommand(0x2b));
+    factory->RegisterCommand(new MathCommand(0x3b));
 }

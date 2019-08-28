@@ -48,8 +48,8 @@ void CPU::Step() {
     AdvancePC();
 
     Command *command = CommandForOpcode(opcode);
-    cout << command->description << " ; $" << commandPC << endl;
     command->Run(this, &mmu);
+    cout << command->description << " ; $" << commandPC << endl;
     // Time instruction takes
     // Directly updates - MMU, CPU
 
