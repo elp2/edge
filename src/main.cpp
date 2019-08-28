@@ -22,8 +22,7 @@ int main() {
     cpu.PreventJumpsDisassembler(true);
 
     cpu.Debugger();
-    for (int i = 0; i < 50; i++) {
-        cout << i << " ";
+    for (int i = 0; i < 500; i++) {
         cpu.Step();
     }
 }

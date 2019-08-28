@@ -10,4 +10,7 @@ public:
     void Run(CPU *cpu, MMU *mmu);
  private:
     void TestBit(uint8_t row, uint8_t column, CPU *cpu);
+    void ResetBit(uint8_t row, uint8_t column, CPU *cpu);
+    void SetBit(uint8_t row, uint8_t column, CPU *cpu);
+    void Swap(uint8_t column, CPU *cpu);
 };

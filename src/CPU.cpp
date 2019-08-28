@@ -43,11 +43,12 @@ void CPU::Step() {
         assert(false); // TODO!
     }
 
+    uint16_t commandPC = pc;
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
 
     Command *command = CommandForOpcode(opcode);
-    cout << "Command: " << command->description << endl;
+    cout << command->description << " ; $" << commandPC << endl;
     command->Run(this, &mmu);
     // Time instruction takes
     // Directly updates - MMU, CPU
@@ -331,8 +332,9 @@ void CPU::JumpRelative(uint8_t relative) {
     }
 
     uint16_t originalAddress = Read16Bit(Register_PC);
-    uint16_t newAddress = originalAddress + relative;
-    cout << "Jumping 0x" << hex << unsigned(relative);
+    int8_t signedRelative = relative;
+    uint16_t newAddress = originalAddress + signedRelative;
+    cout << "Jumping 0x" << hex << signedRelative;
     cout << " relative to 0x" << hex << unsigned(originalAddress);
     cout << " to 0x" << hex << unsigned(newAddress) << endl;
     Set16Bit(Register_PC, newAddress);    

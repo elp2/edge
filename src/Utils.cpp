@@ -49,3 +49,48 @@ Destination destinationForColumn(uint8_t column) {
         break;
     }
 }
+
+string destinationToString(Destination d) {
+    switch (d)
+    {
+    case Register_A:
+        return "A";
+    case Register_B:
+        return "B";
+    case Register_C:
+        return "C";
+    case Register_D:
+        return "D";
+    case Register_E:
+        return "E";
+    case Register_H:
+        return "H";
+    case Register_L:
+        return "L";
+    case Register_BC:
+        return "BC";
+    case Register_DE:
+        return "DE";
+    case Register_HL:
+        return "HL";
+    case Address_SP:
+        return "(SP)";
+    case Address_BC:
+        return "(BC)";
+    case Address_DE:
+        return "(DE)";
+    case Address_HL:
+        return "(HL)";
+    case Address_nn:
+        return "(nn)";
+    case Eat_PC_Byte:
+        return "n";
+    case Eat_PC_Word:
+        return "nn";    
+    default:
+        cout << "Unknown d 0x" << hex << unsigned(d) << endl;
+        assert(false);        
+        break;
+    }
+    return "?";
+}
