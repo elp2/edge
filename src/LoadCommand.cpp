@@ -20,9 +20,9 @@ void LoadCommand::Run(CPU *cpu, MMU *mmu) {
     bool to16Bit = cpu->Requires16Bits(to);
     if (from16Bit) {
         if (to16Bit) {
-            cpu->Set16Bit(to, cpu->Read16Bit(from));
+            cpu->Set16Bit(to, cpu->Get16Bit(from));
         } else {
-            cpu->Set8Bit(to, cpu->Read16Bit(from));
+            cpu->Set8Bit(to, cpu->Get16Bit(from));
         }
     } else {
         if (to16Bit) {
@@ -82,22 +82,22 @@ class SpecialLoadCommand : public Command {
             break;
 
         case 0x3a:
-            address = cpu->Read16Bit(Register_HL);
+            address = cpu->Get16Bit(Register_HL);
             cpu->Set8Bit(Register_A, mmu->GetByteAt(address));
             cpu->Set16Bit(Register_HL, address - 1);
             break;
         case 0x2a:
-            address = cpu->Read16Bit(Register_HL);
+            address = cpu->Get16Bit(Register_HL);
             cpu->Set8Bit(Register_A, mmu->GetByteAt(address));
             cpu->Set16Bit(Register_HL, address + 1);
             break;
         case 0x32:
-            mmu->SetByteAt(cpu->Read16Bit(Register_HL), cpu->Get8Bit(Register_A));
-            cpu->Set16Bit(Register_HL, cpu->Read16Bit(Register_HL) - 1);
+            mmu->SetByteAt(cpu->Get16Bit(Register_HL), cpu->Get8Bit(Register_A));
+            cpu->Set16Bit(Register_HL, cpu->Get16Bit(Register_HL) - 1);
             break;
         case 0x22:
-            mmu->SetByteAt(cpu->Read16Bit(Register_HL), cpu->Get8Bit(Register_A));
-            cpu->Set16Bit(Register_HL, cpu->Read16Bit(Register_HL) + 1);
+            mmu->SetByteAt(cpu->Get16Bit(Register_HL), cpu->Get8Bit(Register_A));
+            cpu->Set16Bit(Register_HL, cpu->Get16Bit(Register_HL) + 1);
             break;
 
         default:

@@ -43,6 +43,18 @@ void MathCommand::Inc(CPU *cpu) {
     case 0x34:
         d = Address_HL;
         break;
+    case 0x03:
+        d = Register_BC;
+        break;
+    case 0x13:
+        d = Register_DE;
+        break;
+    case 0x23:
+        d = Register_HL;
+        break;
+    case 0x33:
+        d = Register_SP;
+        break;
     
     default:
         cout << "Unknown inc command: 0x" << hex << unsigned(opcode) << endl;
@@ -50,22 +62,20 @@ void MathCommand::Inc(CPU *cpu) {
         break;
     }
 
-    cycles = d == Address_HL ? 12 : 4;
+    if (d == Address_HL) {
+        cycles = 12;
+    } else {
+        cycles = cpu->Requires16Bits(d) ? 8 : 4;
+    }
     stringstream stream;
     stream << "INC " << destinationToString(d);
     description = stream.str();
 
     if (cpu->Requires16Bits(d)) {
-        uint16_t orig = cpu->Read16Bit(d);
+        uint16_t orig = cpu->Get16Bit(d);
         uint16_t inc = orig + 1;
+        cpu->Set16Bit(d, inc);
         // TODO: Test overflow.
-        cpu->flags.z = (inc == 0);
-        cpu->flags.n = false;
-
-        assert(false); // TODO!
-        cpu->flags.h = false; // TODO test set if carry.
-
-        // c not affected.
     } else {
         uint8_t orig = cpu->Get8Bit(d);
         uint8_t inc = orig + 1;
@@ -74,6 +84,7 @@ void MathCommand::Inc(CPU *cpu) {
         cpu->flags.n = false;
         cpu->flags.h = NIBBLELOW(orig) == 0xf; // TODO test set if carry2.
         // c not affected.
+        cpu->Set8Bit(d, inc);
     }
 }
 
@@ -91,6 +102,10 @@ void MathCommand::Run(CPU *cpu, MMU *mmu) {
     case 0x24:
     case 0x2c:
     case 0x34:
+    case 0x03:
+    case 0x13:
+    case 0x23:
+    case 0x33:  
         Inc(cpu);
         break;
     
@@ -111,4 +126,11 @@ void registerMathCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new MathCommand(0x24));
     factory->RegisterCommand(new MathCommand(0x2c));
     factory->RegisterCommand(new MathCommand(0x34));
+
+    // 16 bit INC.
+    factory->RegisterCommand(new MathCommand(0x03));
+    factory->RegisterCommand(new MathCommand(0x13));
+    factory->RegisterCommand(new MathCommand(0x23));
+    factory->RegisterCommand(new MathCommand(0x33));
+
 }

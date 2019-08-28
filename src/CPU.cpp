@@ -113,13 +113,13 @@ uint8_t CPU::Get8Bit(Destination d) {
         AdvancePC();
         return pcByte;
     case Address_BC:
-        return mmu.GetByteAt(Read16Bit(Register_BC));
+        return mmu.GetByteAt(Get16Bit(Register_BC));
         break;
     case Address_DE:
-        return mmu.GetByteAt(Read16Bit(Register_DE));
+        return mmu.GetByteAt(Get16Bit(Register_DE));
         break;
     case Address_HL:
-        return mmu.GetByteAt(Read16Bit(Register_HL));
+        return mmu.GetByteAt(Get16Bit(Register_HL));
         break;
     case Address_nn:
         word = mmu.GetWordAt(pc);
@@ -127,7 +127,7 @@ uint8_t CPU::Get8Bit(Destination d) {
         AdvancePC();
         return mmu.GetByteAt(word);
     case Address_SP:
-        return mmu.GetByteAt(Read16Bit(Register_SP));
+        return mmu.GetByteAt(Get16Bit(Register_SP));
         break;
     }
     default:
@@ -136,7 +136,7 @@ uint8_t CPU::Get8Bit(Destination d) {
     }
 }
 
-uint16_t CPU::Read16Bit(Destination d) {
+uint16_t CPU::Get16Bit(Destination d) {
     uint16_t word;
     switch (d)
     {
@@ -206,21 +206,21 @@ void CPU::Set8Bit(Destination d, uint8_t value) {
         l = value;
         break;
     case Address_BC:
-        mmu.SetByteAt(Read16Bit(Register_BC), value);
+        mmu.SetByteAt(Get16Bit(Register_BC), value);
         break;
     case Address_DE:
-        mmu.SetByteAt(Read16Bit(Register_DE), value);
+        mmu.SetByteAt(Get16Bit(Register_DE), value);
         break;
     case Address_HL:
-        mmu.SetByteAt(Read16Bit(Register_HL), value);
+        mmu.SetByteAt(Get16Bit(Register_HL), value);
         break;
     case Address_SP:
         cout << "Consider moving the SP on set? How is it happening elsewhere?" << endl;
         assert(false);
-        mmu.SetByteAt(Read16Bit(Register_SP), value);
+        mmu.SetByteAt(Get16Bit(Register_SP), value);
         break;
     case Address_nn:
-        mmu.SetByteAt(Read16Bit(Eat_PC_Word), value);
+        mmu.SetByteAt(Get16Bit(Eat_PC_Word), value);
         break;
     case Eat_PC_Byte:
         // TODO: Is this even valid/necessary?
@@ -273,7 +273,7 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
     case Address_HL:
     case Address_SP:
     case Address_nn:
-        address = Read16Bit(d);
+        address = Get16Bit(d);
         mmu.SetWordAt(address, value);
         break;
     default:
@@ -283,6 +283,12 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
 }
 
 uint8_t CPU::ReadOpcodeAtPC() {
+    if (disasemblerMode) {
+        mmu.SetDisassemblerMode(false);
+        uint8_t opcode = mmu.GetByteAt(pc);
+        mmu.SetDisassemblerMode(true);
+        return opcode;
+    }
     return mmu.GetByteAt(pc);
 }
 
@@ -312,12 +318,12 @@ void CPU::SetDisassemblerMode(bool disasemblerMode) {
     assert(disasemblerMode);
 
     this->disasemblerMode = disasemblerMode;
+    mmu.SetDisassemblerMode(disasemblerMode);
     cout << "HACK!!!!! Disassembler mode" << endl;
 }
 
 void CPU::JumpAddress(uint16_t address) {
     if (disasemblerMode) {
-        cout << "Skipping jump!" << endl;
         return;
     }
 
@@ -327,11 +333,10 @@ void CPU::JumpAddress(uint16_t address) {
 
 void CPU::JumpRelative(uint8_t relative) {
     if (disasemblerMode) {
-        cout << "Skipping jump!" << endl;
         return;
     }
 
-    uint16_t originalAddress = Read16Bit(Register_PC);
+    uint16_t originalAddress = Get16Bit(Register_PC);
     int8_t signedRelative = relative;
     uint16_t newAddress = originalAddress + signedRelative;
     cout << "Jumping 0x" << hex << signedRelative;

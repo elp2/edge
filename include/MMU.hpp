@@ -29,7 +29,11 @@ public:
 
     void Validate();
 
+    // Hacks to simulate a disassembler.
+    void SetDisassemblerMode(bool disassemblerMode);
+
 private:
     uint8_t *rom;
     uint32_t romSize;
+    bool disasemblerMode;    
 };

@@ -39,7 +39,7 @@ class CPU {
 
     bool Requires16Bits(Destination d);
     uint8_t Get8Bit(Destination d);
-    uint16_t Read16Bit(Destination d);
+    uint16_t Get16Bit(Destination d);
 
     void Set8Bit(Destination d, uint8_t value);
     void Set16Bit(Destination d, uint16_t value);

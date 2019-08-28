@@ -30,22 +30,22 @@ void JumpCommand::Run(CPU *cpu, MMU *mmu) {
     switch (this->opcode)
     {
     case 0xC3:
-        jumpCondition(cpu, true, cpu->Read16Bit(Eat_PC_Word));
+        jumpCondition(cpu, true, cpu->Get16Bit(Eat_PC_Word));
         return;
     case 0xC2:
-        jumpCondition(cpu, !cpu->flags.z, cpu->Read16Bit(Eat_PC_Word));
+        jumpCondition(cpu, !cpu->flags.z, cpu->Get16Bit(Eat_PC_Word));
         return;
     case 0xCA:
-        jumpCondition(cpu, cpu->flags.z, cpu->Read16Bit(Eat_PC_Word));
+        jumpCondition(cpu, cpu->flags.z, cpu->Get16Bit(Eat_PC_Word));
         return;
     case 0xD2:
-        jumpCondition(cpu, !cpu->flags.c, cpu->Read16Bit(Eat_PC_Word));
+        jumpCondition(cpu, !cpu->flags.c, cpu->Get16Bit(Eat_PC_Word));
         return;
     case 0xDA:
-        jumpCondition(cpu, cpu->flags.c, cpu->Read16Bit(Eat_PC_Word));
+        jumpCondition(cpu, cpu->flags.c, cpu->Get16Bit(Eat_PC_Word));
         return;
     case 0xE9:
-        jumpCondition(cpu, true, cpu->Read16Bit(Register_HL));
+        jumpCondition(cpu, true, cpu->Get16Bit(Register_HL));
         return;
     case 0x18:
         jumpConditionRelative(cpu, true, cpu->Get8Bit(Eat_PC_Byte));

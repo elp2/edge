@@ -11,24 +11,44 @@ MMU::MMU() {
     // Initialize memory to random values.
 }
 
+void MMU::SetDisassemblerMode(bool disasemblerMode) {
+    this->disasemblerMode = disasemblerMode;
+}
+
 uint8_t MMU::GetByteAt(uint16_t address) {
+    if (disasemblerMode) {
+        return 0xed;
+    }
     assert(address < romSize);
     uint8_t byte = (uint8_t)rom[address];
     return byte;
 }
 
 uint16_t MMU::GetWordAt(uint16_t address) {
+    if (disasemblerMode) {
+        return 0xeded;
+    }
     uint8_t lsb = GetByteAt(address);
     uint16_t result = (GetByteAt(address+1) << 8)|lsb;
     return result;
 }
 
 void MMU::SetByteAt(uint16_t address, uint8_t byte) {
+    if (disasemblerMode) {
+        return;
+    }
+
+    // TODO: Test general setting.
     // TODO: Probably shouldn't be setting the ROM, how does RAM work?
     rom[address] = byte;
 }
 
 void MMU::SetWordAt(uint16_t address, uint16_t word) {
+    if (disasemblerMode) {
+        return;
+    }
+
+    // TODO: Test.
     SetByteAt(address, HIGHER8(word));
     SetByteAt(address + 1, LOWER8(word));
 }

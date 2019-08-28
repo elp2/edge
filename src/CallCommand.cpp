@@ -19,11 +19,11 @@ class CallCommand : public Command {
         switch (opcode)
         {
         case 0xCD:
-            nextAddress = cpu->Read16Bit(Register_PC) + 1;
+            nextAddress = cpu->Get16Bit(Register_PC) + 1;
             // Presumably, we'll then be able to return by popping and loading.
             cpu->Push16Bit(nextAddress);
             
-            cpu->JumpAddress(cpu->Read16Bit(Eat_PC_Word));
+            cpu->JumpAddress(cpu->Get16Bit(Eat_PC_Word));
             break;
         
         default:
