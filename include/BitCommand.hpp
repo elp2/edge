@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Command.hpp"
+#include "Destination.hpp"
 
 class AbstractCommandFactory;
+class CPU;
 
 class BitCommand : public Command {
 
@@ -10,9 +12,9 @@ class BitCommand : public Command {
     BitCommand(uint8_t opcode, string description, int cycles);
     ~BitCommand();
     void Run(CPU *cpu, MMU *mmu);
- private:
-    void RL(CPU *cpu);
-    void RR(CPU *cpu);
 };
+
+void RL(CPU *cpu, Destination d, bool carry);
+void RR(CPU *cpu, Destination d, bool carry);
 
 void registerBitCommands(AbstractCommandFactory *factory);
