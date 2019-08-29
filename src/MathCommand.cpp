@@ -194,6 +194,8 @@ void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
     stream << " A," << destinationToString(n);
     description = stream.str();
 
+    cycles = (n == Eat_PC_Byte || n == Address_HL) ? 8 : 4;
+
     cpu->flags.z = (after == 0x00);
     cpu->flags.n = !add;
     // TODO - half carry. Test.

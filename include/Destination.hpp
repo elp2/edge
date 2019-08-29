@@ -26,4 +26,5 @@ enum Destination {
     Address_SP,
     // 20
     Address_nn,
+    Register_AF,
 };

@@ -50,6 +50,7 @@ void CPU::Step() {
     Command *command = CommandForOpcode(opcode);
     command->Run(this, &mmu);
     cout << command->description << " ; $" << commandPC << endl;
+    assert(command->cycles < 33 && command->cycles > 0);
     // Time instruction takes
     // Directly updates - MMU, CPU
 
@@ -101,9 +102,16 @@ uint8_t CPU::Get8Bit(Destination d) {
     case Register_E:
         return e;
     case Register_F:
-        // TODO Remove F - it should be covered by flags variable instead.
-        assert(false);
-        return f;
+        // TODO: Test.
+        word = flags.z;
+        word = word << 1;
+        word |= flags.n;
+        word = word << 1;
+        word |= flags.h;
+        word = word << 1;
+        word |= flags.c;
+        word = word << 4;
+        return word;
     case Register_H:
         return h;
     case Register_L:
@@ -156,6 +164,8 @@ uint16_t CPU::Get16Bit(Destination d) {
     case Address_nn:
         cout << "Tried reading 0x" << hex << unsigned(d) << " as a 16 bit value." << endl;
         assert(false);
+    case Register_AF:   
+        return build16(a, Get8Bit(Register_F));
     case Register_BC:
         return build16(b,c);
     case Register_DE:
@@ -299,6 +309,7 @@ void CPU::Push8Bit(uint8_t byte) {
 }
 void CPU::Push16Bit(uint16_t word) {
     // TODO is this the right order???
+    // Test.
     Push8Bit(HIGHER8(word));
     Push8Bit(LOWER8(word));
 }

@@ -10,6 +10,7 @@
 #include "NopCommand.hpp"
 #include "RestartCommand.hpp"
 #include "ReturnCommand.hpp"
+#include "StackCommand.hpp"
 
 AbstractCommandFactory::AbstractCommandFactory() {
     commands = array<Command *, 256>();
@@ -45,6 +46,7 @@ CommandFactory::CommandFactory() {
     registerReturnCommands(this);
     registerBitCommands(this);
     registerMathCommands(this);
+    registerStackCommands(this);
 
     int implementedCommands = 0;
     for (int i = 0; i < 256; i++) {

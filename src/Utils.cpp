@@ -67,6 +67,8 @@ string destinationToString(Destination d) {
         return "H";
     case Register_L:
         return "L";
+    case Register_AF:
+        return "AF";
     case Register_BC:
         return "BC";
     case Register_DE:
