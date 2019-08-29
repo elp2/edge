@@ -11,6 +11,38 @@ MMU::MMU() {
     // Initialize memory to random values.
 }
 
+string AddressRegion(uint16_t address) {
+    if (address < 0x4000) {
+        return "ROM Bank 0 (16kb)";
+    } else if (address < 0x8000) {
+        // TODO - detect + prevent writes to banks.
+        return "ROM Bank 1 (switchable)";
+    } else if (address < 0xa000) {
+        return "Video RAM";
+    } else if (address < 0xc000) {
+        return "Switchable RAM";
+    } else if (address < 0xe000) {
+        return "Internal RAM";
+    } else if (address < 0xfe00) {
+        return "Echo of 8k Internal RAM";
+    } else if (address < 0xfea0) {
+        return "OAM";
+    } else if (address < 0xff00) {
+        return "Empty i/o";
+    } else if (address < 0xff4c) {
+        return "i/o ports";
+    } else if (address < 0xff80) {
+        return "Empty i/o (2)";
+    } else if (address < 0xffff) {
+        return "Internal RAM";
+    } else {
+        return "Interrupt Enable Register";
+    }
+}
+
+
+
+
 void MMU::SetDisassemblerMode(bool disasemblerMode) {
     this->disasemblerMode = disasemblerMode;
 }
@@ -19,8 +51,13 @@ uint8_t MMU::GetByteAt(uint16_t address) {
     if (disasemblerMode) {
         return 0xed;
     }
-    assert(address < romSize);
     uint8_t byte = (uint8_t)rom[address];
+
+    cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
+    cout << " 0x" << hex << unsigned(byte) << " (GET) " << endl;
+
+    assert(address < romSize);
+
     return byte;
 }
 
@@ -37,6 +74,8 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
     if (disasemblerMode) {
         return;
     }
+    cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
+    cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
 
     // TODO: Test general setting.
     // TODO: Probably shouldn't be setting the ROM, how does RAM work?

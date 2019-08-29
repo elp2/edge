@@ -44,23 +44,16 @@ void CPU::Step() {
     }
 
     uint16_t commandPC = pc;
+    cout << "---------------- 0x" << hex << unsigned(commandPC);
+    cout << " ----------------" << endl;
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
 
     Command *command = CommandForOpcode(opcode);
     command->Run(this, &mmu);
     cout << command->description << " ; $" << commandPC << endl;
+    Debugger();
     assert(command->cycles < 33 && command->cycles > 0);
-    // Time instruction takes
-    // Directly updates - MMU, CPU
-
-
-// read instruction code at pc
-// look up instruction command based on that (might be 2 step for cb's)
-// advance the number of steps that the instruction demanded
-
-// ??? interrupts.
-
 }
 
 bool CPU::Requires16Bits(Destination d) {
@@ -350,7 +343,7 @@ void CPU::JumpRelative(uint8_t relative) {
     uint16_t originalAddress = Get16Bit(Register_PC);
     int8_t signedRelative = relative;
     uint16_t newAddress = originalAddress + signedRelative;
-    cout << "Jumping 0x" << hex << signedRelative;
+    cout << "Jumping 0x" << hex << signed(signedRelative);
     cout << " relative to 0x" << hex << unsigned(originalAddress);
     cout << " to 0x" << hex << unsigned(newAddress) << endl;
     Set16Bit(Register_PC, newAddress);    
@@ -372,12 +365,16 @@ void CPU::Reset() {
 }
 
 void CPU::Debugger() {
-    cout << "A: " << hex << unsigned(a) << endl;
-    cout << "SP: " << hex << sp << endl;
-    cout << "PC: " << hex << pc << "[" << hex << unsigned(mmu.GetByteAt(pc)) << "]" << endl;
-    cout << "Flags:" << endl;
-    cout << "   Z: " << hex << flags.z << endl;
-    cout << "   C: " << hex << flags.c << endl;
-    cout << "   H: " << hex << flags.h << endl;
-    cout << "   N: " << hex << flags.n << endl;
+    cout << "AF: " << hex << unsigned(Get16Bit(Register_AF));
+    cout << " BC: " << hex << unsigned(Get16Bit(Register_BC));
+    cout << " DE: " << hex << unsigned(Get16Bit(Register_DE));
+    cout << " HL: " << hex << unsigned(Get16Bit(Register_HL));
+    cout << endl;
+    cout << "SP: " << hex << unsigned(sp);
+    cout << " PC: " << hex << unsigned(pc) << endl;
+    cout << "Flags:";
+    cout << " Z: " << hex << flags.z;
+    cout << " C: " << hex << flags.c;
+    cout << " H: " << hex << flags.h;
+    cout << " N: " << hex << flags.n << endl;
 }
