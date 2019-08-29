@@ -1,10 +1,10 @@
 #pragma once
 
 #include <string>
-using namespace std;
 
-enum CartridgeType {CartridgeType_ROM_MBC1, CartridgeType_Unsupported};
-enum ROMSize {ROMSize_64k, ROMSize_Unsupported};
+#include "ROM.hpp"
+
+using namespace std;
 
 class MMU {
 
@@ -21,19 +21,18 @@ public:
     // Returns the max 16 character upper case game title.
     std::string GameTitle();
 
-    // Loads a ROM file. Returns true if loaded successfully.
-    bool LoadRom();
-
-    CartridgeType CartridgeType();
-    ROMSize ROMSize();
-
-    void Validate();
+    void SetROMs(ROM *bootROM, ROM *cartridgeROM);
 
     // Hacks to simulate a disassembler.
     void SetDisassemblerMode(bool disassemblerMode);
 
 private:
-    uint8_t *rom;
-    uint32_t romSize;
-    bool disasemblerMode;    
+    bool UseBootROMForAddress(uint16_t address);
+    string AddressRegion(uint16_t address);
+    uint8_t *ram;
+
+    bool disasemblerMode;
+    bool overlayBootROM;
+    ROM *bootROM;
+    ROM *cartridgeROM;
 };

@@ -5,22 +5,19 @@
 #include "MMU.hpp"
 int main() {
     cout << "Loading MMU";
-    MMU mmu = MMU();
-    if (mmu.LoadRom()) {
-        cout << "... Loaded";
-    } else {
-        cout << "... Error!!!";
-        exit(0);
-    }
-    cout << endl;
 
-    cout << "Title: " << mmu.GameTitle() << endl;
+    ROM *bootROM = new ROM();
+    assert(bootROM->LoadFile("../boot.gb"));
+    ROM *cartridgeROM = new ROM();
+    assert(cartridgeROM->LoadFile("../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+    cout << "Title: " << cartridgeROM->GameTitle() << endl;
+
+    MMU mmu = MMU();
+    mmu.SetROMs(bootROM, cartridgeROM);
 
     CPU cpu = CPU(mmu);
-
     cpu.JumpAddress(0x00);
 
-    cpu.Debugger();
     for (int i = 0; i < 500; i++) {
         cpu.Step();
     }

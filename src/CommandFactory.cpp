@@ -14,7 +14,6 @@
 
 AbstractCommandFactory::AbstractCommandFactory() {
     commands = array<Command *, 256>();
-    cout << "AbstractCommandFactory!!!" << endl;
 }
 
 void AbstractCommandFactory::RegisterCommand(Command *command) {
