@@ -20,15 +20,6 @@ uint8_t bitForRowColumn(uint8_t startingRow, uint8_t row, uint8_t column) {
 
 CBCommand::CBCommand(uint8_t opcode) {
     this->opcode = opcode;
-    // for (int r = 4; r < 8; r++) {
-    //     for (int column = 0; column < 16; column++) {
-    //         int row = r;
-    //         uint8_t testBit = bitForRowColumn(4, row, column);
-
-    //         cout << hex << unsigned(testBit) << endl;
-    //     }
-    // }
-    // assert(false);
 }
 
 CBCommand::~CBCommand() {
@@ -110,6 +101,9 @@ void CBCommand::Run(CPU *cpu, MMU *mmu) {
     case 0x4:
     case 0x5:
     case 0x6:
+        cout << "Unhandled CB Opcode " << hex << unsigned(opcode) << endl;
+        assert(false);
+        break;
     case 0x7:
         return TestBit(row, column, cpu);
     case 0x8:

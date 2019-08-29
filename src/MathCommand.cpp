@@ -7,6 +7,11 @@
 #include "MMU.hpp"
 #include "Utils.hpp"
 
+#define ADDAd8 0xc6
+#define SUBAd8 0xd6
+#define ADCAd8 0xce
+#define SBCAd8 0xde
+
 MathCommand::MathCommand(uint8_t opcode) {
     this->opcode = opcode;
 }
@@ -161,12 +166,98 @@ void MathCommand::Dec(CPU *cpu) {
     }
 }
 
+void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
+    uint8_t orig = cpu->Get8Bit(Register_A);
+    uint8_t delta = cpu->Get8Bit(n) + (carry ? cpu->flags.c : 0);
+
+    uint8_t after;
+    if (add) {
+        after = orig + delta;
+    } else {
+        after = orig - delta;
+    }
+
+    stringstream stream;
+    if (add) {
+        if (carry) {
+            stream << "ADC";
+        } else {
+            stream << "ADD";
+        }
+    } else {
+        if (carry) {
+            stream << "SBC";
+        } else {
+            stream << "SUB";
+        }
+    }
+    stream << " A," << destinationToString(n);
+    description = stream.str();
+
+    cpu->flags.z = (after == 0x00);
+    cpu->flags.n = !add;
+    // TODO - half carry. Test.
+    // if a + b < max, then this would be LOWER(orig) > LOWER(new), e.g. we've pushed stuff out.
+    // cpu->flags.h = add ? LOWER(orig);
+    cpu->flags.c = add ? (after < orig) : (orig > after); // TODO test. Maybe whether switched sign?
+    cpu->Set8Bit(Register_A, after);
+}
+
+void MathCommand::AddSP(CPU *cpu) {
+    uint8_t unsignedByte = cpu->Get8Bit(Eat_PC_Byte);
+    int8_t signedByte = unsignedByte;
+    uint16_t sp = cpu->Get16Bit(Register_SP);
+    uint16_t spAfter = sp + signedByte;
+    cpu->Set16Bit(Register_SP, spAfter);
+
+    // TODO Test.
+    cpu->flags.z = false;
+    cpu->flags.n = false;
+    cpu->flags.h = spAfter > 0xff && sp <= 0xff;
+    cpu->flags.c = spAfter < sp && signedByte > 0;
+
+    cycles = 16;
+    description = "ADD SP, #";
+}
+
 void MathCommand::Run(CPU *cpu, MMU *mmu) {
     // Nop.
     (void)mmu;
 
+    uint8_t row = NIBBLEHIGH(opcode);
+    uint8_t col = NIBBLELOW(opcode);
+    
+    if ((col == 0x4 && row <= 0x3) || (col == 0xc && row <= 0x3)) {
+        Inc(cpu);
+        return;
+    }
+    if ((col == 0x5 && row <= 0x3) || (col == 0xd && row <= 0x3)) {
+        Dec(cpu);
+        return;
+    }
+
+    if (row == 0x8 || opcode == ADDAd8 || opcode == ADCAd8) {
+        // ADD, ADC.
+        bool carry = col > 7;
+        bool add = true;
+        Destination d = (opcode == ADDAd8 || opcode == ADCAd8) ? Eat_PC_Byte : destinationForColumn(col);
+        Delta8(cpu, d, add, carry);
+        return;
+    }
+
+    if (row == 0x9 || opcode == SUBAd8 || opcode == SBCAd8) {
+        // SUB, SUBC.
+        bool carry = col > 7;
+        bool add = false;
+        Destination d = (opcode == SUBAd8 || opcode == SBCAd8) ? Eat_PC_Byte : destinationForColumn(col);
+        Delta8(cpu, d, add, carry);
+        return;
+    }
+
     switch (opcode)
     {
+        case 0xe8:
+            return AddSP(cpu);
     case 0x3c:
     case 0x04:
     case 0x0c:
@@ -236,4 +327,18 @@ void registerMathCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new MathCommand(0x1b));
     factory->RegisterCommand(new MathCommand(0x2b));
     factory->RegisterCommand(new MathCommand(0x3b));
+
+    // ADD, ADC.
+    for (uint8_t i = 0x80; i < 0x90; i++) {
+        factory->RegisterCommand(new MathCommand(i));
+    }
+    factory->RegisterCommand(new MathCommand(ADDAd8));
+    factory->RegisterCommand(new MathCommand(ADCAd8));
+
+    // SUB, SBC.
+    for (uint8_t i = 0x90; i < 0xa0; i++) {
+        factory->RegisterCommand(new MathCommand(i));
+    }
+    factory->RegisterCommand(new MathCommand(SUBAd8));
+    factory->RegisterCommand(new MathCommand(SBCAd8));
 }
