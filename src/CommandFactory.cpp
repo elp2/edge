@@ -48,7 +48,9 @@ CommandFactory::CommandFactory() {
 
     int implementedCommands = 0;
     for (int i = 0; i < 256; i++) {
-        if (commands[i] != NULL) {
+        if (commands[i] == NULL) {
+            cout << "0x" << hex << unsigned(i) << " not implemented" << endl;
+        } else {
             implementedCommands++;
         }
     }
