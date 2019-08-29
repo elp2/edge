@@ -44,6 +44,42 @@ BitCommand::~BitCommand() {
 
 }
 
+void BitCommand::RR(CPU *cpu) {
+    uint8_t a = cpu->Get8Bit(Register_A);
+    bool bit7 = a & 0x80;
+    uint8_t bit0;
+    if (opcode == 0x07) {
+        bit0 = bit7;
+        cpu->flags.c = bit7;
+    } else {
+        bit0 = cpu->flags.c;
+        cpu->flags.c = bit7;
+    }
+    a <<= 1;
+    a |= bit0;
+    cpu->Set8Bit(Register_A, a);
+    cpu->flags.z = (a == 0);
+    cpu->flags.n = cpu->flags.h = false;
+}
+
+void BitCommand::RL(CPU *cpu) {
+    uint8_t a = cpu->Get8Bit(Register_A);
+    bool bit0 = a & 0x1;
+    uint8_t bit7;
+    if (opcode == 0x0f) {
+        cpu->flags.c = bit0;
+        bit7 = bit0 << 7;
+    } else {
+        bit7 = (((uint8_t)cpu->flags.c) << 7);
+        cpu->flags.c = bit0;
+    }
+    a >>= 1;
+    a |= bit7;
+    cpu->Set8Bit(Register_A, a);
+    cpu->flags.z = (a == 0);
+    cpu->flags.n = cpu->flags.h = false;
+}
+
 void BitCommand::Run(CPU *cpu, MMU *mmu) {
     (void)mmu;
 
@@ -134,7 +170,12 @@ void BitCommand::Run(CPU *cpu, MMU *mmu) {
     case 0xfe:
         cp(cpu, Eat_PC_Byte);
         return;
-
+    case 0x07:
+    case 0x17:
+        return RL(cpu);
+    case 0x0f:
+    case 0x1f:
+        return RR(cpu);
     default:
         cout << "Unknown bit command: 0x" << hex << unsigned(opcode);
         assert(false);
@@ -172,4 +213,9 @@ void registerBitCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new BitCommand(0xbe, "CP (HL)", 8));
     factory->RegisterCommand(new BitCommand(0xbf, "CP A", 4));
     factory->RegisterCommand(new BitCommand(0xfe, "CP #", 8));
+
+    factory->RegisterCommand(new BitCommand(0x07, "RLCA", 4));
+    factory->RegisterCommand(new BitCommand(0x17, "RLA", 4));
+    factory->RegisterCommand(new BitCommand(0x0f, "RRCA", 4));
+    factory->RegisterCommand(new BitCommand(0x1f, "RRA", 4));
 }
