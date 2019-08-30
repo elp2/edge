@@ -4,6 +4,7 @@
 
 #include <sstream>
 
+#include "BitCommand.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
 #include "Utils.hpp"
@@ -25,7 +26,14 @@ CBCommand::CBCommand(uint8_t opcode) {
 CBCommand::~CBCommand() {
 }
 
-string commandName(string base, uint8_t startingRow, uint8_t row, uint8_t column) {
+string noIndexCommandName(string base, uint8_t column) {
+    ostringstream stream;
+    Destination d = destinationForColumn(column);
+    stream << base << " " << destinationToString(d);
+    return stream.str();
+}
+
+string bitIndexCommandName(string base, uint8_t startingRow, uint8_t row, uint8_t column) {
     ostringstream stream;
     Destination d = destinationForColumn(column);
     uint8_t bitNum = ((row - startingRow) * 16 + column) / 8;
@@ -34,7 +42,7 @@ string commandName(string base, uint8_t startingRow, uint8_t row, uint8_t column
 }
 
 void CBCommand::TestBit(uint8_t row, uint8_t column, CPU *cpu) {
-    this->description = commandName("BIT", 4, row, column);
+    this->description = bitIndexCommandName("BIT", 4, row, column);
     uint8_t testBit = bitForRowColumn(4, row, column);
     cpu->flags.z = ((testBit & cpu->Get8Bit(destinationForColumn(column))) == 0);
     cpu->flags.n = false;
@@ -43,7 +51,7 @@ void CBCommand::TestBit(uint8_t row, uint8_t column, CPU *cpu) {
 }
 
 void CBCommand::ResetBit(uint8_t row, uint8_t column, CPU *cpu) {
-    this->description = commandName("RES", 8, row, column);
+    this->description = bitIndexCommandName("RES", 8, row, column);
     uint8_t resetBit = bitForRowColumn(8, row, column);
     resetBit = ~resetBit;
 
@@ -54,7 +62,7 @@ void CBCommand::ResetBit(uint8_t row, uint8_t column, CPU *cpu) {
 }
 
 void CBCommand::SetBit(uint8_t row, uint8_t column, CPU *cpu) {
-    this->description = commandName("SET", 0xc, row, column);
+    this->description = bitIndexCommandName("SET", 0xc, row, column);
     uint8_t setBit = bitForRowColumn(0xc, row, column);
     setBit = ~setBit;
 
@@ -92,12 +100,36 @@ void CBCommand::Run(CPU *cpu, MMU *mmu) {
     switch (row)
     {
     case 0x0:
-        if (column <= 0x7) {
+        if (column < 0x8) {
+            description = noIndexCommandName("RLC", column);
+            return RL(cpu, destinationForColumn(column), true);
+        } else {
+            description = noIndexCommandName("RRC", column);
+            return RR(cpu, destinationForColumn(column), true);
+        }
+        assert(false);
+        break;
+    case 0x1:
+        if (column < 0x8) {
+            description = noIndexCommandName("RL", column);
+            return RL(cpu, destinationForColumn(column), false);
+        } else {
+            description = noIndexCommandName("RR", column);
+            return RR(cpu, destinationForColumn(column), false);
+        }
+        assert(false);
+        break;        
+    case 0x2:
+        cout << "Unhandled CB Opcode " << hex << unsigned(opcode) << endl;
+        assert(false);
+        break;   
+    case 0x3:
+        if (column < 0x8) {
             return Swap(column, cpu);
         }
-    case 0x1:
-    case 0x2:
-    case 0x3:
+        cout << "Unhandled CB Opcode " << hex << unsigned(opcode) << endl;
+        assert(false);
+        break;
     case 0x4:
     case 0x5:
     case 0x6:
