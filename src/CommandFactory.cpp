@@ -8,7 +8,6 @@
 #include "MathCommand.hpp"
 #include "MiscCommand.hpp"
 #include "NopCommand.hpp"
-#include "RestartCommand.hpp"
 #include "ReturnCommand.hpp"
 #include "StackCommand.hpp"
 
@@ -41,7 +40,6 @@ CommandFactory::CommandFactory() {
     registerLoadCommands(this);
     registerMiscCommands(this);
     registerCallCommands(this);
-    registerRestartCommands(this);
     registerReturnCommands(this);
     registerBitCommands(this);
     registerMathCommands(this);
