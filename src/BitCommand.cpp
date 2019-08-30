@@ -3,6 +3,7 @@
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
+#include "Utils.hpp"
 
 void andAWithDestination(CPU *cpu, Destination d) {
     uint8_t anded = cpu->Get8Bit(Register_A) & cpu->Get8Bit(d);
@@ -29,6 +30,16 @@ void xorAWithDestination(CPU *cpu, Destination d) {
     cpu->Set8Bit(Register_A, xored);
 
     cpu->flags.z = (xored == 0);
+    cpu->flags.n = false;
+    cpu->flags.h = false;
+    cpu->flags.c = false;
+}
+
+void orAWithDestination(CPU *cpu, Destination d) {
+    uint8_t ored = cpu->Get8Bit(Register_A) | cpu->Get8Bit(d);
+    cpu->Set8Bit(Register_A, ored);
+
+    cpu->flags.z = (ored == 0);
     cpu->flags.n = false;
     cpu->flags.h = false;
     cpu->flags.c = false;
@@ -82,6 +93,12 @@ void RL(CPU *cpu, Destination d, bool carry) {
 
 void BitCommand::Run(CPU *cpu, MMU *mmu) {
     (void)mmu;
+
+    uint8_t row = NIBBLEHIGH(opcode);
+    uint8_t col = NIBBLELOW(opcode);
+    if (row == 0xb && col < 0x8) {
+        return orAWithDestination(cpu, destinationForColumn(col));
+    }
 
     switch (opcode)
     {
@@ -218,4 +235,13 @@ void registerBitCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new BitCommand(0x17, "RLA", 4));
     factory->RegisterCommand(new BitCommand(0x0f, "RRCA", 4));
     factory->RegisterCommand(new BitCommand(0x1f, "RRA", 4));
+
+    factory->RegisterCommand(new BitCommand(0xb0, "OR B", 4));
+    factory->RegisterCommand(new BitCommand(0xb1, "OR C", 4));
+    factory->RegisterCommand(new BitCommand(0xb2, "OR D", 4));
+    factory->RegisterCommand(new BitCommand(0xb3, "OR E", 4));
+    factory->RegisterCommand(new BitCommand(0xb4, "OR H", 4));
+    factory->RegisterCommand(new BitCommand(0xb5, "OR L", 4));
+    factory->RegisterCommand(new BitCommand(0xb6, "OR (HL)", 8));
+    factory->RegisterCommand(new BitCommand(0xb7, "OR A", 4));
 }

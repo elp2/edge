@@ -55,7 +55,7 @@ int main() {
 
     cpu.JumpAddress(0x00);
 
-    int LIMIT = 100000;
+    int LIMIT = 1000000;
     for (int i = 0; i < LIMIT; i++) {
         cpu.Step();
     }

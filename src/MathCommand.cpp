@@ -205,6 +205,26 @@ void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
     cpu->Set8Bit(Register_A, after);
 }
 
+void MathCommand::AddHL(CPU *cpu, Destination n) {
+    uint16_t orig = cpu->Get16Bit(Register_HL);
+    uint16_t after = orig + cpu->Get16Bit(n);
+
+    stringstream stream;
+    stream << "ADD HL," << destinationToString(n);
+    description = stream.str();
+
+    cycles = 8;
+
+    // Not affected: cpu->flags.z;
+    cpu->flags.n = false;
+    // TODO: Test.
+    assert(false);
+    cpu->flags.h = orig < 0x0fff && after > 0xff;
+    cpu->flags.c = orig < after;
+
+    cpu->Set16Bit(Register_HL, after);
+}
+
 void MathCommand::AddSP(CPU *cpu) {
     uint8_t unsignedByte = cpu->Get8Bit(Eat_PC_Byte);
     int8_t signedByte = unsignedByte;
@@ -233,9 +253,14 @@ void MathCommand::Run(CPU *cpu, MMU *mmu) {
         Inc(cpu);
         return;
     }
+
     if ((col == 0x5 && row <= 0x3) || (col == 0xd && row <= 0x3)) {
         Dec(cpu);
         return;
+    }
+
+    if (col == 0x9 && (row >= 0 && row < 4)) {
+        
     }
 
     if (row == 0x8 || opcode == ADDAd8 || opcode == ADCAd8) {
@@ -343,4 +368,10 @@ void registerMathCommands(AbstractCommandFactory *factory) {
     }
     factory->RegisterCommand(new MathCommand(SUBAd8));
     factory->RegisterCommand(new MathCommand(SBCAd8));
+
+    factory->RegisterCommand(new MathCommand(0x09));
+    factory->RegisterCommand(new MathCommand(0x19));
+    factory->RegisterCommand(new MathCommand(0x29));
+    factory->RegisterCommand(new MathCommand(0x39));
+
 }

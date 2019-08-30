@@ -15,6 +15,7 @@ class MathCommand : public Command {
     void Inc(CPU *cpu);
     void Dec(CPU *cpu);
     void Delta8(CPU *cpu, Destination n, bool add, bool carry);
+    void AddHL(CPU *cpu, Destination n);
     void AddSP(CPU *cpu);
 };
 
