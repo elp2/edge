@@ -5,7 +5,7 @@
 
 using namespace std;
 
-uint16_t build16(uint8_t lsb, uint8_t msb) {
+uint16_t build16(uint8_t msb, uint8_t lsb) {
     uint16_t word = msb;
     word = word << 8;
     word |= lsb;

@@ -2,7 +2,7 @@
 
 enum Destination {
     Unknown = 0,
-    Register_A,
+    Register_A = 100,
     Register_B, 
     Register_C,
     Register_D,

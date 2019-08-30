@@ -10,7 +10,7 @@
 #define NIBBLEHIGH(byte) ((byte  >> 4 ) & 0xf)
 #define NIBBLELOW(byte) (byte & 0xf)
 
-uint16_t build16(uint8_t lsb, uint8_t msb);
+uint16_t build16(uint8_t msb, uint8_t lsb);
 
 // See http://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html.
 Destination destinationForColumn(uint8_t column);

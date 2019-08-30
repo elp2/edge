@@ -3,6 +3,8 @@
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
+#include "Utils.hpp"
+
 int main() {
     cout << "Loading MMU";
 
@@ -16,9 +18,44 @@ int main() {
     mmu.SetROMs(bootROM, cartridgeROM);
 
     CPU cpu = CPU(mmu);
-    cpu.JumpAddress(0x00E0);
 
-    int LIMIT = 500;
+    // BEGIN HACKY TESTS!
+    cpu.Set8Bit(Register_A, 0xed);
+    cpu.Set8Bit(Register_B, 0x12);
+    cpu.Set8Bit(Register_C, 0x34);
+    uint16_t bc = cpu.Get16Bit(Register_BC);
+
+    assert(cpu.Get8Bit(Register_B) == 0x12);
+    assert(cpu.Get8Bit(Register_C) == 0x34);
+    assert(bc == 0x1234);
+
+    cpu.Set8Bit(Register_A, cpu.Get8Bit(Register_B));
+    assert(cpu.Get8Bit(Register_A) == 0x12);
+    cpu.Set8Bit(Register_A, cpu.Get8Bit(Register_C));
+    assert(cpu.Get8Bit(Register_A) == 0x34);
+
+    uint8_t x = 0x12;
+    uint16_t y = 0x0012;
+    assert(x==y);
+
+    cout << hex << unsigned(bc) << endl;
+    assert(bc == 0x1234);
+    cpu.Set16Bit(Register_BC, bc);
+    assert(bc == 0x1234);
+
+    cpu.Set16Bit(Register_HL, 0x134);
+    cpu.Set8Bit(Register_A, cpu.Get8Bit(Register_L));
+    cout << hex << unsigned(cpu.Get16Bit(Register_HL)) << " ";
+    cout << " H: " << hex << unsigned(cpu.Get8Bit(Register_H)) << " ";
+    cout << " L: " << hex << unsigned(cpu.Get8Bit(Register_L)) << " ";
+    cout << " A: " << hex << unsigned(cpu.Get8Bit(Register_A)) << " ";
+    assert(cpu.Get8Bit(Register_A) == 0x34);
+
+    // END TESTS.
+
+    cpu.JumpAddress(0x00);
+
+    int LIMIT = 100000;
     for (int i = 0; i < LIMIT; i++) {
         cpu.Step();
     }
