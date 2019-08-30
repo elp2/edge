@@ -253,9 +253,11 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
     case Register_BC:
         b = LOWER8(value);
         c = HIGHER8(value);
+        break;
     case Register_DE:
         this->d = LOWER8(value);
         e = HIGHER8(value);
+        break;
     case Register_HL:
         h = LOWER8(value);
         l = HIGHER8(value);
@@ -268,8 +270,7 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
         break;
     case Eat_PC_Word:
         mmu.SetWordAt(pc, value);
-        //NOP for now.
-        // TODO ???
+        assert(false);
         break;
     case Address_BC:
     case Address_DE:
@@ -300,21 +301,24 @@ void CPU::Push8Bit(uint8_t byte) {
     sp -= 1;
     mmu.SetByteAt(sp, byte);
 }
+
 void CPU::Push16Bit(uint16_t word) {
     // TODO is this the right order???
     // Test.
-    Push8Bit(HIGHER8(word));
     Push8Bit(LOWER8(word));
+    Push8Bit(HIGHER8(word));
 }
 
 uint8_t CPU::Pop8Bit() {
+    uint16_t oldSp = sp;
     sp += 1;
+    assert(sp > oldSp);
     return mmu.GetByteAt(sp);
 }
 
 uint16_t CPU::Pop16Bit() {
-    uint8_t lsb = Pop8Bit();
     uint8_t msb = Pop8Bit();
+    uint8_t lsb = Pop8Bit();
     return build16(lsb, msb);
 }
 

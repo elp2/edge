@@ -35,7 +35,7 @@ void StackCommand::Push(CPU *cpu, Destination d) {
     cycles = 16;
 
     stringstream stream;
-    stream << "POP " << destinationToString(d);
+    stream << "PUSH " << destinationToString(d);
     description = stream.str();
 
     cpu->Push16Bit(cpu->Get16Bit(d));
@@ -57,7 +57,7 @@ void StackCommand::Run(CPU *cpu, MMU *mmu) {
     uint8_t row = NIBBLEHIGH(opcode);
     uint8_t col = NIBBLELOW(opcode);
     Destination d = stackDestinationForRow(row);
-    if (col == 0xc) {
+    if (col == 0x5) {
         return Push(cpu, d);
     } else {
         return Pop(cpu, d);

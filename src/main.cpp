@@ -16,9 +16,11 @@ int main() {
     mmu.SetROMs(bootROM, cartridgeROM);
 
     CPU cpu = CPU(mmu);
-    cpu.JumpAddress(0x00);
+    cpu.JumpAddress(0x00E0);
 
-    for (int i = 0; i < 500; i++) {
+    int LIMIT = 500;
+    for (int i = 0; i < LIMIT; i++) {
         cpu.Step();
     }
+    cout << "REACHED LIMIT OF " << LIMIT << endl;
 }

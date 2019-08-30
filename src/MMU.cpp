@@ -68,8 +68,8 @@ uint8_t MMU::GetByteAt(uint16_t address) {
         byte = cartridgeROM->GetByteAt(address);
     }
 
-    cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
-    cout << " 0x" << hex << unsigned(byte) << " (GET) " << endl;
+    // cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
+    // cout << " 0x" << hex << unsigned(byte) << " (GET) " << endl;
 
     return byte;
 }

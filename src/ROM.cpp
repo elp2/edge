@@ -37,7 +37,7 @@ uint32_t ROM::Size() {
 uint8_t ROM::GetByteAt(uint16_t address) {
     assert(address < romSize);
 
-    return (uint8_t)rom[address];
+    return rom[address];
 }
 
 CartridgeType ROM::CartridgeType() {
