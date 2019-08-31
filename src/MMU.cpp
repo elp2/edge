@@ -64,8 +64,10 @@ uint8_t MMU::GetByteAt(uint16_t address) {
     uint8_t byte;
     if (UseBootROMForAddress(address)) {
         byte = bootROM->GetByteAt(address);
-    } else {
+    } else if (address < 0x8000) {
         byte = cartridgeROM->GetByteAt(address);
+    } else {
+        byte = ram[address - 0x8000];
     }
 
     // cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
@@ -76,7 +78,7 @@ uint8_t MMU::GetByteAt(uint16_t address) {
 
 uint16_t MMU::GetWordAt(uint16_t address) {
     if (disasemblerMode) {
-        return 0xeded;
+        return 0xed02;
     }
     uint8_t lsb = GetByteAt(address);
     uint16_t result = (GetByteAt(address+1) << 8)|lsb;

@@ -44,8 +44,8 @@ void CPU::Step() {
     }
 
     uint16_t commandPC = pc;
-    cout << "---------------- 0x" << hex << unsigned(commandPC);
-    cout << " ----------------" << endl;
+    // cout << "---------------- 0x" << hex << unsigned(commandPC);
+    // cout << " ----------------" << endl;
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
 
@@ -54,6 +54,7 @@ void CPU::Step() {
     cout << command->description << " ; $" << commandPC << endl;
     Debugger();
     assert(command->cycles < 33 && command->cycles > 0);
+    // TODO: Actually do the cycles.
 }
 
 bool CPU::Requires16Bits(Destination d) {
@@ -158,13 +159,13 @@ uint16_t CPU::Get16Bit(Destination d) {
         cout << "Tried reading 0x" << hex << unsigned(d) << " as a 16 bit value." << endl;
         assert(false);
     case Register_AF:   
-        return build16(a, Get8Bit(Register_F));
+        return buildMsbLsb16(a, Get8Bit(Register_F));
     case Register_BC:
-        return build16(b,c);
+        return buildMsbLsb16(b,c);
     case Register_DE:
-        return build16(this->d, e);
+        return buildMsbLsb16(this->d, e);
     case Register_HL:
-        return build16(h, l);
+        return buildMsbLsb16(h, l);
     case Register_SP:
         return sp;
     case Register_PC:
@@ -311,15 +312,16 @@ void CPU::Push16Bit(uint16_t word) {
 
 uint8_t CPU::Pop8Bit() {
     uint16_t oldSp = sp;
+    uint8_t byte = mmu.GetByteAt(sp);
     sp += 1;
     assert(sp > oldSp);
-    return mmu.GetByteAt(sp);
+    return byte;
 }
 
 uint16_t CPU::Pop16Bit() {
     uint8_t msb = Pop8Bit();
     uint8_t lsb = Pop8Bit();
-    return build16(lsb, msb);
+    return buildMsbLsb16(msb, lsb);
 }
 
 void CPU::SetDisassemblerMode(bool disasemblerMode) {

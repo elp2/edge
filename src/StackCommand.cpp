@@ -59,11 +59,11 @@ void StackCommand::Run(CPU *cpu, MMU *mmu) {
     Destination d = stackDestinationForRow(row);
     if (col == 0x5) {
         return Push(cpu, d);
-    } else {
+    } else if (col == 0x1) {
         return Pop(cpu, d);
+    } else {
+        assert(false);
     }
-
-
 }
 
 void registerStackCommands(AbstractCommandFactory *factory) {
