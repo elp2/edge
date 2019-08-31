@@ -157,7 +157,25 @@ void BitCommand::Run(CPU *cpu, MMU *mmu) {
         return;
     case 0xee:
         xorAWithDestination(cpu, Eat_PC_Byte);
-        return;
+
+    case 0xb0:
+        return orAWithDestination(cpu, destinationForColumn(0x0));
+    case 0xb1:
+        return orAWithDestination(cpu, destinationForColumn(0x1));
+    case 0xb2:
+        return orAWithDestination(cpu, destinationForColumn(0x2));
+    case 0xb3:
+        return orAWithDestination(cpu, destinationForColumn(0x3));
+    case 0xb4:
+        return orAWithDestination(cpu, destinationForColumn(0x4));
+    case 0xb5:
+        return orAWithDestination(cpu, destinationForColumn(0x5));
+    case 0xb6:
+        return orAWithDestination(cpu, destinationForColumn(0x6));
+    case 0xb7:
+        return orAWithDestination(cpu, destinationForColumn(0x7));
+    case 0xF6:
+        return orAWithDestination(cpu, Eat_PC_Byte);
 
     // CPs.
     case 0xbf:
@@ -198,6 +216,7 @@ void BitCommand::Run(CPU *cpu, MMU *mmu) {
         assert(false);
         break;
     }
+
 }
 
 void registerBitCommands(AbstractCommandFactory *factory) {
@@ -244,4 +263,5 @@ void registerBitCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new BitCommand(0xb5, "OR L", 4));
     factory->RegisterCommand(new BitCommand(0xb6, "OR (HL)", 8));
     factory->RegisterCommand(new BitCommand(0xb7, "OR A", 4));
+    factory->RegisterCommand(new BitCommand(0xF6, "OR #", 4));
 }

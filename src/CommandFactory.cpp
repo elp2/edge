@@ -10,6 +10,7 @@
 #include "NopCommand.hpp"
 #include "ReturnCommand.hpp"
 #include "StackCommand.hpp"
+#include "UnimplementedCommand.hpp"
 
 AbstractCommandFactory::AbstractCommandFactory() {
     commands = array<Command *, 256>();
@@ -44,16 +45,14 @@ CommandFactory::CommandFactory() {
     registerBitCommands(this);
     registerMathCommands(this);
     registerStackCommands(this);
+    registerUnimplementedCommands(this);
 
-    int implementedCommands = 0;
     for (int i = 0; i < 256; i++) {
-        if (commands[i] == NULL) {
+        if (commands[i] == NULL && i != 0xCB) {
             cout << "0x" << hex << unsigned(i) << " not implemented" << endl;
-        } else {
-            implementedCommands++;
+            assert(false);
         }
     }
-    cout << implementedCommands << " / " << "256 commands implemented!" << endl;
 }
 
 CommandFactory::~CommandFactory() {

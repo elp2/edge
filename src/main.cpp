@@ -73,9 +73,8 @@ int main() {
         if (cpu->Get16Bit(Register_PC) == 0xfe) {
             cout << "# Instructions = " << i << endl;
             cout << "CPU Cycles " << cpu->Cycles() << endl;
-            exit(0);
+            break;
         }
         cpu->Step();
     }
-    cout << "REACHED LIMIT OF " << LIMIT << endl;
 }

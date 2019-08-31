@@ -374,4 +374,6 @@ void registerMathCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new MathCommand(0x29));
     factory->RegisterCommand(new MathCommand(0x39));
 
+    // ADD SP, n;
+    factory->RegisterCommand(new MathCommand(0xE8));
 }
