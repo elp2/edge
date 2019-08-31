@@ -66,9 +66,9 @@ int main() {
     testRegisters();
 
     CPU *cpu = getCPU();
-    cpu->JumpAddress(0x00);
+    cpu->JumpAddress(0xe0);
 
-    int LIMIT = 1000000;
+    int LIMIT = 10000;
     for (int i = 0; i < LIMIT; i++) {
         cpu->Step();
     }

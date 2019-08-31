@@ -89,6 +89,7 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
     if (disasemblerMode) {
         return;
     }
+
     if (address < 0x8000) {
         cout << "Can't Write to: ";
         cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
@@ -98,6 +99,11 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
     }
     cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
     cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
+
+    if (address == 0xff50) {
+        overlayBootROM = false;
+        cout << "**** REMOVED OVERLAY BOOT ROM ***" << endl;
+    }
 
     // TODO: Test general setting.
     // TODO: Probably shouldn't be setting the ROM, how does RAM work?

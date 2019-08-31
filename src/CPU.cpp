@@ -210,6 +210,7 @@ void CPU::Set8Bit(Destination d, uint8_t value) {
         l = value;
         break;
     case Address_BC:
+
         mmu.SetByteAt(Get16Bit(Register_BC), value);
         break;
     case Address_DE:
@@ -382,5 +383,5 @@ void CPU::Debugger() {
     cout << " Z: " << hex << flags.z;
     cout << " C: " << hex << flags.c;
     cout << " H: " << hex << flags.h;
-    cout << " N: " << hex << flags.n << endl;
+    cout << " N: " << hex << flags.n << endl << endl;
 }
