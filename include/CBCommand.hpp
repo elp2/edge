@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Command.hpp"
+#include "Destination.hpp"
 
 class CBCommand : public Command {
 
@@ -13,4 +14,6 @@ public:
     void ResetBit(uint8_t row, uint8_t column, CPU *cpu);
     void SetBit(uint8_t row, uint8_t column, CPU *cpu);
     void Swap(uint8_t column, CPU *cpu);
+    void SLA(CPU *cpu, Destination d);
+    void SR(CPU *cpu, Destination d, bool resetMSB);
 };

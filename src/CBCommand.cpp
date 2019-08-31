@@ -26,15 +26,14 @@ CBCommand::CBCommand(uint8_t opcode) {
 CBCommand::~CBCommand() {
 }
 
-string noIndexCommandName(string base, uint8_t column) {
-    ostringstream stream;
-    Destination d = destinationForColumn(column);
+string noIndexCommandName(string base, Destination d) {
+    stringstream stream;
     stream << base << " " << destinationToString(d);
     return stream.str();
 }
 
 string bitIndexCommandName(string base, uint8_t startingRow, uint8_t row, uint8_t column) {
-    ostringstream stream;
+    stringstream stream;
     Destination d = destinationForColumn(column);
     uint8_t bitNum = ((row - startingRow) * 16 + column) / 8;
     stream << base << " " << unsigned(bitNum) << "," << destinationToString(d);
@@ -76,7 +75,7 @@ void CBCommand::Swap(uint8_t column, CPU *cpu) {
     assert(column <= 7);
     Destination d = destinationForColumn(column);
 
-    this->description = "SWAP TODO";
+    this->description = noIndexCommandName("SWAP", d);
     uint8_t value = cpu->Get8Bit(d);
     uint8_t swapped = (NIBBLELOW(value) << 4) | NIBBLEHIGH(value);
 
@@ -88,6 +87,31 @@ void CBCommand::Swap(uint8_t column, CPU *cpu) {
     cpu->flags.c = false;
 }
 
+void CBCommand::SLA(CPU *cpu, Destination d) {
+    uint8_t orig = cpu->Get8Bit(d);
+    uint8_t left = orig << 1;
+
+    cpu->Set8Bit(d, left);
+    cpu->flags.z = (left == 0);
+    cpu->flags.n = false;
+    cpu->flags.h = false;
+    cpu->flags.c = (orig & 0xA0) == 0xA0;
+}
+
+void CBCommand::SR(CPU *cpu, Destination d, bool resetMSB) {
+    uint8_t orig = cpu->Get8Bit(d);
+    uint8_t right = orig >> 1;
+    if (!resetMSB) {
+        right |= (orig & 0xA0);
+    }
+
+    cpu->Set8Bit(d, right);
+    cpu->flags.z = (right == 0);
+    cpu->flags.n = false;
+    cpu->flags.h = false;
+    cpu->flags.c = (orig & 0x1);
+}
+
 void CBCommand::Run(CPU *cpu, MMU *mmu) {
     (void)mmu;
 
@@ -95,48 +119,54 @@ void CBCommand::Run(CPU *cpu, MMU *mmu) {
     uint8_t row = NIBBLEHIGH(opcode);
     uint8_t column = NIBBLELOW(opcode);
 
-    cycles = destinationForColumn(column) == Address_HL ? 16 : 8;
+    Destination d = destinationForColumn(column);
+
+    cycles = d == Address_HL ? 16 : 8;
 
     switch (row)
     {
     case 0x0:
         if (column < 0x8) {
-            description = noIndexCommandName("RLC", column);
-            return RL(cpu, destinationForColumn(column), true);
+            description = noIndexCommandName("RLC", d);
+            return RL(cpu, d, true);
         } else {
-            description = noIndexCommandName("RRC", column);
-            return RR(cpu, destinationForColumn(column), true);
+            description = noIndexCommandName("RRC", d);
+            return RR(cpu, d, true);
         }
         assert(false);
         break;
     case 0x1:
         if (column < 0x8) {
-            description = noIndexCommandName("RL", column);
-            return RL(cpu, destinationForColumn(column), false);
+            description = noIndexCommandName("RL", d);
+            return RL(cpu, d, false);
         } else {
-            description = noIndexCommandName("RR", column);
-            return RR(cpu, destinationForColumn(column), false);
+            description = noIndexCommandName("RR", d);
+            return RR(cpu, d, false);
         }
         assert(false);
         break;        
     case 0x2:
-        cout << "Unhandled CB Opcode " << hex << unsigned(opcode) << endl;
+        if (column < 0x8) {
+            description = noIndexCommandName("SLA", d);
+            return SLA(cpu, d);
+        } else {
+            description = noIndexCommandName("SRA", d);
+            return SR(cpu, d, false);
+        }
         assert(false);
         break;   
     case 0x3:
         if (column < 0x8) {
             return Swap(column, cpu);
+        } else {
+            description = noIndexCommandName("SRL", d);
+            return SR(cpu, d, true);
         }
-        cout << "Unhandled CB Opcode " << hex << unsigned(opcode) << endl;
         assert(false);
         break;
     case 0x4:
     case 0x5:
     case 0x6:
-        cout << "Unhandled CB Opcode " << hex << unsigned(opcode) << endl;
-        assert(false);
-        break;
-    case 0x7:
         return TestBit(row, column, cpu);
     case 0x8:
     case 0x9:

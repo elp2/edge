@@ -86,4 +86,5 @@ private:
 
     bool disasemblerMode;
     uint64_t cycles_;
+    bool debugPrint_;
 };

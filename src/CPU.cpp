@@ -44,17 +44,19 @@ void CPU::Step() {
     }
 
     uint16_t commandPC = pc;
-    // cout << "---------------- 0x" << hex << unsigned(commandPC);
-    // cout << " ----------------" << endl;
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
 
     Command *command = CommandForOpcode(opcode);
     command->Run(this, &mmu);
-    // cout << command->description << " ; $" << commandPC << endl;
-    // Debugger();
-    assert(command->cycles < 33 && command->cycles > 0);
     cycles_ += command->cycles;
+
+    if (debugPrint_) {
+        cout << command->description << " ; $" << commandPC << " [" << cycles_ << "]" << endl;
+        Debugger();
+    }
+
+    assert(command->cycles < 33 && command->cycles > 0);
 
     // TODO: Actually do the cycles with PPU.
 }
