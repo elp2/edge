@@ -1,5 +1,6 @@
 #include "MathCommand.hpp"
 
+#include <cassert>
 #include <sstream>
 
 #include "CommandFactory.hpp"

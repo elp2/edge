@@ -1,5 +1,6 @@
 #include "CPU.hpp"
 
+#include <cassert>
 #include <ios>
 #include <iostream>
 
@@ -10,6 +11,8 @@ CPU::CPU(MMU mmu) {
     this->mmu = mmu;
     commandFactory = new CommandFactory();
     cbCommandFactory = new CBCommandFactory();
+    debugPrint_ = false;
+    SetDisassemblerMode(false);
 
     Reset();
 }
@@ -103,11 +106,11 @@ uint8_t CPU::Get8Bit(Destination d) {
         // TODO: Test.
         word = flags.z;
         word = word << 1;
-        word |= flags.n;
+        word |= flags.n ? 0x1 : 0x0;
         word = word << 1;
-        word |= flags.h;
+        word |= flags.h  ? 0x1 : 0x0;
         word = word << 1;
-        word |= flags.c;
+        word |= flags.c  ? 0x1 : 0x0;
         word = word << 4;
         return word;
     case Register_H:
@@ -139,6 +142,7 @@ uint8_t CPU::Get8Bit(Destination d) {
     default:
         cout << "Unknown 8 bit destination: 0x" << hex << unsigned(d) << endl;
         assert(false);
+        return 0xED;
     }
 }
 
@@ -330,11 +334,8 @@ uint16_t CPU::Pop16Bit() {
 }
 
 void CPU::SetDisassemblerMode(bool disasemblerMode) {
-    assert(disasemblerMode);
-
     this->disasemblerMode = disasemblerMode;
     mmu.SetDisassemblerMode(disasemblerMode);
-    cout << "HACK!!!!! Disassembler mode" << endl;
 }
 
 void CPU::JumpAddress(uint16_t address) {
@@ -373,6 +374,10 @@ void CPU::Reset() {
     flags.n = 0;
     flags.c = 0;
     interruptsEnabled = true;
+    haltRequested = false;
+    stopRequested = false;
+    cycles_ = 0;
+    a = b = c = e = f = h = l = 0;
 }
 
 void CPU::Debugger() {

@@ -1,7 +1,7 @@
 #include "CBCommand.hpp"
 
 #include <bitset>
-
+#include <cassert>
 #include <sstream>
 
 #include "BitCommand.hpp"

@@ -46,7 +46,7 @@ Destination destinationForColumn(uint8_t column) {
     default:
         cout << "Unexpected destination for column: 0x" << hex << column << endl;
         assert(false);
-        break;
+        return Destination_Unknown;
     }
 }
 

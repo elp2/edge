@@ -1,5 +1,6 @@
 #include "MMU.hpp"
 
+#include <cassert>
 #include <iostream>
 
 #include "Utils.hpp"
@@ -8,6 +9,7 @@ using namespace std;
 
 MMU::MMU() {
     ram = new uint8_t[0x8000];
+    disasemblerMode = false;
     // TODO Initialize memory to random values.
 }
 

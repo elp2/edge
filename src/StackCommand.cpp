@@ -1,5 +1,6 @@
 #include "StackCommand.hpp"
 
+#include <cassert>
 #include <sstream>
 
 #include "CommandFactory.hpp"
@@ -21,7 +22,7 @@ Destination stackDestinationForRow(uint8_t row) {
     default:
         cout << "Unknown row: " << hex << unsigned(row) << endl;
         assert(false);
-        break;
+        return Destination_Unknown;
     }
 }
 

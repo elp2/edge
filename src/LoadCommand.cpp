@@ -1,8 +1,11 @@
 #include "LoadCommand.hpp"
 
+#include <cassert>
+
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
+
 LoadCommand::LoadCommand(uint8_t opcode, string description, Destination to, Destination from, int cycles) {
         this->opcode = opcode;
         this->description = description;

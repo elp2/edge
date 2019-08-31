@@ -1,5 +1,7 @@
 #include "CommandFactory.hpp"
 
+#include <cassert>
+
 #include "BitCommand.hpp"
 #include "CallCommand.hpp"
 #include "CBCommand.hpp"

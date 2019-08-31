@@ -2,3 +2,7 @@
 *.a
 *.lib
 bin/*
+*.obj
+*.pdb
+*.exe
+*.ilk

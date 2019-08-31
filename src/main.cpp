@@ -1,3 +1,4 @@
+#include <cassert>
 #include <iostream>
 
 #include "CommandFactory.hpp"
@@ -19,6 +20,7 @@ CPU *getCPU() {
 }
 
 void testRegisters() {
+    cout << "----TESTING REGISTERS----" << endl;
     CPU *cpu = getCPU();
     cpu->Set8Bit(Register_A, 0xed);
     cpu->Set8Bit(Register_B, 0x12);
@@ -53,6 +55,7 @@ void testRegisters() {
 }
 
 void testStack() {
+    cout << "----TESTING REGISTERS----" << endl;
     CPU *cpu = getCPU();
     cpu->Set16Bit(Register_HL, 0x1234);
     cpu->Push16Bit(cpu->Get16Bit(Register_HL));

@@ -1,8 +1,11 @@
 #include "MiscCommand.hpp"
 
+#include <cassert>
+
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
+
 MiscCommand::MiscCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
     this->description = description;

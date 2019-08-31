@@ -1,5 +1,7 @@
 #include "CallCommand.hpp"
 
+#include <cassert>
+
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"

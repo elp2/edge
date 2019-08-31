@@ -8,3 +8,4 @@ set compilerflags=/Od /Zi /EHsc /std:c++latest /I include
 set linkerflags=/OUT:bin\main.exe
 cl.exe %compilerflags% src\*.cpp /link %linkerflags%
 del bin\*.ilk *.obj *.pdb
+bin\main.exe

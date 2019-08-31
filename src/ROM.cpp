@@ -1,5 +1,6 @@
 #include "ROM.hpp"
 
+#include <cassert>
 #include <fstream>
 #include <iostream>
 
