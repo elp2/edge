@@ -70,6 +70,11 @@ int main() {
 
     int LIMIT = 10000;
     for (int i = 0; i < LIMIT; i++) {
+        if (cpu->Get16Bit(Register_PC) == 0xfe) {
+            cout << "# Instructions = " << i << endl;
+            cout << "CPU Cycles " << cpu->Cycles() << endl;
+            exit(0);
+        }
         cpu->Step();
     }
     cout << "REACHED LIMIT OF " << LIMIT << endl;

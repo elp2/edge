@@ -51,10 +51,12 @@ void CPU::Step() {
 
     Command *command = CommandForOpcode(opcode);
     command->Run(this, &mmu);
-    cout << command->description << " ; $" << commandPC << endl;
-    Debugger();
+    // cout << command->description << " ; $" << commandPC << endl;
+    // Debugger();
     assert(command->cycles < 33 && command->cycles > 0);
-    // TODO: Actually do the cycles.
+    cycles_ += command->cycles;
+
+    // TODO: Actually do the cycles with PPU.
 }
 
 bool CPU::Requires16Bits(Destination d) {
@@ -338,7 +340,7 @@ void CPU::JumpAddress(uint16_t address) {
         return;
     }
 
-    cout << "Jumping to 0x" << hex << unsigned(address) << endl;
+    // cout << "Jumping to 0x" << hex << unsigned(address) << endl;
     Set16Bit(Register_PC, address);
 }
 
@@ -350,9 +352,9 @@ void CPU::JumpRelative(uint8_t relative) {
     uint16_t originalAddress = Get16Bit(Register_PC);
     int8_t signedRelative = relative;
     uint16_t newAddress = originalAddress + signedRelative;
-    cout << "Jumping 0x" << hex << signed(signedRelative);
-    cout << " relative to 0x" << hex << unsigned(originalAddress);
-    cout << " to 0x" << hex << unsigned(newAddress) << endl;
+    // cout << "Jumping 0x" << hex << signed(signedRelative);
+    // cout << " relative to 0x" << hex << unsigned(originalAddress);
+    // cout << " to 0x" << hex << unsigned(newAddress) << endl;
     Set16Bit(Register_PC, newAddress);    
 }
 
