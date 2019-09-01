@@ -52,9 +52,7 @@ void StackCommand::Pop(CPU *cpu, Destination d) {
     cpu->Set16Bit(d, cpu->Pop16Bit());
 }
 
-void StackCommand::Run(CPU *cpu, MMU *mmu) {
-    (void)mmu;
-
+void StackCommand::Run(CPU *cpu) {
     uint8_t row = NIBBLEHIGH(opcode);
     uint8_t col = NIBBLELOW(opcode);
     Destination d = stackDestinationForRow(row);

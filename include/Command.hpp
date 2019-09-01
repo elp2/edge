@@ -13,7 +13,7 @@ class Command {
  public:
     virtual ~Command() = default;
  
-    virtual void Run(CPU *cpu, MMU *mmu) {(void)cpu; (void)mmu;};
+    virtual void Run(CPU *cpu) { (void)cpu; };
 
     int cycles;
     uint8_t opcode;

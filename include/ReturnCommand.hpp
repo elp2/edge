@@ -10,7 +10,7 @@ public:
     ReturnCommand(uint8_t opcode, string description, int cycles);
     ~ReturnCommand();
 
-    void Run(CPU *cpu, MMU *mmu);    
+    void Run(CPU *cpu);    
 };
 
 void registerReturnCommands(AbstractCommandFactory *factory);

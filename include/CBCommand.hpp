@@ -8,7 +8,7 @@ class CBCommand : public Command {
 public:
     CBCommand(uint8_t opcode);
     ~CBCommand();
-    void Run(CPU *cpu, MMU *mmu);
+    void Run(CPU *cpu);
  private:
     void TestBit(uint8_t row, uint8_t column, CPU *cpu);
     void ResetBit(uint8_t row, uint8_t column, CPU *cpu);

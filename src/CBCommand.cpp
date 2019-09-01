@@ -112,9 +112,7 @@ void CBCommand::SR(CPU *cpu, Destination d, bool resetMSB) {
     cpu->flags.c = (orig & 0x1);
 }
 
-void CBCommand::Run(CPU *cpu, MMU *mmu) {
-    (void)mmu;
-
+void CBCommand::Run(CPU *cpu) {
     // See http://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html.
     uint8_t row = NIBBLEHIGH(opcode);
     uint8_t column = NIBBLELOW(opcode);

@@ -93,9 +93,7 @@ void RL(CPU *cpu, Destination d, bool carry) {
     cpu->flags.n = cpu->flags.h = false;
 }
 
-void BitCommand::Run(CPU *cpu, MMU *mmu) {
-    (void)mmu;
-
+void BitCommand::Run(CPU *cpu) {
     uint8_t row = NIBBLEHIGH(opcode);
     uint8_t col = NIBBLELOW(opcode);
     if (row == 0xb && col < 0x8) {

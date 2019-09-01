@@ -11,7 +11,7 @@ class LoadCommand : public Command {
     LoadCommand(uint8_t opcode, string description, Destination to, Destination from, int cycles);
     ~LoadCommand();
 
-    void Run(CPU *cpu, MMU *mmu);    
+    void Run(CPU *cpu);    
 
  private:
     Destination from;

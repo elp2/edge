@@ -28,8 +28,7 @@ void jumpConditionRelative(CPU *cpu, bool jump, uint8_t relative) {
     }
 }
 
-void JumpCommand::Run(CPU *cpu, MMU *mmu) {
-    (void)mmu; // TODO remove - temporarily silencing warning.
+void JumpCommand::Run(CPU *cpu) {
     switch (this->opcode)
     {
     case 0xC3:

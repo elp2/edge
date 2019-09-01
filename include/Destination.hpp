@@ -27,4 +27,6 @@ enum Destination {
     // 20
     Address_nn,
     Register_AF,
+    Address_0xFF00_Byte, // 0xff00 + immediate PC byte.
+    Address_0xFF00_Register_C, // 0xff00 + Register C.
 };

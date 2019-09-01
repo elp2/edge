@@ -7,4 +7,6 @@ bin/*
 *.exe
 *.ilk
 *.gb
+# Cmake Directories to ignore.
 build/*
+wsl/*

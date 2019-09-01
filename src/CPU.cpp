@@ -51,7 +51,7 @@ void CPU::Step() {
     AdvancePC();
 
     Command *command = CommandForOpcode(opcode);
-    command->Run(this, &mmu);
+    command->Run(this);
     cycles_ += command->cycles;
 
     if (debugPrint_) {
@@ -109,6 +109,10 @@ uint8_t CPU::Get8Bit(Destination d) {
         return h;
     case Register_L:
         return l;
+    case Address_0xFF00_Byte:
+        return mmu.GetByteAt(0xff00 + Get8Bit(Eat_PC_Byte));
+    case Address_0xFF00_Register_C:
+        return mmu.GetByteAt(0xff00 + Get8Bit(Register_C));        
     case Eat_PC_Byte: {
         pcByte = mmu.GetByteAt(pc);
         AdvancePC();
@@ -156,6 +160,8 @@ uint16_t CPU::Get16Bit(Destination d) {
     case Address_HL:
     case Address_SP:
     case Address_nn:
+    case Address_0xFF00_Byte:
+    case Address_0xFF00_Register_C:
         cout << "Tried reading 0x" << hex << unsigned(d) << " as a 16 bit value." << endl;
         assert(false);
     case Register_AF:   
@@ -210,7 +216,6 @@ void CPU::Set8Bit(Destination d, uint8_t value) {
         l = value;
         break;
     case Address_BC:
-
         mmu.SetByteAt(Get16Bit(Register_BC), value);
         break;
     case Address_DE:
@@ -226,6 +231,12 @@ void CPU::Set8Bit(Destination d, uint8_t value) {
         break;
     case Address_nn:
         mmu.SetByteAt(Get16Bit(Eat_PC_Word), value);
+        break;
+    case Address_0xFF00_Byte:
+        mmu.SetByteAt(0xff00 + Get8Bit(Eat_PC_Byte), value);
+        break;
+    case Address_0xFF00_Register_C:
+        mmu.SetByteAt(0xff00 + Get8Bit(Register_C), value);
         break;
     case Eat_PC_Byte:
         // TODO: Is this even valid/necessary?
@@ -250,6 +261,8 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
     case Register_H:
     case Register_L:
     case Eat_PC_Byte:
+    case Address_0xFF00_Byte:
+    case Address_0xFF00_Register_C:
         cout << "0x" << hex << unsigned(d) << " is not 16 bits." << endl;
         assert(false);
     case Register_BC:

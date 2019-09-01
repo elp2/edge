@@ -14,10 +14,9 @@ NopCommand::~NopCommand() {
 
 }
 
-void NopCommand::Run(CPU *cpu, MMU *mmu) {
+void NopCommand::Run(CPU *cpu) {
     // Nop.
     (void)cpu;
-    (void)mmu;
 }
 
 void registerNopCommands(AbstractCommandFactory *factory) {

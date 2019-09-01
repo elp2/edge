@@ -26,8 +26,7 @@ class CallCommand : public Command {
         cpu->JumpAddress(callAddress);
     }
 
-    void Run(CPU *cpu, MMU *mmu) {
-        (void)mmu;
+    void Run(CPU *cpu) {
         switch (opcode)
         {
         case 0xCD:

@@ -243,10 +243,7 @@ void MathCommand::AddSP(CPU *cpu) {
     description = "ADD SP, #";
 }
 
-void MathCommand::Run(CPU *cpu, MMU *mmu) {
-    // Nop.
-    (void)mmu;
-
+void MathCommand::Run(CPU *cpu) {
     uint8_t row = NIBBLEHIGH(opcode);
     uint8_t col = NIBBLELOW(opcode);
     

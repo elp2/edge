@@ -9,7 +9,7 @@ class UnimplementedCommand : public Command {
 public:
     UnimplementedCommand(uint8_t opcode);
     ~UnimplementedCommand();
-    void Run(CPU *cpu, MMU *mmu);
+    void Run(CPU *cpu);
 };
 
 void registerUnimplementedCommands(AbstractCommandFactory *factory);

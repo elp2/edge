@@ -10,7 +10,7 @@ class MathCommand : public Command {
  public:
     MathCommand(uint8_t opcode);
     ~MathCommand();
-    void Run(CPU *cpu, MMU *mmu);
+    void Run(CPU *cpu);
  private:
     void Inc(CPU *cpu);
     void Dec(CPU *cpu);

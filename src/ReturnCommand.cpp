@@ -16,9 +16,7 @@ ReturnCommand::~ReturnCommand() {
 
 }
 
-void ReturnCommand::Run(CPU *cpu, MMU *mmu) {
-    (void)mmu;
-
+void ReturnCommand::Run(CPU *cpu) {
     // TODO - when we take a branch it eats 12 more cycles?
 
     switch (this->opcode)

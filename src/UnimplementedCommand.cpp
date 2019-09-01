@@ -16,10 +16,9 @@ UnimplementedCommand::~UnimplementedCommand() {
 
 }
 
-void UnimplementedCommand::Run(CPU *cpu, MMU *mmu) {
+void UnimplementedCommand::Run(CPU *cpu) {
     // Nop.
     (void)cpu;
-    (void)mmu;
 
     cout << "Unimplemented CPU opcode: " << opcode << endl;
     assert(false);

@@ -16,8 +16,7 @@ MiscCommand::~MiscCommand() {
 
 }
 
-void MiscCommand::Run(CPU *cpu, MMU *mmu) {
-    (void)mmu;
+void MiscCommand::Run(CPU *cpu) {
     uint8_t nextPCByte;
     switch (opcode)
     {
