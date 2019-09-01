@@ -25,6 +25,7 @@ void LoadCommand::Run(CPU *cpu, MMU *mmu) {
         if (to16Bit) {
             cpu->Set16Bit(to, cpu->Get16Bit(from));
         } else {
+			// TODO: Is this possible? If so, write tests and silence compile warning.
             cpu->Set8Bit(to, cpu->Get16Bit(from));
         }
     } else {

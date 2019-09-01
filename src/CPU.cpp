@@ -89,30 +89,22 @@ bool CPU::Requires16Bits(Destination d) {
 
 uint8_t CPU::Get8Bit(Destination d) {
     uint8_t pcByte;
-    uint8_t word;
-    switch (d)
-    {
-    case Register_A:
-        return a;
-    case Register_B:
-        return b;
-    case Register_C:
-        return c;
-    case Register_D:
-        return d;
-    case Register_E:
-        return e;
-    case Register_F:
-        // TODO: Test.
-        word = flags.z;
-        word = word << 1;
-        word |= flags.n ? 0x1 : 0x0;
-        word = word << 1;
-        word |= flags.h  ? 0x1 : 0x0;
-        word = word << 1;
-        word |= flags.c  ? 0x1 : 0x0;
-        word = word << 4;
-        return word;
+	uint16_t word;
+	switch (d)
+	{
+	case Register_A:
+		return a;
+	case Register_B:
+		return b;
+	case Register_C:
+		return c;
+	case Register_D:
+		return d;
+	case Register_E:
+		return e;
+	case Register_F:
+		// TODO: Test.
+		return (flags.z ? 0x80 : 0) | (flags.n ? 0x40 : 0) | (flags.h ? 0x20 : 0) | (flags.c ? 0x10 : 0);
     case Register_H:
         return h;
     case Register_L:

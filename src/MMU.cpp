@@ -10,6 +10,9 @@ using namespace std;
 MMU::MMU() {
     ram = new uint8_t[0x8000];
     disasemblerMode = false;
+    bootROM = NULL;
+    cartridgeROM = NULL;
+    overlayBootROM = true;
     // TODO Initialize memory to random values.
 }
 

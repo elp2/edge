@@ -17,11 +17,11 @@ class ROM {
    CartridgeType GetCartridgeType();
    ROMSizeType GetROMSizeType();
 
-   uint32_t Size();
+   streampos Size() { return romSize; }
 
    string GameTitle();
 
  private:
     uint8_t *rom;
-    uint32_t romSize;
+    streampos romSize;
 };

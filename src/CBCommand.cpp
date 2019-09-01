@@ -95,14 +95,14 @@ void CBCommand::SLA(CPU *cpu, Destination d) {
     cpu->flags.z = (left == 0);
     cpu->flags.n = false;
     cpu->flags.h = false;
-    cpu->flags.c = (orig & 0xA0) == 0xA0;
+    cpu->flags.c = (orig & 0x80) == 0x80;
 }
 
 void CBCommand::SR(CPU *cpu, Destination d, bool resetMSB) {
     uint8_t orig = cpu->Get8Bit(d);
     uint8_t right = orig >> 1;
     if (!resetMSB) {
-        right |= (orig & 0xA0);
+        right |= (orig & 0x80);
     }
 
     cpu->Set8Bit(d, right);

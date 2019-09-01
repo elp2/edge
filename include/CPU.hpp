@@ -67,7 +67,7 @@ class CPU {
     // Checks the state of interrupts.
     bool InterruptsEnabled();
 
-    uint32_t Cycles() { return cycles_; };
+    uint64_t Cycles() { return cycles_; };
 
 private:
     CommandFactory *commandFactory;

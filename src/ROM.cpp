@@ -5,7 +5,7 @@
 #include <iostream>
 
 ROM::ROM() {
-
+	rom = NULL;
 }
 
 bool ROM::LoadFile(string filename) {
@@ -31,12 +31,9 @@ bool ROM::LoadFile(string filename) {
 
 ROM::~ROM() {}
 
-uint32_t ROM::Size() {
-    return romSize;
-}
-
 uint8_t ROM::GetByteAt(uint16_t address) {
     assert(address < romSize);
+	assert(rom);
 
     return rom[address];
 }
@@ -66,6 +63,7 @@ ROMSizeType ROM::GetROMSizeType() {
 }
 
 std::string ROM::GameTitle() {
+	assert(rom);
     int TITLE_START = 0x134;
     int TITLE_MAX_LENGTH = 16;
     
