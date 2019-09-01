@@ -41,7 +41,7 @@ uint8_t ROM::GetByteAt(uint16_t address) {
     return rom[address];
 }
 
-CartridgeType ROM::CartridgeType() {
+CartridgeType ROM::GetCartridgeType() {
     uint16_t ctbyte = rom[0x147];
     switch (ctbyte)
     {
@@ -53,7 +53,7 @@ CartridgeType ROM::CartridgeType() {
     }
 }
 
-ROMSizeType ROM::ROMSizeType() {
+ROMSizeType ROM::GetROMSizeType() {
     uint16_t ctbyte = rom[0x148];
     switch (ctbyte)
     {

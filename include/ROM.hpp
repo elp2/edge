@@ -14,8 +14,8 @@ class ROM {
    bool LoadFile(string filename);
    uint8_t GetByteAt(uint16_t address);
 
-   CartridgeType CartridgeType();
-   ROMSizeType ROMSizeType();
+   CartridgeType GetCartridgeType();
+   ROMSizeType GetROMSizeType();
 
    uint32_t Size();
 

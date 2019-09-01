@@ -6,3 +6,5 @@ bin/*
 *.pdb
 *.exe
 *.ilk
+*.gb
+build/*
