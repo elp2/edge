@@ -25,8 +25,6 @@ class CPU {
     CPU(MMU mmu);
     ~CPU();
 
-    Command *CommandForOpcode(uint8_t opcode);
-
     // Resets the CPU to base state.
     void Reset();
 
@@ -72,6 +70,7 @@ class CPU {
 private:
     CommandFactory *commandFactory;
     CBCommandFactory *cbCommandFactory;
+    Command *CommandForOpcode(uint8_t opcode);
 
     MMU mmu;
     bool interruptsEnabled;

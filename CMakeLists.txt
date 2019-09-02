@@ -16,9 +16,11 @@ add_executable(edge
     src/MiscCommand.cpp
     src/MMU.cpp
     src/NopCommand.cpp
+    src/PPU.cpp
     src/ReturnCommand.cpp
     src/ROM.cpp
     src/StackCommand.cpp
+    src/Sprite.cpp
     src/UnimplementedCommand.cpp
     src/Utils.cpp
     src/main.cpp)

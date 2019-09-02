@@ -4,7 +4,9 @@
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
+#include "PPU.hpp"
 #include "Utils.hpp"
+#include "Sprite.hpp"
 
 CPU *getCPU() {
     ROM *bootROM = new ROM();
@@ -17,6 +19,17 @@ CPU *getCPU() {
     mmu.SetROMs(bootROM, cartridgeROM);
 
     return new CPU(mmu);
+}
+
+void testSprite() {
+    cout << "----TESTING SPRITE----" << endl;
+    Sprite *sprite = new Sprite(0x12, 0x34, 0x34, 0xa0);
+
+    assert(sprite->Priority());
+    assert(!sprite->XFlip());
+    assert(sprite->YFlip());
+    assert(sprite->Palette() == SpritePalette0);
+    cout << endl;
 }
 
 void testRegisters() {
@@ -50,8 +63,9 @@ void testRegisters() {
     cout << hex << unsigned(cpu->Get16Bit(Register_HL)) << " ";
     cout << " H: " << hex << unsigned(cpu->Get8Bit(Register_H)) << " ";
     cout << " L: " << hex << unsigned(cpu->Get8Bit(Register_L)) << " ";
-    cout << " A: " << hex << unsigned(cpu->Get8Bit(Register_A)) << " ";
+    cout << " A: " << hex << unsigned(cpu->Get8Bit(Register_A)) << " " << endl;
     assert(cpu->Get8Bit(Register_A) == 0x34);
+    cout << endl;
 }
 
 void testStack() {
@@ -62,11 +76,25 @@ void testStack() {
     uint16_t popped = cpu->Pop16Bit();
     assert(popped == 0x1234);
     assert(popped == cpu->Get16Bit(Register_HL));
+    cout << endl;
+}
+
+void testPPU() {
+    cout << "----TESTING REGISTERS----" << endl;
+
+    PPU *ppu = new PPU();
+    ppu->Advance(17556); // One full frame.
+    cout << "and1: " << endl;
+    ppu->Advance(1);
+
+    cout << endl;
 }
 
 int main() {
     testStack();
     testRegisters();
+    testSprite();
+    testPPU();
 
     CPU *cpu = getCPU();
     cpu->JumpAddress(0xe0);
