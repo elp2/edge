@@ -16,10 +16,11 @@ CPU *getCPU() {
     assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
     cout << "Title: " << cartridgeROM->GameTitle() << endl;
 
-    MMU mmu = MMU();
-    mmu.SetROMs(bootROM, cartridgeROM);
+    MMU *mmu = new MMU();
+    mmu->SetROMs(bootROM, cartridgeROM);
 
-    return new CPU(mmu);
+    PPU *ppu = new PPU();
+    return new CPU(mmu, ppu);
 }
 
 void testSprite() {

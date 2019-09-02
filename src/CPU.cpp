@@ -4,16 +4,16 @@
 #include <ios>
 #include <iostream>
 
+#include "AddressRouter.hpp"
 #include "Command.hpp"
-#include "MMU.hpp"
 #include "Utils.hpp"
 
-CPU::CPU(MMU mmu) {
-    this->mmu = mmu;
+CPU::CPU(MMU *mmu, PPU *ppu) {
+    ppu_ = ppu;
+    addressRouter_ = new AddressRouter(mmu, ppu);
     commandFactory = new CommandFactory();
     cbCommandFactory = new CBCommandFactory();
     debugPrint_ = false;
-    SetDisassemblerMode(false);
 
     Reset();
 }
@@ -111,29 +111,29 @@ uint8_t CPU::Get8Bit(Destination d) {
     case Register_L:
         return l;
     case Address_0xFF00_Byte:
-        return mmu.GetByteAt(0xff00 + Get8Bit(Eat_PC_Byte));
+        return addressRouter_->GetByteAt(0xff00 + Get8Bit(Eat_PC_Byte));
     case Address_0xFF00_Register_C:
-        return mmu.GetByteAt(0xff00 + Get8Bit(Register_C));        
+        return addressRouter_->GetByteAt(0xff00 + Get8Bit(Register_C));        
     case Eat_PC_Byte: {
-        pcByte = mmu.GetByteAt(pc);
+        pcByte = addressRouter_->GetByteAt(pc);
         AdvancePC();
         return pcByte;
     case Address_BC:
-        return mmu.GetByteAt(Get16Bit(Register_BC));
+        return addressRouter_->GetByteAt(Get16Bit(Register_BC));
         break;
     case Address_DE:
-        return mmu.GetByteAt(Get16Bit(Register_DE));
+        return addressRouter_->GetByteAt(Get16Bit(Register_DE));
         break;
     case Address_HL:
-        return mmu.GetByteAt(Get16Bit(Register_HL));
+        return addressRouter_->GetByteAt(Get16Bit(Register_HL));
         break;
     case Address_nn:
-        word = mmu.GetWordAt(pc);
+        word = addressRouter_->GetWordAt(pc);
         AdvancePC();
         AdvancePC();
-        return mmu.GetByteAt(word);
+        return addressRouter_->GetByteAt(word);
     case Address_SP:
-        return mmu.GetByteAt(Get16Bit(Register_SP));
+        return addressRouter_->GetByteAt(Get16Bit(Register_SP));
         break;
     }
     default:
@@ -178,7 +178,7 @@ uint16_t CPU::Get16Bit(Destination d) {
     case Register_PC:
         return pc;
     case Eat_PC_Word:
-        word = mmu.GetWordAt(pc);
+        word = addressRouter_->GetWordAt(pc);
         AdvancePC();
         AdvancePC();
         return word;
@@ -217,27 +217,27 @@ void CPU::Set8Bit(Destination d, uint8_t value) {
         l = value;
         break;
     case Address_BC:
-        mmu.SetByteAt(Get16Bit(Register_BC), value);
+        addressRouter_->SetByteAt(Get16Bit(Register_BC), value);
         break;
     case Address_DE:
-        mmu.SetByteAt(Get16Bit(Register_DE), value);
+        addressRouter_->SetByteAt(Get16Bit(Register_DE), value);
         break;
     case Address_HL:
-        mmu.SetByteAt(Get16Bit(Register_HL), value);
+        addressRouter_->SetByteAt(Get16Bit(Register_HL), value);
         break;
     case Address_SP:
         cout << "Consider moving the SP on set? How is it happening elsewhere?" << endl;
         assert(false);
-        mmu.SetByteAt(Get16Bit(Register_SP), value);
+        addressRouter_->SetByteAt(Get16Bit(Register_SP), value);
         break;
     case Address_nn:
-        mmu.SetByteAt(Get16Bit(Eat_PC_Word), value);
+        addressRouter_->SetByteAt(Get16Bit(Eat_PC_Word), value);
         break;
     case Address_0xFF00_Byte:
-        mmu.SetByteAt(0xff00 + Get8Bit(Eat_PC_Byte), value);
+        addressRouter_->SetByteAt(0xff00 + Get8Bit(Eat_PC_Byte), value);
         break;
     case Address_0xFF00_Register_C:
-        mmu.SetByteAt(0xff00 + Get8Bit(Register_C), value);
+        addressRouter_->SetByteAt(0xff00 + Get8Bit(Register_C), value);
         break;
     case Eat_PC_Byte:
         // TODO: Is this even valid/necessary?
@@ -285,7 +285,7 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
         sp = value;
         break;
     case Eat_PC_Word:
-        mmu.SetWordAt(pc, value);
+        addressRouter_->SetWordAt(pc, value);
         assert(false);
         break;
     case Address_BC:
@@ -294,7 +294,7 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
     case Address_SP:
     case Address_nn:
         address = Get16Bit(d);
-        mmu.SetWordAt(address, value);
+        addressRouter_->SetWordAt(address, value);
         break;
     default:
         cout << "Unknown 16 bit set: " << d << endl;
@@ -303,19 +303,19 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
 }
 
 uint8_t CPU::ReadOpcodeAtPC() {
-    if (disasemblerMode) {
-        mmu.SetDisassemblerMode(false);
-        uint8_t opcode = mmu.GetByteAt(pc);
-        mmu.SetDisassemblerMode(true);
+    if (disasemblerMode_) {
+        addressRouter_->EnableDisassemblerMode(false);
+        uint8_t opcode = addressRouter_->GetByteAt(pc);
+        addressRouter_->EnableDisassemblerMode(true);
         return opcode;
     }
-    return mmu.GetByteAt(pc);
+    return addressRouter_->GetByteAt(pc);
 }
 
 void CPU::Push8Bit(uint8_t byte) {
     // Stack pointer grows down before anything is pushed.
     sp -= 1;
-    mmu.SetByteAt(sp, byte);
+    addressRouter_->SetByteAt(sp, byte);
 }
 
 void CPU::Push16Bit(uint16_t word) {
@@ -327,7 +327,7 @@ void CPU::Push16Bit(uint16_t word) {
 
 uint8_t CPU::Pop8Bit() {
     uint16_t oldSp = sp;
-    uint8_t byte = mmu.GetByteAt(sp);
+    uint8_t byte = addressRouter_->GetByteAt(sp);
     sp += 1;
     assert(sp > oldSp);
     return byte;
@@ -339,13 +339,13 @@ uint16_t CPU::Pop16Bit() {
     return buildMsbLsb16(msb, lsb);
 }
 
-void CPU::SetDisassemblerMode(bool disasemblerMode) {
-    this->disasemblerMode = disasemblerMode;
-    mmu.SetDisassemblerMode(disasemblerMode);
+void CPU::EnableDisassemblerMode() {
+    disasemblerMode_ = true;
+    addressRouter_->EnableDisassemblerMode(true);
 }
 
 void CPU::JumpAddress(uint16_t address) {
-    if (disasemblerMode) {
+    if (disasemblerMode_) {
         return;
     }
 
@@ -354,7 +354,7 @@ void CPU::JumpAddress(uint16_t address) {
 }
 
 void CPU::JumpRelative(uint8_t relative) {
-    if (disasemblerMode) {
+    if (disasemblerMode_) {
         return;
     }
 

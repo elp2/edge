@@ -24,14 +24,14 @@ public:
     void SetROMs(ROM *bootROM, ROM *cartridgeROM);
 
     // Hacks to simulate a disassembler.
-    void SetDisassemblerMode(bool disassemblerMode);
+    void EnableDisassemblerMode(bool disassemblerMode) { disasemblerMode_ = disassemblerMode; };
 
 private:
     bool UseBootROMForAddress(uint16_t address);
     string AddressRegion(uint16_t address);
     uint8_t *ram;
 
-    bool disasemblerMode;
+    bool disasemblerMode_ = false;
     bool overlayBootROM;
     ROM *bootROM;
     ROM *cartridgeROM;

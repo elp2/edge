@@ -145,6 +145,11 @@ uint8_t AddressRouter::GetByteAtAddressFromOwner(AddressOwner owner, uint16_t ad
     }
 }
 
+void AddressRouter::EnableDisassemblerMode(bool disassemblerMode) {
+    disassemblerMode_ = disassemblerMode;
+    mmu_->EnableDisassemblerMode(disassemblerMode);
+}
+
 void AddressRouter::SetByteAtAddressInOwner(AddressOwner owner, uint16_t address, uint8_t byte) {
     switch (owner)
     {

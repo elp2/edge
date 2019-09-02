@@ -25,9 +25,11 @@ class AddressRouter {
     uint16_t GetWordAt(uint16_t address);
     void SetWordAt(uint16_t address, uint16_t word);
 
+    void EnableDisassemblerMode(bool disassemblerMode);
  private:
     MMU *mmu_;
     PPU *ppu_;
+    bool disassemblerMode_ = false;
 
     uint8_t GetByteAtAddressFromOwner(AddressOwner owner, uint16_t address);
     void SetByteAtAddressInOwner(AddressOwner owner, uint16_t address, uint8_t byte);
