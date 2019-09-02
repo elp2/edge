@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 
+#include "AddressRouter.hpp"
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
@@ -10,9 +11,9 @@
 
 CPU *getCPU() {
     ROM *bootROM = new ROM();
-    assert(bootROM->LoadFile("../boot.gb"));
+    assert(bootROM->LoadFile("../../boot.gb"));
     ROM *cartridgeROM = new ROM();
-    assert(cartridgeROM->LoadFile("../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+    assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
     cout << "Title: " << cartridgeROM->GameTitle() << endl;
 
     MMU mmu = MMU();
@@ -80,12 +81,57 @@ void testStack() {
 }
 
 void testPPU() {
-    cout << "----TESTING REGISTERS----" << endl;
-
     PPU *ppu = new PPU();
+
+    cout << "----TESTING PPU----" << endl;
+
+    ppu->SetByteAt(0xFF40, 0x05);
+    uint8_t lcdc = ppu->GetByteAt(0xFF40);
+    assert(ppu->GetByteAt(0xFF40) == 0x05);
+
+    ppu->SetByteAt(0x8000, 0x56);
+    assert(ppu->GetByteAt(0x8000) == 0x56);
+
     ppu->Advance(17556); // One full frame.
     cout << "and1: " << endl;
     ppu->Advance(1);
+
+    cout << endl;
+}
+
+void testAddressRouter() {
+    cout << "----TESTING ADDRESS ROUTER----" << endl;
+    PPU *ppu = new PPU();
+
+    ROM *bootROM = new ROM();
+    assert(bootROM->LoadFile("../../boot.gb"));
+    ROM *cartridgeROM = new ROM();
+    assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+    cout << "Title: " << cartridgeROM->GameTitle() << endl;
+
+    MMU *mmu = new MMU();
+    mmu->SetROMs(bootROM, cartridgeROM);
+
+    AddressRouter *addressRouter = new AddressRouter(mmu, ppu);
+
+    addressRouter->SetByteAt(0x8000, 0xed);
+    assert(ppu->GetByteAt(0x8000) == 0xed);
+
+    addressRouter->SetByteAt(0xFF40, 0x91);
+    assert(ppu->GetByteAt(0xFF40) == 0x91);
+    assert(ppu->GetByteAt(0xFF40) == addressRouter->GetByteAt(0xFF40));
+
+    mmu->SetByteAt(0xFF00, 0x35);
+    assert(mmu->GetByteAt(0xFF00) == addressRouter->GetByteAt(0xFF00));
+    assert(mmu->GetByteAt(0xFF00) == 0x35);
+
+    mmu->SetWordAt(0xC000, 0x1234);
+    cout << "GWA: " << hex << unsigned(addressRouter->GetWordAt(0xC000)) << endl;
+    assert(addressRouter->GetWordAt(0xC000) == 0x1234);
+
+    addressRouter->SetWordAt(0xC123, 0x8877);
+    assert(addressRouter->GetWordAt(0xC123) == mmu->GetWordAt(0xC123));
+    assert(addressRouter->GetWordAt(0xC123) == 0x8877);
 
     cout << endl;
 }
@@ -95,6 +141,7 @@ int main() {
     testRegisters();
     testSprite();
     testPPU();
+    testAddressRouter();
 
     CPU *cpu = getCPU();
     cpu->JumpAddress(0xe0);

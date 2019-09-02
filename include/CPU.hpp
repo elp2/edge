@@ -6,7 +6,7 @@
 #include "Command.hpp"
 #include "CommandFactory.hpp"
 #include "Destination.hpp"
-#include "MMU.hpp"
+#include "MMU.hpp" // TODO: remove when we add the AddressRouter.
 
 using namespace std;
 

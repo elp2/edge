@@ -86,7 +86,7 @@ uint16_t MMU::GetWordAt(uint16_t address) {
         return 0xed02;
     }
     uint8_t lsb = GetByteAt(address);
-    uint16_t result = (GetByteAt(address+1) << 8)|lsb;
+    uint16_t result = (GetByteAt(address + 1) << 8) | lsb;
     return result;
 }
 
@@ -132,9 +132,8 @@ void MMU::SetWordAt(uint16_t address, uint16_t word) {
         return;
     }
 
-    // TODO: Test.
-    SetByteAt(address, HIGHER8(word));
-    SetByteAt(address + 1, LOWER8(word));
+    SetByteAt(address, LOWER8(word));
+    SetByteAt(address + 1, HIGHER8(word));
 }
 
 MMU::~MMU() {

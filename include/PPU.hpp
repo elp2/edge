@@ -25,9 +25,13 @@ class PPU {
 
         PPUState State() { return state_; };
 
+        uint8_t GetByteAt(uint16_t address);
+        void SetByteAt(uint16_t address, uint8_t byte);
+
     private:
         uint8_t *oam_ram_;
         uint8_t *video_ram_;
+        uint8_t *io_ram_;
 
         PPUState state_;
         int cycles_;

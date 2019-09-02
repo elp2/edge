@@ -1,4 +1,5 @@
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <iostream>
 
@@ -23,6 +24,7 @@ const int FRAME_CYCLES = VISIBLE_CYCLES + VBLANK_CYCLES;
 PPU::PPU() { 
     oam_ram_ = new uint8_t[0xa0];
     video_ram_ = new uint8_t[0x2000];
+    io_ram_ = new uint8_t[0xd];
     cycles_ = 0;
     state_ = OAM_Search;
     row_sprites = NULL;
@@ -64,6 +66,33 @@ void PPU::VisibleCycle() {
     } else if (row_cycles == OAM_SEARCH_CYCLES + PIXEL_TRANSFER_CYCLES) {
         state_ = HBlank;
         BeginHBlank(row);
+    }
+}
+
+uint8_t PPU::GetByteAt(uint16_t address) {
+    if (address >= 0x8000 && address < 0xA000) {
+        return video_ram_[address - 0x8000];
+    } else if (address >= 0xFE00 && address < 0xFEA0) {
+        return oam_ram_[address - 0xFE00];
+    } else if (address >= 0xFF40 && address <= 0xFF4C) {
+        return io_ram_[address - 0xFF40];
+    } else {
+        cout << "Unknown GET TPPU address: 0x" << hex << unsigned(address) << endl;
+        assert(false);
+        return 0xed;
+    }
+}
+
+void PPU::SetByteAt(uint16_t address, uint8_t byte) {
+    if (address >= 0x8000 && address < 0xA000) {
+        video_ram_[address - 0x8000] = byte;
+    } else if (address >= 0xFE00 && address < 0xFEA0) {
+        oam_ram_[address - 0xFE00] = byte;
+    } else if (address >= 0xFF40 && address <= 0xFF4C) {
+        io_ram_[address - 0xFF40] = byte;
+    } else {
+        cout << "Unknown SET PPU address: 0x" << hex << unsigned(address) << endl;
+        assert(false);
     }
 }
 

@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "Command.hpp"
+#include "MMU.hpp"
 #include "Utils.hpp"
 
 CPU::CPU(MMU mmu) {

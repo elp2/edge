@@ -4,6 +4,7 @@ project(edge)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 add_executable(edge
+    src/AddressRouter.cpp
     src/BitCommand.cpp
     src/CallCommand.cpp
     src/CBCommand.cpp
