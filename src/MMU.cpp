@@ -103,7 +103,7 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
     // cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
     // cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
 
-    if (address == 0xff50) {
+    if (address == 0xFF50) {
         overlayBootROM = false;
         cout << "**** REMOVED OVERLAY BOOT ROM ***" << endl;
     }
@@ -114,13 +114,13 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
 
     // TODO: Test.
     // Echo of Internal 8 Bit RAM.
-    if (address >= 0xe000 && address < 0xfe00) {
-        uint16_t echoAddress = 0xc000 + (address - 0xe000);
+    if (address >= 0xE000 && address < 0xFE00) {
+        uint16_t echoAddress = 0xC000 + (address - 0xE000);
         ram[echoAddress - 0x8000] = byte;
     } 
 
-    if (address >= 0xc000 && address < 0xde00) {
-        uint16_t echoAddress = 0xe000 + (address - 0xc000);
+    if (address >= 0xC000 && address < 0xDE00) {
+        uint16_t echoAddress = 0xE000 + (address - 0xC000);
         ram[echoAddress - 0x8000] = byte;
     } 
 }

@@ -153,6 +153,7 @@ int main() {
             // cpu->SetDebugPrint(true);
         }
         if (cpu->Get16Bit(Register_PC) == 0x00fe) {
+            cpu->Step();
             cout << "# Instructions = " << i << endl;
             cout << "CPU Cycles " << cpu->Cycles() << endl;
             break;

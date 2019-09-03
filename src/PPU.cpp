@@ -116,7 +116,7 @@ uint8_t PPU::GetByteAt(uint16_t address) {
     } else {
         cout << "Unknown GET TPPU address: 0x" << hex << unsigned(address) << endl;
         assert(false);
-        return 0xed;
+        return 0x00;
     }
 }
 
@@ -134,9 +134,6 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
         }
         oam_ram_[address - 0xFE00] = byte;
     } else if (address >= 0xFF40 && address <= 0xFF4C) {
-        if (0xFF42 == address) {
-            cout << "0xFF42 <- " << hex << unsigned(byte) << endl;
-        }
         io_ram_[address - 0xFF40] = byte;
     } else {
         cout << "Unknown SET PPU address: 0x" << hex << unsigned(address) << endl;
@@ -176,7 +173,7 @@ bool PPU::CanAccessOAM() {
 }
 
 bool PPU::CanAccessVRAM() {
-    // TODO Writes are nops, reads are 0xff.
+    // TODO Writes are nops, reads are 0xFF.
     return state_ != Pixel_Transfer;
 }
 
