@@ -42,19 +42,19 @@ void MiscCommand::Run(CPU *cpu) {
         cpu->flags.c = true;
         break;
     case 0x76:
-        cpu->haltRequested = true;
+        cpu->HaltNextLoop();
         break;
     case 0x10:
-        cpu->stopRequested = true;
+        cpu->StopNextLoop();
         nextPCByte = cpu->Get8Bit(Eat_PC_Byte);
         assert(nextPCByte == 0x00);
         cpu->AdvancePC();
         break;
     case 0xF3:
-        cpu->disableInterruptsRequested = true;
+        cpu->DisableInterruptsNextLoop();
         break;
     case 0xFB:
-        cpu->enableInterruptsRequested = true;
+        cpu->EnableInterruptsNextLoop();
         break;
     
     

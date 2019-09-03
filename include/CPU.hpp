@@ -25,24 +25,28 @@ class CPU {
  private:
     AddressRouter *addressRouter_;
     PPU *ppu_;
-    CommandFactory *commandFactory;
-    CBCommandFactory *cbCommandFactory;
+    CommandFactory *commandFactory_;
+    CBCommandFactory *cbCommandFactory_;
     Command *CommandForOpcode(uint8_t opcode);
 
-    bool interruptsEnabled;
+    bool interruptsEnabled_;
 
-    uint8_t a,b,c,d_,e,f,h,l;
+    uint8_t a_, b_, c_, d_, e_, f_, h_, l_;
 
     // Points to the next command to be executed.
-    uint16_t pc;
+    uint16_t pc_;
 
     // Points to the stack position.
-    uint16_t sp;
+    uint16_t sp_;
 
     bool disasemblerMode_;
     uint64_t cycles_;
     bool debugPrint_;
 
+    bool haltNextLoop_;
+    bool stopNextLoop_;
+    bool disableInterruptsNextLoop_;
+    bool enableInterruptsNextLoop_;
  public:
     flags_t flags;
 
@@ -81,13 +85,11 @@ class CPU {
     void RegisterCommand(Command *command);
 
     // Special Actions.
-    bool haltRequested;
-    bool stopRequested;
-    bool disableInterruptsRequested;
-    bool enableInterruptsRequested;
+    void HaltNextLoop() { haltNextLoop_ = true; };
+    void StopNextLoop() { stopNextLoop_ = true; };
+    void DisableInterruptsNextLoop() { disableInterruptsNextLoop_ = true; };
+    void EnableInterruptsNextLoop() { enableInterruptsNextLoop_ = true; };
 
-    // Checks the state of interrupts.
-    bool InterruptsEnabled();
     void SetDebugPrint(bool debugPrint) { debugPrint_ = debugPrint; };
 
     uint64_t Cycles() { return cycles_; };

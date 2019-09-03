@@ -12,8 +12,8 @@
 CPU::CPU(MMU *mmu, PPU *ppu) {
     ppu_ = ppu;
     addressRouter_ = new AddressRouter(mmu, ppu);
-    commandFactory = new CommandFactory();
-    cbCommandFactory = new CBCommandFactory();
+    commandFactory_ = new CommandFactory();
+    cbCommandFactory_ = new CBCommandFactory();
     debugPrint_ = false;
 
     Reset();
@@ -26,29 +26,31 @@ CPU::~CPU() {
 Command *CPU::CommandForOpcode(uint8_t opcode) {
     if (opcode == 0xCB) {
         opcode = Get8Bit(Eat_PC_Byte);
-        return cbCommandFactory->CommandForOpcode(opcode);
+        return cbCommandFactory_->CommandForOpcode(opcode);
     } else {
-        return commandFactory->CommandForOpcode(opcode);
+        return commandFactory_->CommandForOpcode(opcode);
     }
 }
 
 void CPU::Step() {
     // Take actions requested in previous cycle.
-    if (disableInterruptsRequested) {
-        interruptsEnabled = false;
-        disableInterruptsRequested = false;
-    } else if (enableInterruptsRequested) {
-        interruptsEnabled = true;
-        enableInterruptsRequested = false;
-    } else if (haltRequested) {
+    if (disableInterruptsNextLoop_) {
+        interruptsEnabled_ = false;
+        disableInterruptsNextLoop_ = false;
+    } else if (enableInterruptsNextLoop_) {
+        interruptsEnabled_ = true;
+        enableInterruptsNextLoop_ = false;
+    } else if (haltNextLoop_) {
         cout << "TODO: Halt!";
+        haltNextLoop_ = false;
         assert(false); // TODO!
-    } else if (stopRequested) {
+    } else if (stopNextLoop_) {
         cout << "TODO: Stop!";
+        stopNextLoop_ = false;
         assert(false); // TODO!
     }
 
-    uint16_t commandPC = pc;
+    uint16_t commandPC = pc_;
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
 
@@ -95,28 +97,28 @@ uint8_t CPU::Get8Bit(Destination destination) {
 	switch (destination)
 	{
 	case Register_A:
-		return a;
+		return a_;
 	case Register_B:
-		return b;
+		return b_;
 	case Register_C:
-		return c;
+		return c_;
 	case Register_D:
 		return d_;
 	case Register_E:
-		return e;
+		return e_;
 	case Register_F:
 		// TODO: Test.
 		return (flags.z ? 0x80 : 0) | (flags.n ? 0x40 : 0) | (flags.h ? 0x20 : 0) | (flags.c ? 0x10 : 0);
     case Register_H:
-        return h;
+        return h_;
     case Register_L:
-        return l;
+        return l_;
     case Address_0xFF00_Byte:
         return addressRouter_->GetByteAt(0xff00 + Get8Bit(Eat_PC_Byte));
     case Address_0xFF00_Register_C:
         return addressRouter_->GetByteAt(0xff00 + Get8Bit(Register_C));        
     case Eat_PC_Byte: {
-        pcByte = addressRouter_->GetByteAt(pc);
+        pcByte = addressRouter_->GetByteAt(pc_);
         AdvancePC();
         return pcByte;
     case Address_BC:
@@ -129,7 +131,7 @@ uint8_t CPU::Get8Bit(Destination destination) {
         return addressRouter_->GetByteAt(Get16Bit(Register_HL));
         break;
     case Address_nn:
-        word = addressRouter_->GetWordAt(pc);
+        word = addressRouter_->GetWordAt(pc_);
         AdvancePC();
         AdvancePC();
         return addressRouter_->GetByteAt(word);
@@ -167,19 +169,19 @@ uint16_t CPU::Get16Bit(Destination destination) {
         cout << "Tried reading 0x" << hex << unsigned(destination) << " as a 16 bit value." << endl;
         assert(false);
     case Register_AF:   
-        return buildMsbLsb16(a, Get8Bit(Register_F));
+        return buildMsbLsb16(a_, Get8Bit(Register_F));
     case Register_BC:
-        return buildMsbLsb16(b,c);
+        return buildMsbLsb16(b_, c_);
     case Register_DE:
-        return buildMsbLsb16(d_, e);
+        return buildMsbLsb16(d_, e_);
     case Register_HL:
-        return buildMsbLsb16(h, l);
+        return buildMsbLsb16(h_, l_);
     case Register_SP:
-        return sp;
+        return sp_;
     case Register_PC:
-        return pc;
+        return pc_;
     case Eat_PC_Word:
-        word = addressRouter_->GetWordAt(pc);
+        word = addressRouter_->GetWordAt(pc_);
         AdvancePC();
         AdvancePC();
         return word;
@@ -194,29 +196,28 @@ void CPU::Set8Bit(Destination destination, uint8_t value) {
     switch (destination)
     {
     case Register_A:
-        a = value;
+        a_ = value;
         break;
     case Register_B:
-        b = value;
+        b_ = value;
         break;
     case Register_C:
-        c = value;
+        c_ = value;
         break;
     case Register_D:
         d_ = value;
-        cout << "D = " << hex << unsigned(value) << endl << "d = " << hex << unsigned(d_) << endl;
         break;
     case Register_E:
-        e = value;
+        e_ = value;
         break;
     case Register_F:
-        f = value;
+        f_ = value;
         break;
     case Register_H:
-        h = value;
+        h_ = value;
         break;
     case Register_L:
-        l = value;
+        l_ = value;
         break;
     case Address_BC:
         addressRouter_->SetByteAt(Get16Bit(Register_BC), value);
@@ -269,25 +270,25 @@ void CPU::Set16Bit(Destination destination, uint16_t value) {
         cout << "0x" << hex << unsigned(destination) << " is not 16 bits." << endl;
         assert(false);
     case Register_BC:
-        b = HIGHER8(value);
-        c = LOWER8(value);
+        b_ = HIGHER8(value);
+        c_ = LOWER8(value);
         break;
     case Register_DE:
         d_ = HIGHER8(value);
-        e = LOWER8(value);
+        e_ = LOWER8(value);
         break;
     case Register_HL:
-        h = HIGHER8(value);
-        l = LOWER8(value);
+        h_ = HIGHER8(value);
+        l_ = LOWER8(value);
         break;
     case Register_PC:
-        pc = value;
+        pc_ = value;
         break;
     case Register_SP:
-        sp = value;
+        sp_ = value;
         break;
     case Eat_PC_Word:
-        addressRouter_->SetWordAt(pc, value);
+        addressRouter_->SetWordAt(pc_, value);
         assert(false);
         break;
     case Address_BC:
@@ -307,17 +308,17 @@ void CPU::Set16Bit(Destination destination, uint16_t value) {
 uint8_t CPU::ReadOpcodeAtPC() {
     if (disasemblerMode_) {
         addressRouter_->EnableDisassemblerMode(false);
-        uint8_t opcode = addressRouter_->GetByteAt(pc);
+        uint8_t opcode = addressRouter_->GetByteAt(pc_);
         addressRouter_->EnableDisassemblerMode(true);
         return opcode;
     }
-    return addressRouter_->GetByteAt(pc);
+    return addressRouter_->GetByteAt(pc_);
 }
 
 void CPU::Push8Bit(uint8_t byte) {
     // Stack pointer grows down before anything is pushed.
-    sp -= 1;
-    addressRouter_->SetByteAt(sp, byte);
+    sp_ -= 1;
+    addressRouter_->SetByteAt(sp_, byte);
 }
 
 void CPU::Push16Bit(uint16_t word) {
@@ -328,10 +329,10 @@ void CPU::Push16Bit(uint16_t word) {
 }
 
 uint8_t CPU::Pop8Bit() {
-    uint16_t oldSp = sp;
-    uint8_t byte = addressRouter_->GetByteAt(sp);
-    sp += 1;
-    assert(sp > oldSp);
+    uint16_t oldSp = sp_;
+    uint8_t byte = addressRouter_->GetByteAt(sp_);
+    sp_ += 1;
+    assert(sp_ > oldSp);
     return byte;
 }
 
@@ -370,22 +371,27 @@ void CPU::JumpRelative(uint8_t relative) {
 }
 
 void CPU::AdvancePC() {
-    pc++;
+    pc_++;
 }
 
 void CPU::Reset() {
-    pc = 0x100;
+    pc_ = 0x100;
     // Initialized on start, but most programs will move it themselves anyway.
-    sp = 0xfffe;
+    sp_ = 0xfffe;
     flags.z = 0;
     flags.h = 0;
     flags.n = 0;
     flags.c = 0;
-    interruptsEnabled = true;
-    haltRequested = false;
-    stopRequested = false;
+
+    interruptsEnabled_ = true;
+
+    haltNextLoop_ = false;
+    stopNextLoop_ = false;
+    disableInterruptsNextLoop_ = false;
+    enableInterruptsNextLoop_ = false;
+
     cycles_ = 0;
-    a = b = c = d_ = e = f = h = l = 0;
+    a_ = b_ = c_ = d_ = e_ = f_ = h_ = l_ = 0;
 }
 
 void CPU::Debugger() {
@@ -393,8 +399,8 @@ void CPU::Debugger() {
     cout << " BC: " << hex << unsigned(Get8Bit(Register_B)) << "," << hex << unsigned(Get8Bit(Register_C));
     cout << " DE: " << hex << unsigned(Get8Bit(Register_D)) << "," << hex << unsigned(Get8Bit(Register_E));
     cout << " HL: " << hex << unsigned(Get8Bit(Register_H)) << "," << hex << unsigned(Get8Bit(Register_L));
-    cout << " SP: " << hex << unsigned(sp);
-    cout << " PC: " << hex << unsigned(pc);
+    cout << " SP: " << hex << unsigned(sp_);
+    cout << " PC: " << hex << unsigned(pc_);
     cout << " Flags:";
     cout << " Z: " << hex << flags.z;
     cout << " C: " << hex << flags.c;

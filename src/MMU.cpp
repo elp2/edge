@@ -64,7 +64,7 @@ uint8_t MMU::GetByteAt(uint16_t address) {
     if (UseBootROMForAddress(address)) {
         byte = bootROM->GetByteAt(address);
     } else if (address < 0x8000) {
-        if (overlayBootROM && address > 0x134) {
+        if (overlayBootROM && address > 0x14E) {
             cout << "ROM access above logo while overlaid at 0x" << hex << unsigned(address) << endl;
             assert(false);
         }

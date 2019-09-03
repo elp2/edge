@@ -150,7 +150,7 @@ int main() {
     long LIMIT = 10000000;
     for (long i = 0; i < LIMIT; i++) {
         if (cpu->Get16Bit(Register_PC) == 0x89) {
-            cpu->SetDebugPrint(true);
+            // cpu->SetDebugPrint(true);
         }
         if (cpu->Get16Bit(Register_PC) == 0x00fe) {
             cout << "# Instructions = " << i << endl;
