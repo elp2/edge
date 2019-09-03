@@ -33,7 +33,6 @@ void LoadCommand::Run(CPU *cpu) {
         } else {
             cpu->Set8Bit(to, cpu->Get8Bit(from));
         }
-        
     }
 }
 
@@ -61,7 +60,6 @@ class SpecialLoadCommand : public Command {
         }
 
         uint16_t address;
-        uint8_t value;
         switch (opcode)
         {
         case 0xf2:

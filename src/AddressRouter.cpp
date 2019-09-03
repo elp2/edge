@@ -139,9 +139,9 @@ uint8_t AddressRouter::GetByteAtAddressFromOwner(AddressOwner owner, uint16_t ad
         return mmu_->GetByteAt(address);
     case AddressOwner_PPU:
         return ppu_->GetByteAt(address);
-    
     default:
-        break;
+		assert(false);
+		return 0x00;
     }
 }
 
