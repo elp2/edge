@@ -22,8 +22,28 @@ class MMU;
 class PPU;
 
 class CPU {
-    public:
+ private:
+    AddressRouter *addressRouter_;
+    PPU *ppu_;
+    CommandFactory *commandFactory;
+    CBCommandFactory *cbCommandFactory;
+    Command *CommandForOpcode(uint8_t opcode);
 
+    bool interruptsEnabled;
+
+    uint8_t a,b,c,d_,e,f,h,l;
+
+    // Points to the next command to be executed.
+    uint16_t pc;
+
+    // Points to the stack position.
+    uint16_t sp;
+
+    bool disasemblerMode_;
+    uint64_t cycles_;
+    bool debugPrint_;
+
+ public:
     flags_t flags;
 
     CPU(MMU *mmu, PPU *ppu);
@@ -68,27 +88,7 @@ class CPU {
 
     // Checks the state of interrupts.
     bool InterruptsEnabled();
+    void SetDebugPrint(bool debugPrint) { debugPrint_ = debugPrint; };
 
     uint64_t Cycles() { return cycles_; };
-
-private:
-    AddressRouter *addressRouter_;
-    PPU *ppu_;
-    CommandFactory *commandFactory;
-    CBCommandFactory *cbCommandFactory;
-    Command *CommandForOpcode(uint8_t opcode);
-
-    bool interruptsEnabled;
-
-    uint8_t a,b,c,d,e,f,h,l;
-
-    // Points to the next command to be executed.
-    uint16_t pc;
-
-    // Points to the stack position.
-    uint16_t sp;
-
-    bool disasemblerMode_;
-    uint64_t cycles_;
-    bool debugPrint_;
 };

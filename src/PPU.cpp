@@ -22,9 +22,10 @@ const int VBLANK_CYCLES = VBLANK_ROWS * ROW_CYCLES;
 const int FRAME_CYCLES = VISIBLE_CYCLES + VBLANK_CYCLES;
 
 PPU::PPU() { 
-    oam_ram_ = new uint8_t[0xa0];
-    video_ram_ = new uint8_t[0x2000];
-    io_ram_ = new uint8_t[0xd];
+    oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
+    video_ram_ = (uint8_t *)calloc(0x2000, sizeof(uint8_t));
+    io_ram_ = (uint8_t *)calloc(0xD, sizeof(uint8_t));
+
     cycles_ = 0;
     state_ = OAM_Search;
     row_sprites = NULL;
@@ -38,9 +39,8 @@ void PPU::Advance(int cycles) {
 
         if (cycles_ < VISIBLE_CYCLES) {
             VisibleCycle();
-        } else if (cycles_ == VISIBLE_CYCLES) {
-            EndHBlank();
-            BeginVBlank();
+        } else {
+            InvisibleCycle();
         }
 
         cycles_++;
@@ -49,6 +49,17 @@ void PPU::Advance(int cycles) {
             cycles_ = 0;
             EndVBlank();
         }        
+    }
+}
+
+void PPU::InvisibleCycle() {
+    if (cycles_ == VISIBLE_CYCLES) {
+        EndHBlank();
+        BeginVBlank();
+    }
+    int invisible_cycles = cycles_ - VISIBLE_CYCLES;
+    if (invisible_cycles % ROW_CYCLES == 0) {
+        set_ly(invisible_cycles / ROW_CYCLES + 144);
     }
 }
 
@@ -69,6 +80,32 @@ void PPU::VisibleCycle() {
     }
 }
 
+uint8_t PPU::scx() {
+    return GetByteAt(0xFF43);
+}
+
+void PPU::set_scx(uint8_t value) {
+    assert(false);
+    SetByteAt(0xFF43, value);
+}
+
+uint8_t PPU::scy() {
+    return GetByteAt(0xFF42);
+}
+
+void PPU::set_scy(uint8_t value) {
+    SetByteAt(0xFF42, value);
+}
+
+uint8_t PPU::ly() {
+    return GetByteAt(0xFF44);
+}
+
+void PPU::set_ly(uint8_t value) {
+    SetByteAt(0xFF44, value);
+    // cout << "LY == " << hex << unsigned(GetByteAt(0xFF44)) << endl;
+}
+
 uint8_t PPU::GetByteAt(uint16_t address) {
     if (address >= 0x8000 && address < 0xA000) {
         return video_ram_[address - 0x8000];
@@ -85,10 +122,21 @@ uint8_t PPU::GetByteAt(uint16_t address) {
 
 void PPU::SetByteAt(uint16_t address, uint8_t byte) {
     if (address >= 0x8000 && address < 0xA000) {
+        if (!CanAccessVRAM()) {
+            // Too many apparent false positives from boot ROM.
+            // TODO: Maybe this is not checked when screen is not on.
+            // cout << "Can not access Video RAM during " << hex << unsigned(state_) << endl;
+        }
         video_ram_[address - 0x8000] = byte;
     } else if (address >= 0xFE00 && address < 0xFEA0) {
+        if (!CanAccessOAM()) {
+            cout << "Can not access OAM during " << hex << unsigned(state_) << endl;
+        }
         oam_ram_[address - 0xFE00] = byte;
     } else if (address >= 0xFF40 && address <= 0xFF4C) {
+        if (0xFF42 == address) {
+            cout << "0xFF42 <- " << hex << unsigned(byte) << endl;
+        }
         io_ram_[address - 0xFF40] = byte;
     } else {
         cout << "Unknown SET PPU address: 0x" << hex << unsigned(address) << endl;
@@ -97,29 +145,26 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
 }
 
 void PPU::DrawRow(int row) {
-    // TODO Draw a row :O.
-    cout << "Drawing row: " << row << endl;
+    assert(scx() == 0);
+    set_ly(row);
+    int y = (row + scy()) % 144;
 }
 
 void PPU::BeginHBlank(int row) {
     // TODO HBlank.
-    cout << "HBlank for " << row << endl;
 }
 
 void PPU::EndHBlank() {
     // TODO HBlank End.
-    cout << "HBlank ended!!!" << endl;
 }
 
 void PPU::BeginVBlank() {
     state_ = VBlank;
     // TODO VBlank begin.
-    cout << "Vblank began!" << endl;
 }
 
 void PPU::EndVBlank() {
     // TODO VBlank end.
-    cout << "VBlank ended!" << endl;
 }
 
 int SpriteHeight() {
@@ -127,18 +172,15 @@ int SpriteHeight() {
 }
 
 bool PPU::CanAccessOAM() {
-    // TODO CanAccessOAM.
     return state_ == HBlank || state_ == VBlank;
 }
 
 bool PPU::CanAccessVRAM() {
-    // TODO CanAccessVRAM.
-    // Writes are nops, reads are 0xff.
+    // TODO Writes are nops, reads are 0xff.
     return state_ != Pixel_Transfer;
 }
 
 vector<Sprite *> *PPU::OAMSearchY(int row) {
-    cout << "OAM Search!" << endl;
     const int NUM_SPRITES = 40;
     vector<Sprite *> *sprites = new vector<Sprite *>();
 

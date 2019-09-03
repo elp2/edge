@@ -1,11 +1,21 @@
 #include "BitCommand.hpp"
 
 #include <cassert>
+#include <sstream>
+#include <string>
 
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
 #include "Utils.hpp"
+
+string detailedDescription(string base, Destination to, Destination from, uint8_t a, uint8_t n) {
+    stringstream stream;
+    stream << base << destinationToString(to) << "[" << hex << unsigned(a) << "], ";
+    stream << destinationToString(from) << "[" << hex << unsigned(n) << "]";
+
+    return stream.str();
+}
 
 void andAWithDestination(CPU *cpu, Destination d) {
     uint8_t anded = cpu->Get8Bit(Register_A) & cpu->Get8Bit(d);
@@ -17,9 +27,11 @@ void andAWithDestination(CPU *cpu, Destination d) {
     cpu->flags.c = false;
 }
 
-void cp(CPU *cpu, Destination d) {
+void BitCommand::CP(CPU *cpu, Destination d) {
     uint8_t a = cpu->Get8Bit(Register_A);
     uint8_t n = cpu->Get8Bit(d);
+
+    description = detailedDescription("CP ", Register_A, d, a, n);
 
     cpu->flags.z = (a == n);
     cpu->flags.n = true;
@@ -179,31 +191,31 @@ void BitCommand::Run(CPU *cpu) {
 
     // CPs.
     case 0xbf:
-        cp(cpu, Register_A);
+        CP(cpu, Register_A);
         return;
     case 0xb8:
-        cp(cpu, Register_B);
+        CP(cpu, Register_B);
         return;
     case 0xb9:
-        cp(cpu, Register_C);
+        CP(cpu, Register_C);
         return;
     case 0xba:
-        cp(cpu, Register_D);
+        CP(cpu, Register_D);
         return;
     case 0xbb:
-        cp(cpu, Register_E);
+        CP(cpu, Register_E);
         return;
     case 0xbc:
-        cp(cpu, Register_H);
+        CP(cpu, Register_H);
         return;
     case 0xbd:
-        cp(cpu, Register_L);
+        CP(cpu, Register_L);
         return;
     case 0xbe:
-        cp(cpu, Address_HL);
+        CP(cpu, Address_HL);
         return;
     case 0xfe:
-        cp(cpu, Eat_PC_Byte);
+        CP(cpu, Eat_PC_Byte);
         return;
     case 0x07:
     case 0x17:

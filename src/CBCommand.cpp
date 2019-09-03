@@ -165,6 +165,7 @@ void CBCommand::Run(CPU *cpu) {
     case 0x4:
     case 0x5:
     case 0x6:
+    case 0x7:
         return TestBit(row, column, cpu);
     case 0x8:
     case 0x9:

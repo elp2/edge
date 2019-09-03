@@ -145,15 +145,20 @@ int main() {
     testAddressRouter();
 
     CPU *cpu = getCPU();
-    cpu->JumpAddress(0xe0);
+    cpu->JumpAddress(0x00);
 
-    int LIMIT = 10000;
-    for (int i = 0; i < LIMIT; i++) {
-        if (cpu->Get16Bit(Register_PC) == 0xfe) {
+    long LIMIT = 10000000;
+    for (long i = 0; i < LIMIT; i++) {
+        if (cpu->Get16Bit(Register_PC) == 0x89) {
+            cpu->SetDebugPrint(true);
+        }
+        if (cpu->Get16Bit(Register_PC) == 0x00fe) {
             cout << "# Instructions = " << i << endl;
             cout << "CPU Cycles " << cpu->Cycles() << endl;
             break;
         }
         cpu->Step();
     }
+
+    cout << "Finished at PC: 0x" << hex << unsigned(cpu->Get16Bit(Register_PC)) << endl;
 }

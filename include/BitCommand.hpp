@@ -7,7 +7,8 @@ class AbstractCommandFactory;
 class CPU;
 
 class BitCommand : public Command {
-
+ private:
+    void CP(CPU *cpu, Destination d);
  public:
     BitCommand(uint8_t opcode, string description, int cycles);
     ~BitCommand();

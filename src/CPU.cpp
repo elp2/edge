@@ -7,6 +7,7 @@
 #include "AddressRouter.hpp"
 #include "Command.hpp"
 #include "Utils.hpp"
+#include "PPU.hpp"
 
 CPU::CPU(MMU *mmu, PPU *ppu) {
     ppu_ = ppu;
@@ -56,17 +57,17 @@ void CPU::Step() {
     cycles_ += command->cycles;
 
     if (debugPrint_) {
-        cout << command->description << " ; $" << commandPC << " [" << cycles_ << "]" << endl;
+        cout << command->description << " ; PC=" << commandPC << endl;
         Debugger();
     }
 
     assert(command->cycles < 33 && command->cycles > 0);
 
-    // TODO: Actually do the cycles with PPU.
+    ppu_->Advance(command->cycles);
 }
 
-bool CPU::Requires16Bits(Destination d) {
-    switch (d)
+bool CPU::Requires16Bits(Destination destination) {
+    switch (destination)
     {
         case Register_A:
         case Register_B:
@@ -88,10 +89,10 @@ bool CPU::Requires16Bits(Destination d) {
     }
 }
 
-uint8_t CPU::Get8Bit(Destination d) {
+uint8_t CPU::Get8Bit(Destination destination) {
     uint8_t pcByte;
 	uint16_t word;
-	switch (d)
+	switch (destination)
 	{
 	case Register_A:
 		return a;
@@ -100,7 +101,7 @@ uint8_t CPU::Get8Bit(Destination d) {
 	case Register_C:
 		return c;
 	case Register_D:
-		return d;
+		return d_;
 	case Register_E:
 		return e;
 	case Register_F:
@@ -137,15 +138,15 @@ uint8_t CPU::Get8Bit(Destination d) {
         break;
     }
     default:
-        cout << "Unknown 8 bit destination: 0x" << hex << unsigned(d) << endl;
+        cout << "Unknown 8 bit destination: 0x" << hex << unsigned(destination) << endl;
         assert(false);
         return 0xED;
     }
 }
 
-uint16_t CPU::Get16Bit(Destination d) {
+uint16_t CPU::Get16Bit(Destination destination) {
     uint16_t word;
-    switch (d)
+    switch (destination)
     {
     case Register_A:
     case Register_B:
@@ -163,14 +164,14 @@ uint16_t CPU::Get16Bit(Destination d) {
     case Address_nn:
     case Address_0xFF00_Byte:
     case Address_0xFF00_Register_C:
-        cout << "Tried reading 0x" << hex << unsigned(d) << " as a 16 bit value." << endl;
+        cout << "Tried reading 0x" << hex << unsigned(destination) << " as a 16 bit value." << endl;
         assert(false);
     case Register_AF:   
         return buildMsbLsb16(a, Get8Bit(Register_F));
     case Register_BC:
         return buildMsbLsb16(b,c);
     case Register_DE:
-        return buildMsbLsb16(this->d, e);
+        return buildMsbLsb16(d_, e);
     case Register_HL:
         return buildMsbLsb16(h, l);
     case Register_SP:
@@ -183,14 +184,14 @@ uint16_t CPU::Get16Bit(Destination d) {
         AdvancePC();
         return word;
     default:
-        cout << "Unknown desination for get: " << d << endl;
+        cout << "Unknown desination for get: 0x" << hex << unsigned(destination) << endl;
         assert(false);
     }
     return 0xDEAD;
 }
 
-void CPU::Set8Bit(Destination d, uint8_t value) {
-    switch (d)
+void CPU::Set8Bit(Destination destination, uint8_t value) {
+    switch (destination)
     {
     case Register_A:
         a = value;
@@ -202,7 +203,8 @@ void CPU::Set8Bit(Destination d, uint8_t value) {
         c = value;
         break;
     case Register_D:
-        this->d = value;
+        d_ = value;
+        cout << "D = " << hex << unsigned(value) << endl << "d = " << hex << unsigned(d_) << endl;
         break;
     case Register_E:
         e = value;
@@ -244,14 +246,14 @@ void CPU::Set8Bit(Destination d, uint8_t value) {
         assert(false);
         break;
     default:
-        cout << "Unknown 8 bit destination: 0x" << hex << unsigned(d) << endl;
+        cout << "Unknown 8 bit destination: 0x" << hex << unsigned(destination) << endl;
         assert(false);
     }
 }
 
-void CPU::Set16Bit(Destination d, uint16_t value) {
+void CPU::Set16Bit(Destination destination, uint16_t value) {
     uint16_t address;
-    switch (d)
+    switch (destination)
     {
     case Register_A:
     case Register_B:
@@ -264,14 +266,14 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
     case Eat_PC_Byte:
     case Address_0xFF00_Byte:
     case Address_0xFF00_Register_C:
-        cout << "0x" << hex << unsigned(d) << " is not 16 bits." << endl;
+        cout << "0x" << hex << unsigned(destination) << " is not 16 bits." << endl;
         assert(false);
     case Register_BC:
         b = HIGHER8(value);
         c = LOWER8(value);
         break;
     case Register_DE:
-        this->d = HIGHER8(value);
+        d_ = HIGHER8(value);
         e = LOWER8(value);
         break;
     case Register_HL:
@@ -293,11 +295,11 @@ void CPU::Set16Bit(Destination d, uint16_t value) {
     case Address_HL:
     case Address_SP:
     case Address_nn:
-        address = Get16Bit(d);
+        address = Get16Bit(destination);
         addressRouter_->SetWordAt(address, value);
         break;
     default:
-        cout << "Unknown 16 bit set: " << d << endl;
+        cout << "Unknown 16 bit set: " << hex << unsigned(destination) << endl;
         assert(false);
     }
 }
@@ -383,18 +385,17 @@ void CPU::Reset() {
     haltRequested = false;
     stopRequested = false;
     cycles_ = 0;
-    a = b = c = e = f = h = l = 0;
+    a = b = c = d_ = e = f = h = l = 0;
 }
 
 void CPU::Debugger() {
-    cout << "AF: " << hex << unsigned(Get16Bit(Register_AF));
-    cout << " BC: " << hex << unsigned(Get16Bit(Register_BC));
-    cout << " DE: " << hex << unsigned(Get16Bit(Register_DE));
-    cout << " HL: " << hex << unsigned(Get16Bit(Register_HL));
-    cout << endl;
-    cout << "SP: " << hex << unsigned(sp);
-    cout << " PC: " << hex << unsigned(pc) << endl;
-    cout << "Flags:";
+    cout << "AF: " << hex << unsigned(Get8Bit(Register_A)) << "," << hex << unsigned(Get8Bit(Register_F));
+    cout << " BC: " << hex << unsigned(Get8Bit(Register_B)) << "," << hex << unsigned(Get8Bit(Register_C));
+    cout << " DE: " << hex << unsigned(Get8Bit(Register_D)) << "," << hex << unsigned(Get8Bit(Register_E));
+    cout << " HL: " << hex << unsigned(Get8Bit(Register_H)) << "," << hex << unsigned(Get8Bit(Register_L));
+    cout << " SP: " << hex << unsigned(sp);
+    cout << " PC: " << hex << unsigned(pc);
+    cout << " Flags:";
     cout << " Z: " << hex << flags.z;
     cout << " C: " << hex << flags.c;
     cout << " H: " << hex << flags.h;

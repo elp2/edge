@@ -38,6 +38,7 @@ class PPU {
         vector<Sprite *> *row_sprites;
 
         void VisibleCycle();
+        void InvisibleCycle();
         void DrawRow(int row);
 
         void BeginHBlank(int row);
@@ -48,6 +49,15 @@ class PPU {
 
         bool CanAccessVRAM();
         bool CanAccessOAM();
+
+        void set_scx(uint8_t value);
+        uint8_t scx();
+
+        void set_scy(uint8_t value);
+        uint8_t scy();
+
+        void set_ly(uint8_t value);
+        uint8_t ly();
 
         // Performs the OAM Search function, returning up to 10 sprites visible on this row.
         vector<Sprite *> *OAMSearchY(int row);
