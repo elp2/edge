@@ -2,10 +2,7 @@
 
 #include <cstdint>
 
-enum SpritePalette {
-    SpritePalette0 = 0,
-    SpritePalette1 = 1,
-};
+#include "Palette.hpp"
 
 class Sprite {
 private:
@@ -21,9 +18,9 @@ public:
     bool IntersectsRow(int row, int sprite_height);
 
     // If false, only overrites color 0 of BG and window.
-    bool Priority() { return flags_ & 0x80; };
-    uint8_t TileNumber() { return tile_number_; };
-    bool XFlip() { return flags_ & 0x40; };
-    bool YFlip() { return flags_ & 0x20; };
-    SpritePalette Palette() { return flags_ & 0x10 ?  SpritePalette1 : SpritePalette0; };
+    bool priority() { return flags_ & 0x80; };
+    uint8_t tile_number() { return tile_number_; };
+    bool x_flip() { return flags_ & 0x40; };
+    bool y_flip() { return flags_ & 0x20; };
+    Palette palette() { return flags_ & 0x10 ?  SpritePalette1 : SpritePalette0; };
 };

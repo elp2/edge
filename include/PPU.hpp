@@ -6,6 +6,8 @@
 
 #include "Sprite.hpp"
 
+class Screen;
+
 using namespace std;
 
 enum PPUState {
@@ -32,6 +34,7 @@ class PPU {
         uint8_t *oam_ram_;
         uint8_t *video_ram_;
         uint8_t *io_ram_;
+        Screen *screen_;
 
         PPUState state_;
         int cycles_;
@@ -80,9 +83,18 @@ class PPU {
         void set_wx(uint8_t value);
         uint8_t wx();
 
+		uint8_t bgp();
+		uint8_t obp0();
+		uint8_t obp1();
+
         void set_bgp(uint8_t address);
         void set_obp0(uint8_t address);
         void set_obp1(uint8_t address);
+
+
+        bool DisplayWindow();
+        int SpriteHeight();
+        bool DisplaySprites();
 
         // Performs the OAM Search function, returning up to 10 sprites visible on this row.
         vector<Sprite *> *OAMSearchY(int row);

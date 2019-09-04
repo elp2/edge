@@ -27,10 +27,10 @@ void testSprite() {
     cout << "----TESTING SPRITE----" << endl;
     Sprite *sprite = new Sprite(0x12, 0x34, 0x34, 0xa0);
 
-    assert(sprite->Priority());
-    assert(!sprite->XFlip());
-    assert(sprite->YFlip());
-    assert(sprite->Palette() == SpritePalette0);
+    assert(sprite->priority());
+    assert(!sprite->x_flip());
+    assert(sprite->y_flip());
+    assert(sprite->palette() == SpritePalette0);
     cout << endl;
 }
 
@@ -144,6 +144,7 @@ int main() {
     testPPU();
     testAddressRouter();
 
+	cout << "----STARTING MAIN----" << endl;
     CPU *cpu = getCPU();
     cpu->JumpAddress(0x00);
 

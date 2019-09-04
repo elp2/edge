@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "PPU.hpp"
+#include "Screen.hpp"
 #include "Sprite.hpp"
 
 using namespace std;
@@ -42,6 +43,7 @@ PPU::PPU() {
     cycles_ = 0;
     state_ = OAM_Search;
     row_sprites = NULL;
+    screen_ = new Screen();
 }
 
 void PPU::Advance(int cycles) {
@@ -162,15 +164,30 @@ uint8_t PPU::wx() {
 }
 
 void PPU::set_bgp(uint8_t value) {
+	screen_->SetPalette(BGPalette, value);
     SetIORAM(BGP_ADDRESS, value);
 }
 
 void PPU::set_obp0(uint8_t value) {
+	screen_->SetPalette(SpritePalette0, value);
     SetIORAM(OBP0_ADDRESS, value);
 }
 
 void PPU::set_obp1(uint8_t value) {
+	screen_->SetPalette(SpritePalette1, value);
     SetIORAM(OBP1_ADDRESS, value);
+}
+
+uint8_t PPU::bgp() {
+	return GetIORAM(BGP_ADDRESS);
+}
+
+uint8_t PPU::obp0() {
+	return GetIORAM(OBP0_ADDRESS);
+}
+
+uint8_t PPU::obp1() {
+	return GetIORAM(OBP1_ADDRESS);
 }
 
 uint8_t PPU::lcdc() {
@@ -316,8 +333,8 @@ void PPU::EndVBlank() {
     // TODO VBlank end.
 }
 
-int SpriteHeight() {
-    return 8;
+int PPU::SpriteHeight() {
+    return 0x4 == (GetByteAt(LCDC_ADDRESS) & 0x4) ? 16 : 8;
 }
 
 bool PPU::CanAccessOAM() {
@@ -328,6 +345,16 @@ bool PPU::CanAccessVRAM() {
     // TODO Writes are nops, reads are 0xFF.
     return state_ != Pixel_Transfer;
 }
+
+bool PPU::DisplaySprites() {
+    return 0x2 == (GetByteAt(LCDC_ADDRESS) & 0x2);
+}
+
+bool PPU::DisplayWindow() {
+    return 0x20 == (GetByteAt(LCDC_ADDRESS) & 0x20);
+}
+
+// TODO: BG & Window: 
 
 vector<Sprite *> *PPU::OAMSearchY(int row) {
     const int NUM_SPRITES = 40;

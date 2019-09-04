@@ -20,6 +20,7 @@ add_executable(edge
     src/PPU.cpp
     src/ReturnCommand.cpp
     src/ROM.cpp
+    src/Screen.cpp
     src/StackCommand.cpp
     src/Sprite.cpp
     src/UnimplementedCommand.cpp
