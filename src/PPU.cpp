@@ -21,10 +21,23 @@ const int VBLANK_CYCLES = VBLANK_ROWS * ROW_CYCLES;
 
 const int FRAME_CYCLES = VISIBLE_CYCLES + VBLANK_CYCLES;
 
+const uint16_t LCDC_ADDRESS = 0xFF40;
+const uint16_t STAT_ADDRESS = 0xFF41;
+const uint16_t SCY_ADDRESS = 0xFF42;
+const uint16_t SCX_ADDRESS = 0xFF43;
+const uint16_t LY_ADDRESS = 0xFF44;
+const uint16_t LYC_ADDRESS = 0xFF45;
+const uint16_t DMA_ADDRESS = 0xFF46;
+const uint16_t BGP_ADDRESS = 0xFF47;
+const uint16_t OBP0_ADDRESS = 0xFF48;
+const uint16_t OBP1_ADDRESS = 0xFF49;
+const uint16_t WY_ADDRESS = 0xFF4A;
+const uint16_t WX_ADDRESS = 0xFF4B;
+
 PPU::PPU() { 
     oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
     video_ram_ = (uint8_t *)calloc(0x2000, sizeof(uint8_t));
-    io_ram_ = (uint8_t *)calloc(0xD, sizeof(uint8_t));
+    io_ram_ = (uint8_t*)calloc(0xD, sizeof(uint8_t));
 
     cycles_ = 0;
     state_ = OAM_Search;
@@ -80,30 +93,100 @@ void PPU::VisibleCycle() {
     }
 }
 
-uint8_t PPU::scx() {
-    return GetByteAt(0xFF43);
+void PPU::SetIORAM(uint16_t address, uint8_t value) {
+    io_ram_[address - LCDC_ADDRESS] = value;
 }
 
-void PPU::set_scx(uint8_t value) {
-    assert(false);
-    SetByteAt(0xFF43, value);
+uint8_t PPU::GetIORAM(uint16_t address) {
+    return io_ram_[address - LCDC_ADDRESS];
+}
+
+uint8_t PPU::scx() {
+    return GetIORAM(SCX_ADDRESS);
+}
+
+void PPU::set_scx(uint8_t value) { 
+	SetIORAM(SCX_ADDRESS, value);
 }
 
 uint8_t PPU::scy() {
-    return GetByteAt(0xFF42);
+    return GetIORAM(SCY_ADDRESS);
 }
 
 void PPU::set_scy(uint8_t value) {
-    SetByteAt(0xFF42, value);
+	SetIORAM(SCY_ADDRESS, value);
 }
 
 uint8_t PPU::ly() {
-    return GetByteAt(0xFF44);
+    return GetIORAM(LY_ADDRESS);
 }
 
 void PPU::set_ly(uint8_t value) {
-    SetByteAt(0xFF44, value);
+	SetIORAM(LY_ADDRESS, value);
     // cout << "LY == " << hex << unsigned(GetByteAt(0xFF44)) << endl;
+}
+
+void PPU::set_lyc(uint8_t value) {
+	SetIORAM(LYC_ADDRESS, value);
+}
+
+uint8_t PPU::lyc() {
+    return GetIORAM(LYC_ADDRESS);
+}
+
+void PPU::set_dma(uint8_t value) {
+	cout << "Attempted OAM DMA! TODO!" << endl;
+    assert(false); // TODO.
+	SetIORAM(DMA_ADDRESS, value);
+}
+
+uint8_t PPU::dma() {
+    assert(false); // TODO. Does it even make sense?
+    return GetIORAM(DMA_ADDRESS);
+}
+
+void PPU::set_wy(uint8_t value) {
+	SetIORAM(WY_ADDRESS, value);
+}
+
+uint8_t PPU::wy() {
+    return GetIORAM(WY_ADDRESS);
+}
+
+void PPU::set_wx(uint8_t value) {
+	SetIORAM(WX_ADDRESS, value);
+}
+
+uint8_t PPU::wx() {
+    return GetIORAM(WX_ADDRESS);
+}
+
+void PPU::set_bgp(uint8_t value) {
+    SetIORAM(BGP_ADDRESS, value);
+}
+
+void PPU::set_obp0(uint8_t value) {
+    SetIORAM(OBP0_ADDRESS, value);
+}
+
+void PPU::set_obp1(uint8_t value) {
+    SetIORAM(OBP1_ADDRESS, value);
+}
+
+uint8_t PPU::lcdc() {
+    return GetIORAM(LCDC_ADDRESS);
+}
+
+void PPU::set_lcdc(uint8_t value) {
+	SetIORAM(LCDC_ADDRESS, value);
+}
+
+uint8_t PPU::stat() {
+    return GetIORAM(STAT_ADDRESS);
+}
+
+void PPU::set_stat(uint8_t value) {
+	SetIORAM(STAT_ADDRESS, value);
 }
 
 uint8_t PPU::GetByteAt(uint16_t address) {
@@ -111,8 +194,36 @@ uint8_t PPU::GetByteAt(uint16_t address) {
         return video_ram_[address - 0x8000];
     } else if (address >= 0xFE00 && address < 0xFEA0) {
         return oam_ram_[address - 0xFE00];
-    } else if (address >= 0xFF40 && address <= 0xFF4C) {
-        return io_ram_[address - 0xFF40];
+    } else if (address >= 0xFF40 && address < 0xFF4C) {
+		switch (address) {
+            case LCDC_ADDRESS:
+                return lcdc();
+            case STAT_ADDRESS:
+                return stat();
+            case SCY_ADDRESS:
+                return scy();
+            case SCX_ADDRESS:
+                return scx();
+            case LY_ADDRESS:
+                return ly();
+            case LYC_ADDRESS:
+                return lyc();
+            case DMA_ADDRESS:
+                return dma();
+            case BGP_ADDRESS:
+            case OBP0_ADDRESS:
+            case OBP1_ADDRESS:
+                // TODO Palettes.
+                return 0xed;
+            case WY_ADDRESS:
+                return wy();
+            case WX_ADDRESS:
+                return wx();
+            default:
+                cout << "Unknown GetByte " << hex << unsigned(address) << endl;
+                assert(false);
+                return 0;
+		}
     } else {
         cout << "Unknown GET TPPU address: 0x" << hex << unsigned(address) << endl;
         assert(false);
@@ -133,9 +244,50 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
             cout << "Can not access OAM during " << hex << unsigned(state_) << endl;
         }
         oam_ram_[address - 0xFE00] = byte;
-    } else if (address >= 0xFF40 && address <= 0xFF4C) {
-        io_ram_[address - 0xFF40] = byte;
-    } else {
+    } else if (address >= 0xFF40 && address < 0xFF4C) {
+		switch (address) {
+            case LCDC_ADDRESS:
+                set_lcdc(byte);
+                break;
+            case STAT_ADDRESS:
+                set_stat(byte);
+                break;
+            case SCY_ADDRESS:
+                set_scy(byte);
+                break;
+            case SCX_ADDRESS:
+                set_scx(byte);
+                break;		
+            case LY_ADDRESS:
+                set_ly(byte);
+                break;
+            case LYC_ADDRESS:
+                set_lyc(byte);
+                break;
+            case DMA_ADDRESS:
+                set_dma(byte);
+                break;		
+            case BGP_ADDRESS:
+                set_bgp(byte);
+                break;
+            case OBP0_ADDRESS:
+                set_obp0(byte);
+                break;
+            case OBP1_ADDRESS:
+                set_obp1(byte);
+                break;
+            case WY_ADDRESS:
+                set_wy(byte);
+                break;
+            case WX_ADDRESS:
+                set_wx(byte);
+                break;
+            default:
+                cout << "Unknown GetByte " << hex << unsigned(address) << endl;
+                assert(false);
+                return;
+		}
+	} else {
         cout << "Unknown SET PPU address: 0x" << hex << unsigned(address) << endl;
         assert(false);
     }

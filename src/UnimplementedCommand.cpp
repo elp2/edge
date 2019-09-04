@@ -20,7 +20,7 @@ void UnimplementedCommand::Run(CPU *cpu) {
     // Nop.
     (void)cpu;
 
-    cout << "Unimplemented CPU opcode: " << opcode << endl;
+    cout << "Unimplemented CPU opcode: " << hex << unsigned(opcode) << endl;
     assert(false);
 }
 

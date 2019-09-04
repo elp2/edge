@@ -375,7 +375,6 @@ void CPU::AdvancePC() {
 }
 
 void CPU::Reset() {
-    pc_ = 0x100;
     // Initialized on start, but most programs will move it themselves anyway.
     sp_ = 0xfffe;
     flags.z = 0;

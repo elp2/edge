@@ -148,6 +148,7 @@ int main() {
     cpu->JumpAddress(0x00);
 
     long LIMIT = 10000000;
+	// cpu->SetDebugPrint(true);
     for (long i = 0; i < LIMIT; i++) {
         if (cpu->Get16Bit(Register_PC) == 0x89) {
             // cpu->SetDebugPrint(true);
@@ -156,7 +157,7 @@ int main() {
             cpu->Step();
             cout << "# Instructions = " << i << endl;
             cout << "CPU Cycles " << cpu->Cycles() << endl;
-            break;
+            // break;
         }
         cpu->Step();
     }
