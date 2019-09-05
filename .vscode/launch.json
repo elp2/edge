@@ -2,17 +2,25 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "C++ Debug (lldb)",
+            "name": "(lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/main",
-            "preLaunchTask": "Build C++ project",
+            // Resolved by CMake Tools:
+            "program": "${command:cmake.launchTargetPath}",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build",
             "environment": [],
             "externalConsole": true,
-            "MIMode": "lldb"
+            "miDebuggerPath": "/Users/edwardpalmer/.vscode/extensions/ms-vscode.cpptools-0.25.1/debugAdapters/lldb/bin/lldb-mi",
+            "MIMode": "lldb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for lldb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }
