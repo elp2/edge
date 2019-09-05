@@ -20,7 +20,6 @@ add_executable(edge
     src/MiscCommand.cpp
     src/MMU.cpp
     src/NopCommand.cpp
-    src/PixelFIFO.cpp
     src/PPU.cpp
     src/ReturnCommand.cpp
     src/ROM.cpp
