@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <iostream>
 
+#include "PixelFIFO.hpp"
 #include "PPU.hpp"
 #include "Screen.hpp"
 #include "Sprite.hpp"
@@ -44,9 +45,14 @@ PPU::PPU() {
     state_ = OAM_Search;
     row_sprites = NULL;
     screen_ = new Screen();
+    fifo_ = new PixelFIFO(this);
 }
 
 void PPU::Advance(int cycles) {
+    if (!screen_->on()) {
+        // Nothing for the PPU to output if the screen's not on.
+        return;
+    }
     // Naive version - immediately do all the things for that particular cycle once.
     while(cycles) {
         // Iterating one at a time should be OK since we shouldn't be jumping
@@ -82,16 +88,29 @@ void PPU::VisibleCycle() {
     int row = cycles_ / ROW_CYCLES;
     int row_cycles = cycles_ % ROWS;
 
+    if (state_ == HBlank) {
+        return;
+    }
+
     if (row_cycles == 0) {
         EndHBlank();
         state_ = OAM_Search;
         row_sprites = OAMSearchY(row);
+    } else if (row_cycles < OAM_SEARCH_CYCLES) {
+        // NOP.
     } else if (row_cycles == OAM_SEARCH_CYCLES) {
         state_ = Pixel_Transfer;
-        DrawRow(row);
-    } else if (row_cycles == OAM_SEARCH_CYCLES + PIXEL_TRANSFER_CYCLES) {
-        state_ = HBlank;
-        BeginHBlank(row);
+        fifo_->NewRow(row);
+        fifo_->Advance(screen_);
+    } else {
+        if (state_ == HBlank) {
+            // NOP.
+        } else {
+            // Keep advancing the FIFO until it signals that it's done.
+            if (fifo_->Advance(screen_)) {
+                state_ = HBlank;
+            }
+        }
     }
 }
 
@@ -164,7 +183,7 @@ uint8_t PPU::wx() {
 }
 
 void PPU::set_bgp(uint8_t value) {
-	screen_->SetPalette(BGPalette, value);
+	screen_->SetPalette(BackgroundWindowPalette, value);
     SetIORAM(BGP_ADDRESS, value);
 }
 
@@ -195,6 +214,25 @@ uint8_t PPU::lcdc() {
 }
 
 void PPU::set_lcdc(uint8_t value) {
+    // Don't do pixel fifos + shit when the lcd's not on!
+    // 10010001.
+    bool screen_on = value & 80;
+    screen_->set_on(screen_on);
+    // window_tile_map_base_address_ = value & 0x40 ? 0x9C00 : 0x9800;
+    // // TODO read window display 0x20.
+    // background_tile_data_base_address_ = value & 0x10 ? 0x8000 : 0x8800;
+    // background_tile_map_display_base_address = value &0x8 ? 0x9C00 : 0x9800;
+    // Sprite height should be handled.
+    // BG & window.
+    // bool sprites = value & 0x2;
+    // bool bg = value & 0x1
+
+    
+
+    if (value & 80) {
+
+    }
+
 	SetIORAM(LCDC_ADDRESS, value);
 }
 
@@ -310,13 +348,8 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
     }
 }
 
-void PPU::DrawRow(int row) {
-    assert(scx() == 0);
-    set_ly(row);
-    int y = (row + scy()) % 144;
-}
-
 void PPU::BeginHBlank(int row) {
+    (void)row;
     // TODO HBlank.
 }
 
@@ -368,4 +401,14 @@ vector<Sprite *> *PPU::OAMSearchY(int row) {
         }
     }
     return sprites;
+}
+
+uint16_t PPU::BackgroundTile(int tile_x, int tile_y) {
+    assert(tile_x % 8 == 0);
+    (void)tile_y; // TODO remove.
+    // cout << "Getting bg tile: 0x" << hex << unsigned(tile_x) << " x 0x" << hex << unsigned(tile_y) << endl;
+    // int tile_map_x = (tile_x / 8) % 32;
+    // int tile_map_y = (tile_y / 8) % 32;
+
+    return 0xaaaa; // TODO actually get right bank, and right details.
 }

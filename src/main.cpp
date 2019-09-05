@@ -88,7 +88,7 @@ void testPPU() {
 
     ppu->SetByteAt(0xFF40, 0x05);
     uint8_t lcdc = ppu->GetByteAt(0xFF40);
-    assert(ppu->GetByteAt(0xFF40) == 0x05);
+    assert(lcdc == 0x05);
 
     ppu->SetByteAt(0x8000, 0x56);
     assert(ppu->GetByteAt(0x8000) == 0x56);

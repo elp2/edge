@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -95,4 +96,10 @@ string destinationToString(Destination d) {
         break;
     }
     return "?";
+}
+
+std::string descriptionforPixel(Pixel p) {
+    stringstream stream;
+    stream << hex << unsigned(p.two_bit_color_) << " P:" << p.palette_;
+    return stream.str();
 }

@@ -6,6 +6,7 @@
 
 #include "Sprite.hpp"
 
+class PixelFIFO;
 class Screen;
 
 using namespace std;
@@ -30,11 +31,17 @@ class PPU {
         uint8_t GetByteAt(uint16_t address);
         void SetByteAt(uint16_t address, uint8_t byte);
 
+        uint16_t BackgroundTile(int tile_x, int tile_y);
+
+        uint8_t scx();
+        uint8_t scy();
+
     private:
         uint8_t *oam_ram_;
         uint8_t *video_ram_;
         uint8_t *io_ram_;
         Screen *screen_;
+        PixelFIFO *fifo_;
 
         PPUState state_;
         int cycles_;
@@ -63,10 +70,8 @@ class PPU {
         uint8_t stat();
 
         void set_scx(uint8_t value);
-        uint8_t scx();
 
         void set_scy(uint8_t value);
-        uint8_t scy();
 
         void set_ly(uint8_t value);
         uint8_t ly();

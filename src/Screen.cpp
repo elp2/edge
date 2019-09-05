@@ -1,14 +1,20 @@
 #include "Screen.hpp"
 
+#include <cassert>
+#include <iostream>
+
 Screen::Screen() {
 
 }
 
-void Screen::DrawPixel(uint8_t pixel, Palette palette) {
-
+void Screen::DrawPixel(Pixel pixel) {
+    assert(on_);
+    cout << hex << unsigned(pixel.two_bit_color_);
 }
-void Screen::NewLine() {
 
+void Screen::NewLine() {
+    assert(on_);
+    cout << endl;
 }
 
 void Screen::Show() {
@@ -16,5 +22,6 @@ void Screen::Show() {
 }
 
 void Screen::SetPalette(Palette palette, uint8_t value) {
-
+    (void)palette;
+    (void)value;
 }

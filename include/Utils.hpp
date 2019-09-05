@@ -2,6 +2,7 @@
 #include <string>
 
 #include "Destination.hpp"
+#include "Pixel.hpp"
 
 // Bit utility functions.
 #define HIGHER8(word) ((word >> 8) & 0xff)
@@ -16,3 +17,5 @@ uint16_t buildMsbLsb16(uint8_t msb, uint8_t lsb);
 Destination destinationForColumn(uint8_t column);
 
 std::string destinationToString(Destination d);
+
+std::string descriptionforPixel(Pixel p);
