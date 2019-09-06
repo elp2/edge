@@ -32,5 +32,8 @@ add_executable(edge
     src/main.cpp)
 
 target_include_directories(edge PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_compile_options(edge PRIVATE -Werror -Wall -Wextra)
+if(CMAKE_COMPILER_IS_GNUCXX)
+    target_compile_options(edge PRIVATE -Werror -Wall -Wextra)
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
 install(TARGETS edge DESTINATION bin)

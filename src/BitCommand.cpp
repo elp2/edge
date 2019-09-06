@@ -171,6 +171,8 @@ void BitCommand::Run(CPU *cpu) {
     case 0xee:
         xorAWithDestination(cpu, Eat_PC_Byte);
 		return;
+
+    // ORs.
     case 0xb0:
         return orAWithDestination(cpu, destinationForColumn(0x0));
     case 0xb1:
@@ -220,10 +222,12 @@ void BitCommand::Run(CPU *cpu) {
         return;
     case 0x07:
     case 0x17:
-        return RL(cpu, Register_A, opcode == 0x17);
+        RL(cpu, Register_A, opcode == 0x17);
+        return;
     case 0x0f:
     case 0x1f:
-        return RR(cpu, Register_A, opcode == 0x1f);
+        RR(cpu, Register_A, opcode == 0x1f);
+        return;
     default:
         cout << "Unknown bit command: 0x" << hex << unsigned(opcode);
         assert(false);

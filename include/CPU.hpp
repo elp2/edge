@@ -29,24 +29,24 @@ class CPU {
     CBCommandFactory *cbCommandFactory_;
     Command *CommandForOpcode(uint8_t opcode);
 
-    bool interruptsEnabled_;
+    bool interruptsEnabled_ = false;
 
-    uint8_t a_, b_, c_, d_, e_, f_, h_, l_;
+    uint8_t a_, b_, c_, d_, e_, f_, h_, l_ = 0;
 
     // Points to the next command to be executed.
-    uint16_t pc_;
+    uint16_t pc_ = 0;
 
     // Points to the stack position.
-    uint16_t sp_;
+    uint16_t sp_ = 0;
 
-    bool disasemblerMode_;
-    uint64_t cycles_;
-    bool debugPrint_;
+    bool disasemblerMode_ = false;
+    uint64_t cycles_ = 0;
+	bool debugPrint_ = false;
 
-    bool haltNextLoop_;
-    bool stopNextLoop_;
-    bool disableInterruptsNextLoop_;
-    bool enableInterruptsNextLoop_;
+    bool haltNextLoop_ = false;
+    bool stopNextLoop_ = false;
+    bool disableInterruptsNextLoop_ = false;
+    bool enableInterruptsNextLoop_ = false;
  public:
     flags_t flags;
 
