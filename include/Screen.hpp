@@ -10,6 +10,7 @@ using namespace std;
 class Screen {
  private:
     bool on_ = false;
+    bool debugger_ = false;
 
  public:
     Screen();
@@ -17,7 +18,7 @@ class Screen {
 
     void DrawPixel(Pixel pixel);
     void NewLine();
-    void Show();
+    void VBlank();
 	void SetPalette(Palette palette, uint8_t value);
     bool on() { return on_; };
     void set_on(bool on) { on_ = on; };

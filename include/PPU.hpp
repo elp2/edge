@@ -51,7 +51,7 @@ class PPU {
         void InvisibleCycle();
         void DrawRow(int row);
 
-        void BeginHBlank(int row);
+        void BeginHBlank();
         void EndHBlank();
 
         void BeginVBlank();

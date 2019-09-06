@@ -28,11 +28,11 @@ class PixelFIFO {
  private:
     list<Pixel> *fifo_;
     PPU *ppu_;
-    int scx_shift_;
-    int pixels_outputted_;
-    int x_;
-    int y_;
-    int row_;
+    int scx_shift_ = 0;
+    int pixels_outputted_ = 0;
+    int x_ = 0;
+    int y_ = 0;
+    int row_ = 0;
 
     Fetch *fetch_ = NULL;
 

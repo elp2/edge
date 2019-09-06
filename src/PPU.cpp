@@ -7,12 +7,13 @@
 #include "PPU.hpp"
 #include "Screen.hpp"
 #include "Sprite.hpp"
+#include "Utils.hpp"
 
 using namespace std;
 
-const int OAM_SEARCH_CYCLES = 20;
-const int PIXEL_TRANSFER_CYCLES = 43;
-const int HBLANK_CYCLES = 51;
+const int OAM_SEARCH_CYCLES = 20 * 4;
+const int PIXEL_TRANSFER_CYCLES = 43 * 4;
+const int HBLANK_CYCLES = 51 * 4;
 const int ROW_CYCLES = OAM_SEARCH_CYCLES + PIXEL_TRANSFER_CYCLES + HBLANK_CYCLES;
 
 const int ROWS = 144;
@@ -36,6 +37,9 @@ const uint16_t OBP1_ADDRESS = 0xFF49;
 const uint16_t WY_ADDRESS = 0xFF4A;
 const uint16_t WX_ADDRESS = 0xFF4B;
 
+const int TILES_PER_ROW = 32;
+const int BYTES_PER_TILE = 2;
+
 PPU::PPU() { 
     oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
     video_ram_ = (uint8_t *)calloc(0x2000, sizeof(uint8_t));
@@ -48,16 +52,19 @@ PPU::PPU() {
     fifo_ = new PixelFIFO(this);
 }
 
-void PPU::Advance(int cycles) {
+void PPU::Advance(int machineCycles) {
     if (!screen_->on()) {
         // Nothing for the PPU to output if the screen's not on.
         return;
     }
+
+    // Machine cycles is for the 1.05 MHZ CPU, we are working with the 4.19 MHZ GPU.
+    int clockCycles = machineCycles * 4;
+    
     // Naive version - immediately do all the things for that particular cycle once.
-    while(cycles) {
+    while(clockCycles) {
         // Iterating one at a time should be OK since we shouldn't be jumping
         // more than 30 or so cycles at a time.
-
         if (cycles_ < VISIBLE_CYCLES) {
             VisibleCycle();
         } else {
@@ -65,11 +72,11 @@ void PPU::Advance(int cycles) {
         }
 
         cycles_++;
-        cycles--;
+        clockCycles--;
         if (cycles_ == FRAME_CYCLES) {
             cycles_ = 0;
             EndVBlank();
-        }        
+        }
     }
 }
 
@@ -80,17 +87,13 @@ void PPU::InvisibleCycle() {
     }
     int invisible_cycles = cycles_ - VISIBLE_CYCLES;
     if (invisible_cycles % ROW_CYCLES == 0) {
-        set_ly(invisible_cycles / ROW_CYCLES + 144);
+        set_ly(invisible_cycles / ROW_CYCLES + ROWS);
     }
 }
 
 void PPU::VisibleCycle() {
     int row = cycles_ / ROW_CYCLES;
-    int row_cycles = cycles_ % ROWS;
-
-    if (state_ == HBlank) {
-        return;
-    }
+    int row_cycles = cycles_ % ROW_CYCLES;
 
     if (row_cycles == 0) {
         EndHBlank();
@@ -103,12 +106,12 @@ void PPU::VisibleCycle() {
         fifo_->NewRow(row);
         fifo_->Advance(screen_);
     } else {
-        if (state_ == HBlank) {
+        if (state_ == HBlank) {            
             // NOP.
         } else {
             // Keep advancing the FIFO until it signals that it's done.
             if (fifo_->Advance(screen_)) {
-                state_ = HBlank;
+                BeginHBlank();
             }
         }
     }
@@ -144,7 +147,6 @@ uint8_t PPU::ly() {
 
 void PPU::set_ly(uint8_t value) {
 	SetIORAM(LY_ADDRESS, value);
-    // cout << "LY == " << hex << unsigned(GetByteAt(0xFF44)) << endl;
 }
 
 void PPU::set_lyc(uint8_t value) {
@@ -214,8 +216,6 @@ uint8_t PPU::lcdc() {
 }
 
 void PPU::set_lcdc(uint8_t value) {
-    // Don't do pixel fifos + shit when the lcd's not on!
-    // 10010001.
     bool screen_on = value & 80;
     screen_->set_on(screen_on);
     // window_tile_map_base_address_ = value & 0x40 ? 0x9C00 : 0x9800;
@@ -226,12 +226,6 @@ void PPU::set_lcdc(uint8_t value) {
     // BG & window.
     // bool sprites = value & 0x2;
     // bool bg = value & 0x1
-
-    
-
-    if (value & 80) {
-
-    }
 
 	SetIORAM(LCDC_ADDRESS, value);
 }
@@ -288,10 +282,8 @@ uint8_t PPU::GetByteAt(uint16_t address) {
 
 void PPU::SetByteAt(uint16_t address, uint8_t byte) {
     if (address >= 0x8000 && address < 0xA000) {
-        if (!CanAccessVRAM()) {
-            // Too many apparent false positives from boot ROM.
-            // TODO: Maybe this is not checked when screen is not on.
-            // cout << "Can not access Video RAM during " << hex << unsigned(state_) << endl;
+        if (screen_->on() && !CanAccessVRAM()) {
+            cout << "Can not access Video RAM during " << hex << unsigned(state_) << endl;
         }
         video_ram_[address - 0x8000] = byte;
     } else if (address >= 0xFE00 && address < 0xFEA0) {
@@ -348,17 +340,19 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
     }
 }
 
-void PPU::BeginHBlank(int row) {
-    (void)row;
-    // TODO HBlank.
+void PPU::BeginHBlank() {
+    screen_->NewLine();
+    state_ = HBlank;
+    // TODO HBlank register.
 }
 
 void PPU::EndHBlank() {
-    // TODO HBlank End.
+    // TODO HBlank End register.
 }
 
 void PPU::BeginVBlank() {
     state_ = VBlank;
+    screen_->VBlank();
     // TODO VBlank begin.
 }
 
@@ -403,12 +397,35 @@ vector<Sprite *> *PPU::OAMSearchY(int row) {
     return sprites;
 }
 
-uint16_t PPU::BackgroundTile(int tile_x, int tile_y) {
-    assert(tile_x % 8 == 0);
-    (void)tile_y; // TODO remove.
+uint16_t PPU::BackgroundTile(int x, int y) {
+    assert(x % 8 == 0);
     // cout << "Getting bg tile: 0x" << hex << unsigned(tile_x) << " x 0x" << hex << unsigned(tile_y) << endl;
-    // int tile_map_x = (tile_x / 8) % 32;
-    // int tile_map_y = (tile_y / 8) % 32;
+    int tile_map_x = (x / 8) % TILES_PER_ROW;
+    int tile_map_y = (y / 8) % TILES_PER_ROW;
 
-    return 0xaaaa; // TODO actually get right bank, and right details.
+    int tile_index = (tile_map_x + tile_map_y * TILES_PER_ROW) * BYTES_PER_TILE;
+    uint16_t tile_map_address_base = lcdc() & 0x4 ? 0x9C00 : 0x9800;
+    uint16_t tile_map_address_ = tile_map_address_base + tile_index;
+    uint8_t tile_number = GetByteAt(tile_map_address_);
+
+    uint16_t tile_data_address;
+    uint16_t tile_data_base_address = lcdc() & 0x10 ? 0x8000 : 0x8800;
+    int8_t signed_tile_number;
+    switch (tile_data_base_address)
+    {
+    case 0x8000:
+        tile_data_address = tile_data_base_address + tile_number * 16;
+        break;
+    case 0x8800:
+        signed_tile_number = tile_number;
+        tile_data_address = 0x9000 + signed_tile_number * 16;
+        break;
+    default:
+        assert(false);
+        break;
+    }
+    // Each row in title is two bytes.
+    tile_data_address += (y % 8 ) * 2;
+    uint16_t tile_data = buildMsbLsb16(GetByteAt(tile_data_address), GetByteAt(tile_data_address + 1));
+    return tile_data;
 }

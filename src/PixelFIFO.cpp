@@ -16,7 +16,6 @@ PixelFIFO::PixelFIFO(PPU *ppu) {
 }
 
 void PixelFIFO::NewRow(int row) {
-    cout << "NewRow" << row << endl;
     if (fifo_ != NULL) {
         free(fifo_);
         fifo_ = NULL;
@@ -26,6 +25,7 @@ void PixelFIFO::NewRow(int row) {
     y_ = row_ + ppu_->scy();
     scx_shift_ = ppu_->scx() % 8;
     x_ = ppu_->scx() - scx_shift_;
+    assert(pixels_outputted_ == 160 || pixels_outputted_ == 0);
     pixels_outputted_ = 0;
 }
 
