@@ -8,7 +8,6 @@
 #include "MMU.hpp"
 #include "PPU.hpp"
 #include "Utils.hpp"
-#include "Sprite.hpp"
 
 CPU *getCPU() {
     ROM *bootROM = new ROM();
@@ -24,16 +23,6 @@ CPU *getCPU() {
     return new CPU(mmu, ppu);
 }
 
-void testSprite() {
-    cout << "----TESTING SPRITE----" << endl;
-    Sprite *sprite = new Sprite(0x12, 0x34, 0x34, 0xa0);
-
-    assert(sprite->priority());
-    assert(!sprite->x_flip());
-    assert(sprite->y_flip());
-    assert(sprite->palette() == SpritePalette0);
-    cout << endl;
-}
 
 void testRegisters() {
     cout << "----TESTING REGISTERS----" << endl;
@@ -200,7 +189,6 @@ int main() {
     testBitCommands();
     testStack();
     testRegisters();
-    testSprite();
     testPPU();
     testAddressRouter();
 
