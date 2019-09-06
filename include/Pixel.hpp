@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "Palette.hpp"
 
 struct Pixel

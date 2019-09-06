@@ -257,7 +257,7 @@ void MathCommand::Run(CPU *cpu) {
         return;
     }
 
-    if (col == 0x9 && (row >= 0 && row < 4)) {
+    if (col == 0x9 && (row < 4)) {
         
     }
 

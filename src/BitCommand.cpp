@@ -170,7 +170,7 @@ void BitCommand::Run(CPU *cpu) {
         return;
     case 0xee:
         xorAWithDestination(cpu, Eat_PC_Byte);
-
+		return;
     case 0xb0:
         return orAWithDestination(cpu, destinationForColumn(0x0));
     case 0xb1:
