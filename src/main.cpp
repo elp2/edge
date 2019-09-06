@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "AddressRouter.hpp"
+#include "BitCommand.hpp"
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
@@ -137,7 +138,66 @@ void testAddressRouter() {
     cout << endl;
 }
 
+void testBitCommands() {
+    ROM *bootROM = new ROM();
+    assert(bootROM->LoadFile("../../boot.gb"));
+    ROM *cartridgeROM = new ROM();
+    assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+    cout << "Title: " << cartridgeROM->GameTitle() << endl;
+
+    MMU *mmu = new MMU();
+    mmu->SetROMs(bootROM, cartridgeROM);
+
+    PPU *ppu = new PPU();
+    CPU *cpu = new CPU(mmu, ppu);
+
+    const uint8_t RLCA = 0x07;
+    const uint8_t RLA = 0x17;
+    const uint8_t RRCA = 0x0F;
+    const uint8_t RRA = 0x1F;
+
+    const uint16_t ram_start = 0xC000;
+
+    mmu->SetByteAt(ram_start, RLCA);
+    cpu->Set8Bit(Register_A, 0x85);
+    cpu->JumpAddress(ram_start);
+    cpu->Step();
+    // Examples say 0x0A but that makes no sense, since the bit7 is 1 and should be in bit0.
+    // The logo works when it's like this, so gonna stick with this.
+    assert(cpu->Get8Bit(Register_A) == 0x0B);
+    assert(!cpu->flags.z);
+    assert(cpu->flags.c);
+
+    mmu->SetByteAt(ram_start, RLA);
+    cpu->Set8Bit(Register_A, 0x95);
+    cpu->flags.c = true;
+    cpu->JumpAddress(ram_start);
+    cpu->Step();
+    assert(cpu->Get8Bit(Register_A) == 0x2B);
+    assert(cpu->flags.z == false);
+    assert(cpu->flags.c);
+
+    mmu->SetByteAt(ram_start, RRA);
+    cpu->Set8Bit(Register_A, 0x81);
+    cpu->flags.c = false;
+    cpu->JumpAddress(ram_start);
+    cpu->Step();
+    assert(cpu->Get8Bit(Register_A) == 0x40);
+    assert(cpu->flags.z == false);
+    assert(cpu->flags.c);
+
+    mmu->SetByteAt(ram_start, RRCA);
+    cpu->Set8Bit(Register_A, 0x3B);
+    cpu->flags.c = false;
+    cpu->JumpAddress(ram_start);
+    cpu->Step();
+    assert(cpu->Get8Bit(Register_A) == 0x9D);
+    assert(cpu->flags.z == false);
+    assert(cpu->flags.c);
+}
+
 int main() {
+    testBitCommands();
     testStack();
     testRegisters();
     testSprite();

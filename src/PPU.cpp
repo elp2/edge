@@ -38,6 +38,7 @@ const uint16_t WY_ADDRESS = 0xFF4A;
 const uint16_t WX_ADDRESS = 0xFF4B;
 
 const int TILES_PER_ROW = 32;
+const int BYTES_PER_8X8_TILE = 16;
 
 PPU::PPU() { 
     oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
@@ -413,18 +414,18 @@ uint16_t PPU::BackgroundTile(int x, int y) {
     switch (tile_data_base_address)
     {
     case 0x8000:
-        tile_data_address = tile_data_base_address + tile_number * 16;
+        tile_data_address = tile_data_base_address + tile_number * BYTES_PER_8X8_TILE;
         break;
     case 0x8800:
         signed_tile_number = tile_number;
-        tile_data_address = 0x9000 + signed_tile_number * 16;
+        tile_data_address = 0x9000 + signed_tile_number * BYTES_PER_8X8_TILE;
         break;
     default:
         assert(false);
         break;
     }
     // Each row in title is two bytes.
-    tile_data_address += (y % 8 ) * 2;
+    tile_data_address += (y % 8) * 2;
     uint16_t tile_data = buildMsbLsb16(GetByteAt(tile_data_address), GetByteAt(tile_data_address + 1));
     return tile_data;
 }

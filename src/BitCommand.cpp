@@ -69,37 +69,38 @@ BitCommand::~BitCommand() {
 
 }
 
-void RR(CPU *cpu, Destination d, bool carry) {
+void RR(CPU *cpu, Destination d, bool throughCarry) {
     uint8_t byte = cpu->Get8Bit(d);
-    bool bit7 = byte & 0x80;
-    uint8_t bit0;
-    if (carry) {
-        bit0 = bit7;
-        cpu->flags.c = bit7;
+    uint8_t bit7 = 0x0;
+    uint8_t bit0 = byte & 0x1;
+    
+    if (throughCarry) {
+        bit7 = (cpu->flags.c) << 7;
+        cpu->flags.c = bit0;
     } else {
-        bit0 = cpu->flags.c;
-        cpu->flags.c = bit7;
+        cpu->flags.c = bit0;
+        bit7 = (bit0) << 7;
     }
-    byte <<= 1;
-    byte |= bit0;
+    byte >>= 1;
+    byte |= bit7;
     cpu->Set8Bit(d, byte);
     cpu->flags.z = (byte == 0);
     cpu->flags.n = cpu->flags.h = false;
 }
 
-void RL(CPU *cpu, Destination d, bool carry) {
+void RL(CPU *cpu, Destination d, bool throughCarry) {
     uint8_t byte = cpu->Get8Bit(d);
-    bool bit0 = byte & 0x1;
-    uint8_t bit7;
-    if (carry) {
-        cpu->flags.c = bit0;
-        bit7 = bit0 << 7;
+    uint8_t bit7 = byte & 0x80;
+    uint8_t bit0 = 0x0;
+    if (throughCarry) {
+        bit0 = cpu->flags.c;
+        cpu->flags.c = bit7;
     } else {
-        bit7 = (((uint8_t)cpu->flags.c) << 7);
-        cpu->flags.c = bit0;
+        cpu->flags.c = bit7;
+        bit0 = bit7 >> 7;
     }
-    byte >>= 1;
-    byte |= bit7;
+    byte <<= 1;
+    byte |= bit0;
     cpu->Set8Bit(d, byte);
     cpu->flags.z = (byte == 0);
     cpu->flags.n = cpu->flags.h = false;
@@ -219,10 +220,10 @@ void BitCommand::Run(CPU *cpu) {
         return;
     case 0x07:
     case 0x17:
-        return RL(cpu, Register_A, opcode == 0x07);
+        return RL(cpu, Register_A, opcode == 0x17);
     case 0x0f:
     case 0x1f:
-        return RL(cpu, Register_A, opcode == 0x0f);
+        return RR(cpu, Register_A, opcode == 0x1f);
     default:
         cout << "Unknown bit command: 0x" << hex << unsigned(opcode);
         assert(false);
