@@ -38,7 +38,6 @@ const uint16_t WY_ADDRESS = 0xFF4A;
 const uint16_t WX_ADDRESS = 0xFF4B;
 
 const int TILES_PER_ROW = 32;
-const int BYTES_PER_TILE = 2;
 
 PPU::PPU() { 
     oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
@@ -403,7 +402,7 @@ uint16_t PPU::BackgroundTile(int x, int y) {
     int tile_map_x = (x / 8) % TILES_PER_ROW;
     int tile_map_y = (y / 8) % TILES_PER_ROW;
 
-    int tile_index = (tile_map_x + tile_map_y * TILES_PER_ROW) * BYTES_PER_TILE;
+    int tile_index = (tile_map_x + tile_map_y * TILES_PER_ROW);
     uint16_t tile_map_address_base = lcdc() & 0x4 ? 0x9C00 : 0x9800;
     uint16_t tile_map_address_ = tile_map_address_base + tile_index;
     uint8_t tile_number = GetByteAt(tile_map_address_);

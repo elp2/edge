@@ -78,11 +78,6 @@ void PixelFIFO::ApplyFetch() {
             break;
     }
 
-    // cout << "New fifo after applying: ";
-    // for (list<Pixel>::iterator it = fifo_->begin(); it != fifo_->end(); it++) {
-    //     cout << descriptionforPixel(*it) << " ";;
-    // }
-    // cout << endl;
     free(fetch_);
     fetch_ = NULL;
 }
