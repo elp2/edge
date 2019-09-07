@@ -12,8 +12,17 @@ const int FETCH_CYCLES = 3;
 
 PixelFIFO::PixelFIFO(PPU *ppu) {
     ppu_ = ppu;
-    fifo_ = new list<Pixel>();
-    fetch_ = NULL;
+    Reset();
+    fetch_ = new Fetch();
+    fetch_->cycles_remaining_ = 0;
+    fetch_->pixels_ = (Pixel *)calloc(8, sizeof(Pixel));
+    fetch_->strategy_ = AppendFetchStrategy;
+}
+
+void PixelFIFO::Reset() {
+    fifo_ = (Pixel *)calloc(16, sizeof(Pixel));
+    fifo_length_ = 0;
+    fifo_start_ = 0;
 }
 
 void PixelFIFO::NewRow(int row) {
@@ -21,7 +30,7 @@ void PixelFIFO::NewRow(int row) {
         free(fifo_);
         fifo_ = NULL;
     }
-    fifo_ = new list<Pixel>();
+    Reset();
     row_ = row;
     y_ = row_ + ppu_->scy();
     scx_shift_ = ppu_->scx() % 8;
@@ -30,31 +39,47 @@ void PixelFIFO::NewRow(int row) {
     pixels_outputted_ = 0;
 }
 
+void PixelFIFO::PopFront() {
+    fifo_start_++;
+	fifo_start_ = fifo_start_ % 16;
+    fifo_length_--;
+}
+
+Pixel PixelFIFO::PeekFront() {
+    return fifo_[fifo_start_];
+}
+
+void PixelFIFO::Append(Pixel pixel) {
+    int pos = (fifo_start_ + fifo_length_) % 16;
+    fifo_[pos] = pixel;
+    fifo_length_ += 1;
+}
+
 bool PixelFIFO::Advance(Screen *screen) {
     assert(row_ + ppu_->scy() == y_);
-    if (fetch_) {
+    if (fetch_->cycles_remaining_ > 0) {
         fetch_->cycles_remaining_--;
         if (fetch_->cycles_remaining_ == 0) {
             ApplyFetch();
         }
     }
-    if (fifo_->size() <= 8 && fetch_ == NULL) {
+    if (fifo_length_ <= 8 && fetch_->cycles_remaining_ == 0) {
         StartFetch();
     }
 
-    if (!fifo_->size()) {
+    if (!fifo_length_) {
         return false;
     }
 
     if (scx_shift_) {
         scx_shift_--;
-        fifo_->pop_front();
+        PopFront();
         x_++;
         return false;
     }
 
-    screen->DrawPixel(fifo_->front());
-    fifo_->pop_front();
+    screen->DrawPixel(PeekFront());
+    PopFront();
     x_++;
     return (++pixels_outputted_ == PIXELS_PER_ROW);
 }
@@ -64,10 +89,11 @@ void PixelFIFO::ApplyFetch() {
 
     switch(fetch_->strategy_) {
         case AppendFetchStrategy:
-            assert(fifo_->size() <= 8);
-            assert(fetch_->pixels_.size() == 8);
-            fifo_->splice(fifo_->end(), fetch_->pixels_);
-            assert(fifo_->size() != 0);
+            assert(fifo_length_ <= 8);
+            for (int i = 0; i < 8; i++) {
+				Append(fetch_->pixels_[i]);
+            }
+            assert(fifo_length_ != 0);
             break;
         case OverlayFirst8FetchStrategy:
             cout << "TODO: Sprite!" << endl;
@@ -78,36 +104,30 @@ void PixelFIFO::ApplyFetch() {
             assert(false);
             break;
     }
-
-    free(fetch_);
-    fetch_ = NULL;
 }
 
-list<Pixel> PixelList(uint16_t pixels, Palette palette) {
-    list<Pixel> ret = list<Pixel>();
-
+void PixelList(uint16_t pixels, Palette palette, Pixel *list) {
     uint8_t row_a = HIGHER8(pixels);
     uint8_t row_b = LOWER8(pixels);
-    for (int i = 0; i < 8; i++) {
+    for (int i = 7; i >= 0; i--) {
         Pixel p = Pixel();
         p.palette_ = palette;
         p.two_bit_color_ = ((row_a & 0x1) << 1) | (row_b & 0x1);
-        ret.push_front(p);
+		if (list) {
+			list[i] = p;
+		}
         row_a >>= 1;
         row_b >>= 1;
     }
-    return ret;
 }
 
 void PixelFIFO::StartFetch() {
-    assert(fetch_ == NULL);
-    fetch_ = new Fetch();
     fetch_->cycles_remaining_ = FETCH_CYCLES;
     
     // TODO: Find the right next tile based on where we are.
-    int next_tile = x_ + fifo_->size();
+    int next_tile = x_ + fifo_length_;
     // cout << "Fetching next tile: 0x" << hex << unsigned(next_tile) << endl;
     uint16_t background_tile = ppu_->BackgroundTile(next_tile, y_);
-    fetch_->pixels_ = PixelList(background_tile, BackgroundWindowPalette);
+    PixelList(background_tile, BackgroundWindowPalette, fetch_->pixels_);
     fetch_->strategy_ = AppendFetchStrategy;
 }

@@ -15,7 +15,7 @@ enum FetchStrategy {
 
 struct Fetch
 {
-    list<Pixel> pixels_;
+    Pixel *pixels_;
     int cycles_remaining_;
     // Whether we should overlay the front 8 pixels for a sprite.
     FetchStrategy strategy_;
@@ -26,7 +26,10 @@ class Screen;
 
 class PixelFIFO {
  private:
-    list<Pixel> *fifo_;
+    Pixel *fifo_;
+    int fifo_length_ = 0;
+    int fifo_start_ = 0;
+
     PPU *ppu_;
     int scx_shift_ = 0;
     int pixels_outputted_ = 0;
@@ -38,6 +41,10 @@ class PixelFIFO {
 
     void StartFetch();
     void ApplyFetch();
+    void Reset();
+    void PopFront();
+    Pixel PeekFront();
+	void Append(Pixel p);
 
  public:
     PixelFIFO(PPU *ppu);

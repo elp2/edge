@@ -1,3 +1,5 @@
+#include "SDL.h"
+
 #include <cassert>
 #include <iostream>
 
@@ -9,12 +11,9 @@
 #include "PPU.hpp"
 #include "Utils.hpp"
 
-#include "SDL.h"
-
+int main(int argc, char* argv[]) {
 const int SCREEN_WIDTH = 160;
 const int SCREEN_HEIGHT = 144;
-
-int main() {
 
     ROM *bootROM = new ROM();
     assert(bootROM->LoadFile("../../boot.gb"));
@@ -88,4 +87,6 @@ int main() {
     }
 
     cout << "Finished at PC: 0x" << hex << unsigned(cpu->Get16Bit(Register_PC)) << endl;
+
+	return 1;
 }

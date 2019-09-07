@@ -31,7 +31,9 @@ void BitCommand::CP(CPU *cpu, Destination d) {
     uint8_t a = cpu->Get8Bit(Register_A);
     uint8_t n = cpu->Get8Bit(d);
 
-    description = detailedDescription("CP ", Register_A, d, a, n);
+    description = "CP A,?";
+    // VERY SLOW!    
+    // description = detailedDescription("CP ", Register_A, d, a, n);
 
     cpu->flags.z = (a == n);
     cpu->flags.n = true;

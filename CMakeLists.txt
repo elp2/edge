@@ -3,6 +3,7 @@ project(edge)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Debug)
+set(SDL2_DIR "C://Users/edwar/Documents/Dev/SDL2-2.0.10")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -35,11 +36,14 @@ add_library (edge_lib
     src/Utils.cpp)
 target_include_directories(edge_lib PUBLIC ${SDL2_INCLUDE_DIR})
 target_include_directories(edge_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(edge_lib ${SDL2_LIBRARY})
+target_link_libraries(edge_lib ${SDL2_LIBRARIES})
 
-add_executable(edge
+
+add_executable(edge WIN32
     src/main.cpp)
 target_link_libraries(edge edge_lib)
+target_link_libraries(edge ${SDL2_LIBRARIES})
+
 
 target_include_directories(edge PUBLIC ${PROJECT_SOURCE_DIR}/include)
 if(CMAKE_COMPILER_IS_GNUCXX)

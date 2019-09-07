@@ -11,7 +11,7 @@ void Screen::SetTexturePixels(uint32_t *pixels) {
 }
 
 void Screen::DrawPixel(Pixel pixel) {
-    uint32_t color;
+    uint32_t color = 0xFF0000FF;
     switch(pixel.two_bit_color_) {
         case 0x00:
             color = 0xFFFF0000;
@@ -25,6 +25,9 @@ void Screen::DrawPixel(Pixel pixel) {
         case 0x03:
             color = 0XFFFFFFFF;
             break;
+		default:
+			color = 0xFF0000FF;
+			break;
     }
     assert(x_ + y_ * 160 < 160 * 144);
     pixels_[x_ + y_ * 160] = color;
