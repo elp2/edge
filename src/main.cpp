@@ -60,13 +60,6 @@ const int SCREEN_HEIGHT = 144;
     int x = 0;
     SDL_Event e;
     while (true) {
-        while(SDL_PollEvent( &e ) != 0) {
-            if( e.type == SDL_QUIT ) {
-                cout << "SDL_QuIT" << endl;
-                return 0;
-            }
-        }
-
         if (cpu->Get16Bit(Register_PC) == 0x89) {
             // cpu->SetDebugPrint(true);
         }
@@ -78,6 +71,13 @@ const int SCREEN_HEIGHT = 144;
 
         cycles += 10;
         if (cycles >= frame_cycles) {
+            while(SDL_PollEvent( &e ) != 0) {
+                if( e.type == SDL_QUIT ) {
+                    cout << "SDL_QuIT" << endl;
+                    return 0;
+                }
+            }
+
             cycles = 0;
             SDL_UpdateTexture(texture, NULL, pixels, SCREEN_WIDTH * sizeof(Uint32));
             SDL_RenderClear(renderer);
