@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Debug)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
 
 add_library (edge_lib
     src/AddressRouter.cpp
@@ -29,7 +33,9 @@ add_library (edge_lib
     src/Sprite.cpp
     src/UnimplementedCommand.cpp
     src/Utils.cpp)
+target_include_directories(edge_lib PUBLIC ${SDL2_INCLUDE_DIR})
 target_include_directories(edge_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(edge_lib ${SDL2_LIBRARY})
 
 add_executable(edge
     src/main.cpp)

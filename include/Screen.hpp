@@ -11,10 +11,15 @@ class Screen {
  private:
     bool on_ = false;
     bool debugger_ = false;
+    uint32_t *pixels_;
+    int x_ = 0;
+    int y_ = 0;
 
  public:
     Screen();
     ~Screen() = default;
+
+    void SetTexturePixels(uint32_t *pixels);
 
     void DrawPixel(Pixel pixel);
     void NewLine();
