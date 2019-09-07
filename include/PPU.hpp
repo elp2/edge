@@ -47,7 +47,7 @@ class PPU {
 
         PPUState state_;
         int cycles_;
-        vector<Sprite *> *row_sprites;
+        Sprite *row_sprites_;
 
         void VisibleCycle();
         void InvisibleCycle();
@@ -103,6 +103,6 @@ class PPU {
         int SpriteHeight();
         bool DisplaySprites();
 
-        // Performs the OAM Search function, returning up to 10 sprites visible on this row.
-        vector<Sprite *> *OAMSearchY(int row);
+        // Performs the OAM Search function, finding up to 10 sprites visible at this row.
+        void OAMSearchY(int row);
 };

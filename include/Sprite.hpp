@@ -4,6 +4,16 @@
 
 #include "Palette.hpp"
 
+struct Sprite {
+	int x_;
+	int y_;
+	uint8_t tile_number_;
+	uint8_t flags_; // Priority, flips, palette.
+};
+
+bool SpriteYIntersectsRow(uint8_t sprite_y, int row, int sprite_height);
+
+/*
 class Sprite {
 private:
     int x_;
@@ -12,7 +22,7 @@ private:
     uint8_t flags_; // Priority, flips, palette.
 
 public:
-    Sprite(uint8_t x_byte, uint8_t y_byte, uint8_t tile_number_byte, uint8_t flags_byte);
+    Sprite();
     ~Sprite() = default;
 
     bool IntersectsRow(int row, int sprite_height);
@@ -24,3 +34,4 @@ public:
     bool y_flip() { return flags_ & 0x20; };
     Palette palette() { return flags_ & 0x10 ?  SpritePalette1 : SpritePalette0; };
 };
+*/

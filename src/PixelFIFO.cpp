@@ -110,12 +110,8 @@ void PixelList(uint16_t pixels, Palette palette, Pixel *list) {
     uint8_t row_a = HIGHER8(pixels);
     uint8_t row_b = LOWER8(pixels);
     for (int i = 7; i >= 0; i--) {
-        Pixel p = Pixel();
-        p.palette_ = palette;
-        p.two_bit_color_ = ((row_a & 0x1) << 1) | (row_b & 0x1);
-		if (list) {
-			list[i] = p;
-		}
+        list[i].palette_ = palette;
+        list[i].two_bit_color_ = ((row_a & 0x1) << 1) | (row_b & 0x1);
         row_a >>= 1;
         row_b >>= 1;
     }

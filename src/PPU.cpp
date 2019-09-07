@@ -47,7 +47,7 @@ PPU::PPU() {
 
     cycles_ = 0;
     state_ = OAM_Search;
-    row_sprites = NULL;
+    row_sprites_ = (Sprite *)calloc(10, sizeof(Sprite));
     screen_ = new Screen();
     fifo_ = new PixelFIFO(this);
 }
@@ -102,7 +102,7 @@ void PPU::VisibleCycle() {
     if (row_cycles == 0) {
         EndHBlank();
         state_ = OAM_Search;
-        row_sprites = OAMSearchY(row);
+        OAMSearchY(row);
     } else if (row_cycles < OAM_SEARCH_CYCLES) {
         // NOP.
     } else if (row_cycles == OAM_SEARCH_CYCLES) {
@@ -385,20 +385,26 @@ bool PPU::DisplayWindow() {
     return 0x20 == (GetByteAt(LCDC_ADDRESS) & 0x20);
 }
 
-// TODO: BG & Window: 
+void PPU::OAMSearchY(int row) {
+    const int NUM_OAM_SPRITES = 40;
 
-vector<Sprite *> *PPU::OAMSearchY(int row) {
-    const int NUM_SPRITES = 40;
-    vector<Sprite *> *sprites = new vector<Sprite *>();
-
-    for (int i = 0; i < NUM_SPRITES; i++) {
+	int sprites_found = 0;
+    for (int i = 0; i < NUM_OAM_SPRITES; i++) {
         int offset = 4 * i;
-        Sprite *sprite = new Sprite(oam_ram_[offset], oam_ram_[offset + 1], oam_ram_[offset + 2], oam_ram_[offset + 3]);
-        if (sprite->IntersectsRow(row, SpriteHeight())) {
-            sprites->push_back(sprite);
-        }
+		
+		uint8_t sprite_x = oam_ram_[offset + 0];
+		uint8_t sprite_y = oam_ram_[offset + 1];
+		if (SpriteYIntersectsRow(sprite_x, sprite_y, row)) {
+			row_sprites_[sprites_found].x_ = sprite_x;
+			row_sprites_[sprites_found].y_ = sprite_y;
+			row_sprites_[sprites_found].tile_number_ = oam_ram_[offset + 2];
+			row_sprites_[sprites_found].flags_ = oam_ram_[offset + 3];
+		}
+		sprites_found++;
+		if (sprites_found == 10) {
+			return;
+		}
     }
-    return sprites;
 }
 
 uint16_t PPU::BackgroundTile(int x, int y) {
