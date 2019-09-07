@@ -57,7 +57,6 @@ void MiscCommand::Run(CPU *cpu) {
         cpu->EnableInterruptsNextLoop();
         break;
     
-    
     default:
         cout << "Attempt to use MiscComman for " << hex << unsigned(opcode) << endl;
         assert(false);

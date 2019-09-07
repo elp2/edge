@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "Destination.hpp"
 #include "Pixel.hpp"
@@ -24,5 +25,7 @@ std::string descriptionforPixel(Pixel p);
 
 class CPU;
 CPU *getTestingCPU();
+CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions);
+
 class MMU;
 MMU *getTestingMMU();

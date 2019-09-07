@@ -73,7 +73,6 @@ void JumpCommand::Run(CPU *cpu) {
         assert(false);
         break;
     }
-    // TODO - nothing should hit here.
     assert(false);
 }
 

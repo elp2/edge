@@ -125,3 +125,17 @@ CPU *getTestingCPU() {
     PPU *ppu = new PPU();
     return new CPU(mmu, ppu);
 }
+
+CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions) {
+    MMU *mmu = getTestingMMU();
+    PPU *ppu = new PPU();
+    CPU *cpu = new CPU(mmu, ppu);
+
+    uint16_t ram_start = 0xC000;
+    cpu->JumpAddress(ram_start);
+    for (std::vector<uint8_t>::iterator i = instructions.begin(); i != instructions.end(); i++) {
+        mmu->SetByteAt(ram_start, *i);
+        ram_start++;
+    }
+    return cpu;
+}
