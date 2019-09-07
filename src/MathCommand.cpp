@@ -313,6 +313,19 @@ void MathCommand::Run(CPU *cpu) {
         Dec(cpu);
         break;
 
+    case 0x09:
+        AddHL(cpu, Register_BC);
+        break;
+    case 0x19:
+        AddHL(cpu, Register_DE);
+        break;
+    case 0x29:
+        AddHL(cpu, Register_HL);
+        break;
+    case 0x39:
+        AddHL(cpu, Register_SP);
+        break;
+
     default:
         cout << "Unknown math command: 0x" << hex << unsigned(opcode) << endl;
         assert(false);
@@ -367,6 +380,7 @@ void registerMathCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new MathCommand(SUBAd8));
     factory->RegisterCommand(new MathCommand(SBCAd8));
 
+    // 16 bit adds.
     factory->RegisterCommand(new MathCommand(0x09));
     factory->RegisterCommand(new MathCommand(0x19));
     factory->RegisterCommand(new MathCommand(0x29));

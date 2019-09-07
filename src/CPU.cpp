@@ -107,7 +107,6 @@ uint8_t CPU::Get8Bit(Destination destination) {
 	case Register_E:
 		return e_;
 	case Register_F:
-		// TODO: Test.
 		return (flags.z ? 0x80 : 0) | (flags.n ? 0x40 : 0) | (flags.h ? 0x20 : 0) | (flags.c ? 0x10 : 0);
     case Register_H:
         return h_;
@@ -211,7 +210,10 @@ void CPU::Set8Bit(Destination destination, uint8_t value) {
         e_ = value;
         break;
     case Register_F:
-        f_ = value;
+        flags.z = 0x80 & value;
+        flags.n = 0x40 & value;
+        flags.h = 0x20 & value;
+        flags.c = 0x10 & value;
         break;
     case Register_H:
         h_ = value;
@@ -269,6 +271,10 @@ void CPU::Set16Bit(Destination destination, uint16_t value) {
     case Address_0xFF00_Register_C:
         cout << "0x" << hex << unsigned(destination) << " is not 16 bits." << endl;
         assert(false);
+    case Register_AF:
+        a_ = HIGHER8(value);
+        Set8Bit(Register_F, LOWER8(value));
+        break;
     case Register_BC:
         b_ = HIGHER8(value);
         c_ = LOWER8(value);
@@ -390,7 +396,7 @@ void CPU::Reset() {
     enableInterruptsNextLoop_ = false;
 
     cycles_ = 0;
-    a_ = b_ = c_ = d_ = e_ = f_ = h_ = l_ = 0;
+    a_ = b_ = c_ = d_ = e_ = h_ = l_ = 0;
 }
 
 void CPU::Debugger() {

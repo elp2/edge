@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdint>
 #include <string>
 
@@ -19,3 +21,8 @@ Destination destinationForColumn(uint8_t column);
 std::string destinationToString(Destination d);
 
 std::string descriptionforPixel(Pixel p);
+
+class CPU;
+CPU *getTestingCPU();
+class MMU;
+MMU *getTestingMMU();

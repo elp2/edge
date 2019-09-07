@@ -37,7 +37,6 @@ Command *AbstractCommandFactory::CommandForOpcode(uint8_t opcode) {
 
 CommandFactory::CommandFactory() {
     name = "Base";
-    cout << name << " created!" << endl;
     registerNopCommands(this);
     registerJumpCommands(this);
     registerLoadCommands(this);
@@ -63,7 +62,6 @@ CommandFactory::~CommandFactory() {
 
 CBCommandFactory::CBCommandFactory() {
     name = "CB";
-    cout << name << " created!" << endl;
 
     for (int i = 0; i < 256; i++) {
         RegisterCommand(new CBCommand(i));

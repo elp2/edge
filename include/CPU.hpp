@@ -31,7 +31,7 @@ class CPU {
 
     bool interruptsEnabled_ = false;
 
-    uint8_t a_, b_, c_, d_, e_, f_, h_, l_ = 0;
+    uint8_t a_, b_, c_, d_, e_, h_, l_ = 0;
 
     // Points to the next command to be executed.
     uint16_t pc_ = 0;

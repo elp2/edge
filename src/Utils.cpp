@@ -4,6 +4,11 @@
 #include <iostream>
 #include <sstream>
 
+#include "CPU.hpp"
+#include "MMU.hpp"
+#include "ROM.hpp"
+#include "PPU.hpp"
+
 using namespace std;
 
 uint16_t buildMsbLsb16(uint8_t msb, uint8_t lsb) {
@@ -102,4 +107,21 @@ std::string descriptionforPixel(Pixel p) {
     stringstream stream;
     stream << hex << unsigned(p.two_bit_color_) << " P:" << p.palette_;
     return stream.str();
+}
+
+MMU *getTestingMMU() {
+    ROM *bootROM = new ROM();
+    assert(bootROM->LoadFile("../../boot.gb"));
+    ROM *cartridgeROM = new ROM();
+    assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+
+    MMU *mmu = new MMU();
+    mmu->SetROMs(bootROM, cartridgeROM);
+    return mmu;
+}
+
+CPU *getTestingCPU() {
+    MMU *mmu = getTestingMMU();
+    PPU *ppu = new PPU();
+    return new CPU(mmu, ppu);
 }

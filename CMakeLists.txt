@@ -77,7 +77,12 @@ endif()
 
 # Tests
 add_executable(tests
-    tests/sprite_test.cpp)
+    tests/address_router_test.cpp
+    tests/bit_commands_test.cpp
+    tests/cpu_registers_test.cpp
+    tests/ppu_test.cpp
+    tests/sprite_test.cpp
+    tests/stack_test.cpp)
 target_include_directories(tests PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(tests gtest_main)
 target_link_libraries(tests edge_lib)
