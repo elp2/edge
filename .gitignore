@@ -7,6 +7,11 @@ bin/*
 *.exe
 *.ilk
 *.gb
+
+# OS.
+.DS_Store
+.DS_Store?
+
 # Cmake Directories to ignore.
 build/*
 wsl/*

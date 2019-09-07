@@ -3,10 +3,13 @@ project(edge)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Debug)
-set(SDL2_DIR "C://Users/edwar/Documents/Dev/SDL2-2.0.10")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
+if (WIN32)
+set(SDL2_DIR "C://Users/edwar/Documents/Dev/SDL2-2.0.10")
+endif()
 
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
