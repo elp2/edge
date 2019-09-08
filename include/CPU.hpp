@@ -40,7 +40,7 @@ class CPU {
     uint16_t sp_ = 0;
 
     bool disasemblerMode_ = false;
-    uint64_t cycles_ = 0;
+    uint32_t cycles_ = 0;
 	bool debugPrint_ = false;
 
     bool haltNextLoop_ = false;
@@ -58,6 +58,8 @@ class CPU {
 
     // Prints debugger info.
     void Debugger();
+
+    uint32_t cycles() { return cycles_; };
 
     uint8_t ReadOpcodeAtPC();
     void AdvancePC();

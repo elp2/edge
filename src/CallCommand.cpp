@@ -20,6 +20,10 @@ class CallCommand : public Command {
         if (!condition) {
             return;
         }
+        if (cycles == 12) {
+            // Conditional calls take 2x as many cycles if they jump.
+            cycles = 24;
+        }
         //  Where we should return is where we are currently pointing after the call.
         uint16_t returnAddress = cpu->Get16Bit(Register_PC);
         cpu->Push16Bit(returnAddress);
@@ -65,7 +69,7 @@ class CallCommand : public Command {
 
 void registerCallCommands(AbstractCommandFactory *factory) {
     // CALL.
-    factory->RegisterCommand(new CallCommand(0xCD, "CALL nn", 12));
+    factory->RegisterCommand(new CallCommand(0xCD, "CALL nn", 24));
     factory->RegisterCommand(new CallCommand(0xC4, "CALL NZ,nn", 12));
     factory->RegisterCommand(new CallCommand(0xCC, "CALL Z,nn", 12));
     factory->RegisterCommand(new CallCommand(0xD4, "CALL NC,nn", 12));

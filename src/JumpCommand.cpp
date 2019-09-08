@@ -16,14 +16,19 @@ JumpCommand::~JumpCommand() {
 
 }
 
-void jumpCondition(CPU *cpu, bool jump, uint16_t address) {
+void JumpCommand::JumpCondition(CPU *cpu, bool jump, Destination destination) {
+    uint16_t address = cpu->Get16Bit(destination);
     if (jump) {
+        cycles = destination == Register_HL ? 4 : 16;
         cpu->JumpAddress(address);
     }
 }
 
-void jumpConditionRelative(CPU *cpu, bool jump, uint8_t relative) {
+void JumpCommand::JumpConditionRelative(CPU *cpu, bool jump, Destination destination) {
+    uint8_t relative = cpu->Get8Bit(destination);
+
     if (jump) {
+        cycles = 12;
         cpu->JumpRelative(relative);
     }
 }
@@ -32,40 +37,40 @@ void JumpCommand::Run(CPU *cpu) {
     switch (this->opcode)
     {
     case 0xC3:
-        jumpCondition(cpu, true, cpu->Get16Bit(Eat_PC_Word));
+        JumpCondition(cpu, true, Eat_PC_Word);
         return;
     case 0xC2:
-        jumpCondition(cpu, !cpu->flags.z, cpu->Get16Bit(Eat_PC_Word));
+        JumpCondition(cpu, !cpu->flags.z, Eat_PC_Word);
         return;
     case 0xCA:
-        jumpCondition(cpu, cpu->flags.z, cpu->Get16Bit(Eat_PC_Word));
+        JumpCondition(cpu, cpu->flags.z, Eat_PC_Word);
         return;
     case 0xD2:
-        jumpCondition(cpu, !cpu->flags.c, cpu->Get16Bit(Eat_PC_Word));
+        JumpCondition(cpu, !cpu->flags.c, Eat_PC_Word);
         return;
     case 0xDA:
-        jumpCondition(cpu, cpu->flags.c, cpu->Get16Bit(Eat_PC_Word));
+        JumpCondition(cpu, cpu->flags.c, Eat_PC_Word);
         return;
     case 0xE9:
-        jumpCondition(cpu, true, cpu->Get16Bit(Register_HL));
+        JumpCondition(cpu, true, Register_HL);
         return;
     case 0x18:
-        jumpConditionRelative(cpu, true, cpu->Get8Bit(Eat_PC_Byte));
+        JumpConditionRelative(cpu, true, Eat_PC_Byte);
         return;
     case 0x20:
-        jumpConditionRelative(cpu, !cpu->flags.z, cpu->Get8Bit(Eat_PC_Byte));
+        JumpConditionRelative(cpu, !cpu->flags.z, Eat_PC_Byte);
         //  JR NZ,* 20 8
         return;
     case 0x28:
-        jumpConditionRelative(cpu, cpu->flags.z, cpu->Get8Bit(Eat_PC_Byte));
+        JumpConditionRelative(cpu, cpu->flags.z, Eat_PC_Byte);
         //  JR Z,* 28 8
         return;
     case 0x30:
-        jumpConditionRelative(cpu, !cpu->flags.c, cpu->Get8Bit(Eat_PC_Byte));
+        JumpConditionRelative(cpu, !cpu->flags.c, Eat_PC_Byte);
         //  JR NC,* 30 8
         return;
     case 0x38:
-        jumpConditionRelative(cpu, cpu->flags.c, cpu->Get8Bit(Eat_PC_Byte));
+        JumpCommand::JumpConditionRelative(cpu, cpu->flags.c, Eat_PC_Byte);
         //  JR C,* 38 8
         return;
     default:

@@ -133,6 +133,7 @@ CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions) {
 
     uint16_t ram_start = 0xC000;
     cpu->JumpAddress(ram_start);
+    cpu->Set16Bit(Register_SP, 0xFFFE);
     for (std::vector<uint8_t>::iterator i = instructions.begin(); i != instructions.end(); i++) {
         mmu->SetByteAt(ram_start, *i);
         ram_start++;

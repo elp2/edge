@@ -92,7 +92,9 @@ endif()
 add_executable(tests
     tests/address_router_test.cpp
     tests/bit_commands_test.cpp
+    tests/call_command_test.cpp
     tests/cpu_registers_test.cpp
+    tests/jump_command_test.cpp
     tests/ppu_test.cpp
     tests/sprite_test.cpp
     tests/stack_test.cpp)
