@@ -67,6 +67,19 @@ TEST(JumpCommandTest, JRn) {
     ASSERT_EQ(cpu->cycles(), 12);
 }
 
+TEST(JumpCommandTest, JRnNegative) {
+    const uint8_t JRn = 0x18;
+    int8_t signed_relative = -10;
+    uint8_t unsigned_int = signed_relative;
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ JRn, unsigned_int, 0x12 });
+    uint16_t pc = cpu->Get16Bit(Register_PC);
+    cpu->Step();
+
+    ASSERT_EQ(cpu->Get16Bit(Register_PC), pc + 2 + signed_relative);
+    ASSERT_LT(cpu->Get16Bit(Register_PC), pc + 2);
+    ASSERT_EQ(cpu->cycles(), 12);
+}
+
 TEST(JumpCommandTest, JRNZn) {
     const uint8_t JRNZ = 0x20;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ JRNZ, 0x34, 0x12 });

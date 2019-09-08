@@ -21,6 +21,17 @@ MathCommand::~MathCommand() {
 
 }
 
+uint8_t aluAdd(uint8_t a, uint8_t b, bool carry_in, bool *carry_out) {
+    assert(a < 0x10);
+    assert(b < 0x10);
+
+    uint8_t ret = a + b + (carry_in ? 1 : 0);
+
+    *carry_out = (ret > 0xf) ? true : false;
+    ret = ret & 0xf;
+    return ret;
+}
+
 void MathCommand::Inc(CPU *cpu) {
     Destination d;
     switch (opcode)
@@ -207,8 +218,29 @@ void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
 }
 
 void MathCommand::AddHL(CPU *cpu, Destination n) {
-    uint16_t orig = cpu->Get16Bit(Register_HL);
-    uint16_t after = orig + cpu->Get16Bit(n);
+    uint16_t hl = cpu->Get16Bit(Register_HL);
+    uint16_t other = cpu->Get16Bit(n);
+
+    uint16_t result = 0;
+    uint8_t hlnib = NIBBLELOW(LOWER8(hl));
+    uint8_t otnib = NIBBLELOW(LOWER8(other));
+
+    bool carry = false;
+    result |= aluAdd(hlnib, otnib, false, &carry);
+
+    hlnib = NIBBLEHIGH(LOWER8(hl));
+    otnib = NIBBLEHIGH(LOWER8(other));
+    result |= (aluAdd(hlnib, otnib, carry, &carry) << 4);
+
+    hlnib = NIBBLELOW(HIGHER8(hl));
+    otnib = NIBBLELOW(HIGHER8(other));
+    result |= (aluAdd(hlnib, otnib, carry, &carry) << 8);
+    cpu->flags.h = carry;
+
+    hlnib = NIBBLEHIGH(HIGHER8(hl));
+    otnib = NIBBLEHIGH(HIGHER8(other));
+    result |= (aluAdd(hlnib, otnib, carry, &carry) << 12);
+    cpu->flags.c = carry;
 
     stringstream stream;
     stream << "ADD HL," << destinationToString(n);
@@ -216,14 +248,9 @@ void MathCommand::AddHL(CPU *cpu, Destination n) {
 
     cycles = 8;
 
-    // Not affected: cpu->flags.z;
     cpu->flags.n = false;
-    // TODO: Test.
-    assert(false);
-    cpu->flags.h = orig < 0x0fff && after > 0xff;
-    cpu->flags.c = orig < after;
 
-    cpu->Set16Bit(Register_HL, after);
+    cpu->Set16Bit(Register_HL, result);
 }
 
 void MathCommand::AddSP(CPU *cpu) {
