@@ -17,8 +17,6 @@ class MathCommandTest : public ::testing::Test {
 // TODO: INC
 // TODO: DEC
 
-// ADDHL
-
 TEST(MathCommandTest, AddHLNoCarries) {
     const uint8_t ADDHLBC = 0x09;
     const uint8_t ADDHLHL = 0x29;
@@ -176,3 +174,40 @@ TEST(MathCommandTest, SBC) {
     EXPECT_FLAGS(false, true, true, true);
 }
 
+TEST(MathCommandTest, AddSP1) {
+    const uint8_t ADD_SP = 0xE8;
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_SP, 0x01 });
+    uint32_t cycles = cpu->cycles();
+    cpu->Set16Bit(Register_SP, 0xFF00);
+    
+    cpu->Step();
+    ASSERT_EQ(cpu->cycles(), 16);
+    ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFF01);
+    EXPECT_FLAGS(false, false, false, false);
+}
+
+TEST(MathCommandTest, AddSP2) {
+    const uint8_t ADD_SP = 0xE8;
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_SP, 0x02 });
+    uint32_t cycles = cpu->cycles();
+    cpu->Set16Bit(Register_SP, 0xFFF8);
+    
+    cpu->Step();
+    ASSERT_EQ(cpu->cycles(), 16);
+    ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFFFA);
+    EXPECT_FLAGS(false, false, false, false);
+}
+
+TEST(MathCommandTest, AddSPNegative) {
+    const uint8_t ADD_SP = 0xE8;
+    const int8_t negative8 = -8;
+    const uint8_t unsigned_negative8 = negative8;
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_SP, unsigned_negative8 });
+    uint32_t cycles = cpu->cycles();
+    cpu->Set16Bit(Register_SP, 0xFFF8);
+    
+    cpu->Step();
+    ASSERT_EQ(cpu->cycles(), 16);
+    ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFFF0);
+    EXPECT_FLAGS(false, false, false, false);
+}

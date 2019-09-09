@@ -283,17 +283,18 @@ void MathCommand::AddHL(CPU *cpu, Destination n) {
 }
 
 void MathCommand::AddSP(CPU *cpu) {
-    uint8_t unsignedByte = cpu->Get8Bit(Eat_PC_Byte);
-    int8_t signedByte = unsignedByte;
+    uint8_t unsigned_byte = cpu->Get8Bit(Eat_PC_Byte);
+    int8_t signed_byte = unsigned_byte;
     uint16_t sp = cpu->Get16Bit(Register_SP);
-    uint16_t spAfter = sp + signedByte;
-    cpu->Set16Bit(Register_SP, spAfter);
+    
+    uint16_t sp_after = sp + signed_byte;
+    cpu->Set16Bit(Register_SP, sp_after);
 
     // TODO Test.
     cpu->flags.z = false;
     cpu->flags.n = false;
-    cpu->flags.h = spAfter > 0xff && sp <= 0xff;
-    cpu->flags.c = spAfter < sp && signedByte > 0;
+    cpu->flags.h = sp_after > 0xff && sp <= 0xff;
+    cpu->flags.c = sp_after < sp && signed_byte > 0;
 
     cycles = 16;
     description = "ADD SP, #";
@@ -337,7 +338,7 @@ void MathCommand::Run(CPU *cpu) {
 
     switch (opcode)
     {
-        case 0xe8:
+        case 0xE8:
             return AddSP(cpu);
     case 0x3c:
     case 0x04:

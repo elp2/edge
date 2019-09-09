@@ -46,3 +46,32 @@ TEST(MiscCommandTest, CPL) {
     ASSERT_TRUE(cpu->flags.n);
     ASSERT_TRUE(cpu->flags.h);
 }
+
+TEST(MiscCommandTest, CCF) {
+    const uint8_t CCF = 0x3F;
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ CCF, CCF });
+
+    cpu->flags.z = true;
+    cpu->flags.n = true;
+    cpu->flags.h = true;
+    cpu->flags.c = false;
+    cpu->Step();
+    EXPECT_FLAGS(true, false, false, true);
+    cpu->Step();
+    EXPECT_FLAGS(true, false, false, false);
+}
+
+TEST(MiscCommandTest, SCF) {
+    const uint8_t SCF = 0x37;
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ SCF, SCF });
+
+    cpu->flags.z = true;
+    cpu->flags.n = true;
+    cpu->flags.h = true;
+    cpu->flags.c = false;
+    cpu->Step();
+    EXPECT_FLAGS(true, false, false, true);
+    cpu->Step();
+    EXPECT_FLAGS(true, false, false, true);
+}
+
