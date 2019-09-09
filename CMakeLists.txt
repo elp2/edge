@@ -33,6 +33,7 @@ add_library (edge_lib
     src/ReturnCommand.cpp
     src/ROM.cpp
     src/Screen.cpp
+    src/serial_controller.cpp
     src/StackCommand.cpp
     src/Sprite.cpp
     src/UnimplementedCommand.cpp
