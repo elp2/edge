@@ -168,7 +168,7 @@ void PPU::set_dma(uint8_t value) {
 }
 
 uint8_t PPU::dma() {
-    assert(false); // TODO. Does it even make sense?
+	cout << "Sketchy: Reading DMA." << endl;
     return GetIORAM(DMA_ADDRESS);
 }
 

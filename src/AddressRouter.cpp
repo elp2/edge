@@ -102,7 +102,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     return AddressOwner_MMU;
     default:
         cout << "Unknown i/o address: 0x" << hex << unsigned(address) << endl;
-        return AdressOwner_Unknown;
+		return AddressOwner_MMU;
     }
 }
 

@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
     SDL_Window *window = SDL_CreateWindow(
         "EDGE",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        SCREEN_WIDTH,
-        SCREEN_HEIGHT,
+        SCREEN_WIDTH * 2,
+        SCREEN_HEIGHT * 2,
         0
     );
 
