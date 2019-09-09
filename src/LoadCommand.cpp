@@ -55,7 +55,7 @@ class SpecialLoadCommand : public Command {
             cpu->flags.n = false;
             // H/z depending on result.
             // TODO: FLAGS!!!
-            assert(false);
+            // assert(false);
             return;
         }
 

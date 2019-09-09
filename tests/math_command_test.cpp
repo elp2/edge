@@ -13,7 +13,6 @@ class MathCommandTest : public ::testing::Test {
 // TODO: ADC
 
 // TODO: SUB
-// TODO: SUBC
 
 // TODO: INC
 // TODO: DEC
@@ -146,3 +145,34 @@ TEST(MathCommandTest, AddHLExamples) {
     ASSERT_TRUE(cpu->flags.h);
     ASSERT_TRUE(cpu->flags.c);
 }
+
+TEST(MathCommandTest, SBC) {
+    const uint8_t SBC_AH = 0x9C;
+    const uint8_t SBC_N = 0xDE;
+    const uint8_t SBC_Address_HL = 0x9E;
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ SBC_AH, SBC_N, 0x3A, SBC_Address_HL });
+    uint32_t cycles = cpu->cycles();
+
+    cpu->Set8Bit(Register_A, 0x3B);
+    cpu->flags.c = true;
+
+    cpu->Set8Bit(Register_H, 0x2A);
+    cpu->Step();
+    ASSERT_EQ(cpu->Get8Bit(Register_A), 0x10);
+    EXPECT_FLAGS(false, false, true, false);
+
+    cpu->Set8Bit(Register_A, 0x3B);
+    cpu->flags.c = true;
+    cpu->Step();
+    ASSERT_EQ(cpu->Get8Bit(Register_A), 0x0);
+    EXPECT_FLAGS(true, false, true, false);
+
+    cpu->Set8Bit(Register_A, 0x3B);
+    cpu->Set16Bit(Register_HL, 0x9999);
+    cpu->Set8Bit(Address_HL, 0x4F);
+    cpu->flags.c = true;
+    cpu->Step();
+    ASSERT_EQ(cpu->Get8Bit(Register_A), 0xEB);
+    EXPECT_FLAGS(false, true, true, true);
+}
+

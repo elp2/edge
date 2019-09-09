@@ -26,6 +26,7 @@ public:
     // Hacks to simulate a disassembler.
     void EnableDisassemblerMode(bool disassemblerMode) { disasemblerMode_ = disassemblerMode; };
 
+    uint8_t bank() { return bank_; };
 private:
     bool UseBootROMForAddress(uint16_t address);
     string AddressRegion(uint16_t address);
@@ -35,4 +36,5 @@ private:
     bool overlayBootROM;
     ROM *bootROM;
     ROM *cartridgeROM;
+    uint8_t bank_ = 0x1;
 };

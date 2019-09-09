@@ -27,8 +27,20 @@ uint8_t aluAdd(uint8_t a, uint8_t b, bool carry_in, bool *carry_out) {
 
     uint8_t ret = a + b + (carry_in ? 1 : 0);
 
-    *carry_out = (ret > 0xf) ? true : false;
-    ret = ret & 0xf;
+    *carry_out = (a + b + (carry_in ? 1 : 0) > 0xf) ? true : false;
+    ret = ret & 0xF;
+    return ret;
+}
+
+uint8_t aluSub(uint8_t a, uint8_t b, bool carry_in, bool *carry_out) {
+    assert(a < 0x10);
+    assert(b < 0x10);
+    uint8_t delta = (b + (carry_in ? 1 : 0));
+    uint8_t ret = a - delta;
+
+    *carry_out = (a < delta) ? true : false;
+    ret = ret & 0xF;
+
     return ret;
 }
 
@@ -179,16 +191,6 @@ void MathCommand::Dec(CPU *cpu) {
 }
 
 void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
-    uint8_t orig = cpu->Get8Bit(Register_A);
-    uint8_t delta = cpu->Get8Bit(n) + (carry ? cpu->flags.c : 0);
-
-    uint8_t after;
-    if (add) {
-        after = orig + delta;
-    } else {
-        after = orig - delta;
-    }
-
     stringstream stream;
     if (add) {
         if (carry) {
@@ -206,15 +208,42 @@ void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
     stream << " A," << destinationToString(n);
     description = stream.str();
 
+    uint8_t orig = cpu->Get8Bit(Register_A);
+    uint8_t delta = cpu->Get8Bit(n);
+
+    uint16_t result = 0;
+    uint8_t orig_nib;
+    uint8_t delta_nib;
+
+    bool math_carry = (carry ? cpu->flags.c : false);
+    if (add) {
+        orig_nib = NIBBLELOW(orig);
+        delta_nib = NIBBLELOW(delta);
+        result |= aluAdd(orig_nib, delta_nib, math_carry, &math_carry);
+        cpu->flags.h = math_carry;
+
+        orig_nib = NIBBLEHIGH(orig);
+        delta_nib = NIBBLEHIGH(delta);
+        result |= (aluAdd(orig_nib, delta_nib, math_carry, &math_carry) << 4);
+        cpu->flags.c = math_carry;
+    } else {
+        orig_nib = NIBBLELOW(orig);
+        delta_nib = NIBBLELOW(delta);
+        result |= aluSub(orig_nib, delta_nib, math_carry, &math_carry);
+        cpu->flags.h = math_carry;
+
+        orig_nib = NIBBLEHIGH(orig);
+        delta_nib = NIBBLEHIGH(delta);
+        result |= (aluSub(orig_nib, delta_nib, math_carry, &math_carry) << 4);
+        cpu->flags.c = math_carry;
+    }
+
+    cpu->Set8Bit(Register_A, result);
+
     cycles = (n == Eat_PC_Byte || n == Address_HL) ? 8 : 4;
 
-    cpu->flags.z = (after == 0x00);
+    cpu->flags.z = (result == 0x00);
     cpu->flags.n = !add;
-    // TODO - half carry. Test.
-    // if a + b < max, then this would be LOWER(orig) > LOWER(new), e.g. we've pushed stuff out.
-    // cpu->flags.h = add ? LOWER(orig);
-    cpu->flags.c = add ? (after < orig) : (orig > after); // TODO test. Maybe whether switched sign?
-    cpu->Set8Bit(Register_A, after);
 }
 
 void MathCommand::AddHL(CPU *cpu, Destination n) {

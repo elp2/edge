@@ -93,7 +93,13 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
         return;
     }
 
-    if (address < 0x8000) {
+    if (address >= 0x2000 && address <= 0x3FFF) {
+        if (byte == 0x00) {
+            byte = 0x01;
+        }
+        bank_ = byte;
+        assert(bank_ == 0x01); // TODO Other banks and testing.
+    } else if (address < 0x8000) {
         cout << "Can't Write to: ";
         cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
         cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
