@@ -12,8 +12,8 @@
 #include "Utils.hpp"
 
 int main(int argc, char* argv[]) {
-const int SCREEN_WIDTH = 160;
-const int SCREEN_HEIGHT = 144;
+    const int SCREEN_WIDTH = 160;
+    const int SCREEN_HEIGHT = 144;
 
     ROM *bootROM = new ROM();
     assert(bootROM->LoadFile("../../boot.gb"));

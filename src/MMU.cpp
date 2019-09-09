@@ -18,6 +18,10 @@ void MMU::SetROMs(ROM *bootROM, ROM *cartridgeROM) {
     overlayBootROM = true;
     this->bootROM = bootROM;
     this->cartridgeROM = cartridgeROM;
+
+    assert(this->cartridgeROM->GetCartridgeType() != CartridgeType_Unsupported);
+    assert(this->cartridgeROM->GetROMSizeType() != ROMSize_Unsupported);
+    bank_ = 1;
 }
 
 string MMU::AddressRegion(uint16_t address) {
@@ -26,7 +30,6 @@ string MMU::AddressRegion(uint16_t address) {
     } else if (address < 0x4000) {
         return "ROM Bank 0 (16kb)";
     } else if (address < 0x8000) {
-        // TODO - detect + prevent writes to banks.
         return "ROM Bank 1 (switchable)";
     } else if (address < 0xa000) {
         return "Video RAM";
@@ -68,7 +71,12 @@ uint8_t MMU::GetByteAt(uint16_t address) {
             cout << "ROM access above logo while overlaid at 0x" << hex << unsigned(address) << endl;
             assert(false);
         }
-        byte = cartridgeROM->GetByteAt(address);
+        if (address < 0x4000) {
+            byte = cartridgeROM->GetByteAt(address);
+        } else {
+            uint16_t bank_address = address + (bank() - 1) * 0x4000;
+            byte = cartridgeROM->GetByteAt(bank_address);
+        }
     } else {
         byte = ram[address - 0x8000];
     }
@@ -98,7 +106,9 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
             byte = 0x01;
         }
         bank_ = byte;
-        assert(bank_ == 0x01); // TODO Other banks and testing.
+        cout << "Switched to ROM bank: 0x" << hex << unsigned(bank_) << endl;
+        assert(bank_ < 4); // TODO.
+        return;
     } else if (address < 0x8000) {
         cout << "Can't Write to: ";
         cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";

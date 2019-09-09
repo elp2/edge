@@ -97,6 +97,7 @@ add_executable(tests
     tests/jump_command_test.cpp
     tests/math_command_test.cpp
     tests/misc_command_test.cpp
+    tests/mmu_test.cpp
     tests/ppu_test.cpp
     tests/sprite_test.cpp
     tests/stack_test.cpp)
