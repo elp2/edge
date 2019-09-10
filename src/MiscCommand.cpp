@@ -5,6 +5,7 @@
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
+#include "Utils.hpp"
 
 MiscCommand::MiscCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
@@ -16,34 +17,53 @@ MiscCommand::~MiscCommand() {
 
 }
 
+void DAA(CPU* cpu) {
+	uint8_t a = cpu->Get8Bit(Register_A);
+	bool carry = cpu->flags.c;
+	int low_dec = NIBBLELOW(a);
+	int high_dec = NIBBLEHIGH(a);
+
+	if (cpu->flags.n) {
+		// Subtraction.
+	}
+	else {
+		if (cpu->flags.h) {
+			low_dec += 16;
+			// Higher decimal got a free increase since low nibble add spilled over.
+			high_dec--;
+		}
+		if (low_dec >= 10) {
+			low_dec %= 10;
+			high_dec++;
+		}
+		if (carry) {
+			high_dec += 16;
+		}
+		if (high_dec >= 10) {
+			high_dec %= 10;
+			carry = true;
+		}
+		assert(high_dec < 10 && high_dec >= 0);
+		assert(low_dec < 10 && low_dec >= 0);
+		uint8_t h = high_dec;
+		uint8_t l = low_dec;
+		a = (h << 4) | l;
+	}
+
+	cpu->flags.z = a == 0;
+	// cpu->flags.n not affected.
+	cpu->flags.h = false; // Half carry only makes sense for Decimal Adjustment.
+	cpu->flags.c = carry;
+	cpu->Set8Bit(Register_A, a);
+}
+
 void MiscCommand::Run(CPU *cpu) {
     uint8_t nextPCByte;
-    uint8_t a;
+
     switch (opcode)
     {
     case 0x27:
-        a = cpu->Get8Bit(Register_A);
-        if(!cpu->flags.n) {
-            if (cpu->flags.c || a > 0x99) {
-                a = (a + 0x60) & 0xFF;
-                cpu->flags.c = true;
-            }
-            if (cpu->flags.c || (a & 0xF) > 0x9) {
-                a = (a + 0x06) & 0xFF;
-                cpu->flags.h = false;
-            }
-        } else if (cpu->flags.c && cpu->flags.h) {
-            a = (a + 0x9A) & 0xFF;
-        } else if (cpu->flags.c) {
-            a = (a + 0xA0) & 0xFF;
-        } else if (cpu->flags.h) {
-            a = (a + 0xFA) & 0xFF;
-        }
-
-        cpu->flags.z = a == 0;
-        // cpu->flags.n not affected.
-        cpu->flags.h = false; // May be set.
-        cpu->Set8Bit(Register_A, a);
+		DAA(cpu);
         break;
     case 0x2F:
         cpu->Set8Bit(Register_A, ~cpu->Get8Bit(Register_A));

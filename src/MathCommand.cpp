@@ -331,8 +331,6 @@ uint8_t aluAdd8(CPU *cpu, bool add, bool carry, uint8_t orig, uint8_t delta) {
 }
 
 void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
-
-
     uint8_t orig = cpu->Get8Bit(Register_A);
     uint8_t delta = cpu->Get8Bit(n);
 

@@ -274,3 +274,42 @@ TEST(MathCommandTest, ADC) {
 	ASSERT_EQ(cpu->Get8Bit(Register_A), 0x00);
 	EXPECT_FLAGS(true, true, false, true);
 }
+
+TEST(MathCommandTest, AddDAA) {
+	const uint8_t ADD_AB = 0x80;
+	const uint8_t DAA = 0x27;
+
+	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_AB, DAA });
+	// O = ones, T = tens for a and b.
+	for (uint8_t oa = 0; oa < 9; oa++) {
+		for (uint8_t ta = 0; ta < 9; ta++) {
+			for (uint8_t ob = 0; ob < 9; ob++) {
+				for (uint8_t tb = 0; tb < 9; tb++) {
+					int expected = 10 * ta + oa + 10 * tb + ob;
+					bool carry = expected >= 100;
+					if (carry) {
+						expected -= 100;
+					}
+					uint8_t expected_o = expected % 10;
+					uint8_t expected_t = expected / 10;
+					uint8_t expected8 = (expected_t << 4) | expected_o;
+
+					uint8_t a = (ta << 4) | oa;
+					uint8_t b = (tb << 4) | ob;
+					cpu->Set8Bit(Register_A, a);
+					cpu->Set8Bit(Register_B, b);
+
+					cpu->Step();
+					uint8_t added = cpu->Get8Bit(Register_A);
+
+					cpu->Step();
+
+					EXPECT_EQ(cpu->Get8Bit(Register_A), expected8);
+					EXPECT_FLAGS(expected8 == 0, false, false, carry);
+					uint8_t relative = -2;
+					cpu->JumpRelative(relative);
+				}
+			}
+		}
+	}
+}
