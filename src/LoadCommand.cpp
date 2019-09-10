@@ -4,6 +4,7 @@
 
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
+#include "MathCommand.hpp"
 #include "MMU.hpp"
 
 LoadCommand::LoadCommand(uint8_t opcode, string description, Destination to, Destination from, int cycles) {
@@ -49,13 +50,7 @@ class SpecialLoadCommand : public Command {
 
     void Run(CPU *cpu) {
         if (opcode == 0xF8) {
-            uint8_t offset = cpu->Get8Bit(Eat_PC_Byte);
-            cpu->Set16Bit(Register_SP, 0xff00 + offset);
-            cpu->flags.z = false;
-            cpu->flags.n = false;
-            // H/z depending on result.
-            // TODO: FLAGS!!!
-            // assert(false);
+            cpu->Set16Bit(Register_HL, AddSP(cpu));
             return;
         }
 
@@ -117,11 +112,6 @@ void registerSpecialLoadCommands(AbstractCommandFactory *factory) {
 }
 
 void register16BitLoadCommands(AbstractCommandFactory *factory) {
-    // TODO: Clean these up.
-    // factory->RegisterCommand(new LoadCommand(0x01, "LD BC,nn", Register_BC, Eat_PC_Word, 12));
-    // factory->RegisterCommand(new LoadCommand(0x11, "LD DE,nn", Register_DE, Eat_PC_Word, 12));
-    // factory->RegisterCommand(new LoadCommand(0x21, "LD HL,nn", Register_HL, Eat_PC_Word, 12));
-    // factory->RegisterCommand(new LoadCommand(0x31, "LD SP,nn", Register_SP, Eat_PC_Word, 12));
     factory->RegisterCommand(new LoadCommand(0xF9, "LD SP,HL", Register_SP, Register_HL, 8));
     factory->RegisterCommand(new LoadCommand(0x08, "LD (nn),SP", Address_nn, Register_SP, 20));    
 }

@@ -16,7 +16,8 @@ class MathCommand : public Command {
     void Dec(CPU *cpu);
     void Delta8(CPU *cpu, Destination n, bool add, bool carry);
     void AddHL(CPU *cpu, Destination n);
-    void AddSP(CPU *cpu);
 };
+
+uint16_t AddSP(CPU *cpu);
 
 void registerMathCommands(AbstractCommandFactory *factory);

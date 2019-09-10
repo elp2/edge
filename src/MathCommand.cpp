@@ -190,28 +190,8 @@ void MathCommand::Dec(CPU *cpu) {
     }
 }
 
-void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
-    stringstream stream;
-    if (add) {
-        if (carry) {
-            stream << "ADC";
-        } else {
-            stream << "ADD";
-        }
-    } else {
-        if (carry) {
-            stream << "SBC";
-        } else {
-            stream << "SUB";
-        }
-    }
-    stream << " A," << destinationToString(n);
-    description = stream.str();
-
-    uint8_t orig = cpu->Get8Bit(Register_A);
-    uint8_t delta = cpu->Get8Bit(n);
-
-    uint16_t result = 0;
+uint8_t aluAdd8(CPU *cpu, bool add, bool carry, uint8_t orig, uint8_t delta) {
+    uint8_t result = 0;
     uint8_t orig_nib;
     uint8_t delta_nib;
 
@@ -237,7 +217,31 @@ void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
         result |= (aluSub(orig_nib, delta_nib, math_carry, &math_carry) << 4);
         cpu->flags.c = math_carry;
     }
+    return result;
+}
 
+void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
+    stringstream stream;
+    if (add) {
+        if (carry) {
+            stream << "ADC";
+        } else {
+            stream << "ADD";
+        }
+    } else {
+        if (carry) {
+            stream << "SBC";
+        } else {
+            stream << "SUB";
+        }
+    }
+    stream << " A," << destinationToString(n);
+    description = stream.str();
+
+    uint8_t orig = cpu->Get8Bit(Register_A);
+    uint8_t delta = cpu->Get8Bit(n);
+
+    uint8_t result = aluAdd8(cpu, add, carry, orig, delta);
     cpu->Set8Bit(Register_A, result);
 
     cycles = (n == Eat_PC_Byte || n == Address_HL) ? 8 : 4;
@@ -282,22 +286,33 @@ void MathCommand::AddHL(CPU *cpu, Destination n) {
     cpu->Set16Bit(Register_HL, result);
 }
 
-void MathCommand::AddSP(CPU *cpu) {
+uint16_t AddSP(CPU *cpu) {
     uint8_t unsigned_byte = cpu->Get8Bit(Eat_PC_Byte);
     int8_t signed_byte = unsigned_byte;
     uint16_t sp = cpu->Get16Bit(Register_SP);
     
-    uint16_t sp_after = sp + signed_byte;
-    cpu->Set16Bit(Register_SP, sp_after);
 
-    // TODO Test.
-    cpu->flags.z = false;
-    cpu->flags.n = false;
-    cpu->flags.h = sp_after > 0xff && sp <= 0xff;
-    cpu->flags.c = sp_after < sp && signed_byte > 0;
+    uint8_t delta;
+    bool add;
 
-    cycles = 16;
-    description = "ADD SP, #";
+    if (signed_byte > 0) {
+        add = true;
+        delta = unsigned_byte;
+    } else {
+        add = false;
+        delta = -1 * signed_byte;
+    }
+    uint8_t lower8 = aluAdd8(cpu, add, false, LOWER8(sp), delta);
+    uint16_t sp_after = (HIGHER8(sp) << 8) | lower8;
+    if (cpu->flags.c) {
+        sp_after += 0x0100; // TODO negative?
+    }
+
+    if (sp_after < 0x1000) {
+        cout << "SP too low after adding: " << hex << unsigned(sp_after) << endl;
+        assert(false);
+    }
+    return sp_after;
 }
 
 void MathCommand::Run(CPU *cpu) {
@@ -339,7 +354,10 @@ void MathCommand::Run(CPU *cpu) {
     switch (opcode)
     {
         case 0xE8:
-            return AddSP(cpu);
+            cycles = 16;
+            description = "ADD SP, #";
+            cpu->Set16Bit(Register_SP, AddSP(cpu));
+            return;
     case 0x3c:
     case 0x04:
     case 0x0c:
