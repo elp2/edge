@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     SDL_Event e;
     while (true) {
         if (cpu->Get16Bit(Register_PC) == 0x100) {
-            cpu->SetDebugPrint(true);
+            // cpu->SetDebugPrint(true);
             cout << "CPU Cycles to 0x100: 0x" << hex << unsigned(cpu->Cycles()) << endl;
         }
         cpu->Step();

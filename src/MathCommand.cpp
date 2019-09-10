@@ -15,6 +15,122 @@
 
 MathCommand::MathCommand(uint8_t opcode) {
     this->opcode = opcode;
+
+	uint8_t row = NIBBLEHIGH(opcode);
+	uint8_t col = NIBBLELOW(opcode);
+
+	if (opcode == 0xE8) {
+		cycles = 16;
+		description = "ADD SP, #";
+		return;
+	}
+
+	if ((col == 0x3 || col == 0xb) && row < 0x4) {
+		switch (opcode)
+		{
+			case 0x03:
+				description = "INC BC";
+				break;
+			case 0x23:
+				description = "INC DE";
+				break;
+			case 0x33:
+				description = "INC HL";
+				break;
+			case 0x43:
+				description = "INC SP";
+				break;
+			case 0x0B:
+				description = "DEC BC";
+				break;
+			case 0x1B:
+				description = "DEC DE";
+				break;
+			case 0x2B:
+				description = "DEC HL";
+				break;
+			case 0x3B:
+				description = "DEC SP";
+				break;
+			default:
+				break;
+		}
+		cycles = 8;
+		return;
+	}
+
+	if ((col == 0x4 && row <= 0x3) || (col == 0xc && row <= 0x3)) {
+		stringstream stream;
+		stream << "DEC " << destinationToString(destinationForColumn(col));
+		description = stream.str();
+		return;
+	}
+
+	if ((col == 0x5 && row <= 0x3) || (col == 0xd && row <= 0x3)) {
+		stringstream stream;
+		stream << "INC " << destinationToString(destinationForColumn(col));
+		description = stream.str();
+		return;
+	}
+
+	if (col == 0x9 && (row < 4)) {
+		switch (opcode)
+		{
+		case 0x09:
+			description = "ADD HL, BC";
+			break;
+		case 0x19:
+			description = "ADD HL, DE";
+			break;
+		case 0x29:
+			description = "ADD HL, HL";
+			break;
+		case 0x39:
+			description = "ADD HL, SP";
+			break;
+		default:
+			break;
+		}
+		return;
+	}
+
+	bool carry;
+	bool add;
+	Destination d;
+	if (row == 0x8 || opcode == ADDAd8 || opcode == ADCAd8) {
+		// ADD, ADC.
+		carry = col > 7;
+		add = true;
+		d = (opcode == ADDAd8 || opcode == ADCAd8) ? Eat_PC_Byte : destinationForColumn(col);
+	}
+
+	if (row == 0x9 || opcode == SUBAd8 || opcode == SBCAd8) {
+		// SUB, SUBC.
+		carry = col > 7;
+		add = false;
+		d = (opcode == SUBAd8 || opcode == SBCAd8) ? Eat_PC_Byte : destinationForColumn(col);
+	}
+
+
+	stringstream stream;
+	if (add) {
+		if (carry) {
+			stream << "ADC";
+		}
+		else {
+			stream << "ADD";
+		}
+	}
+	else {
+		if (carry) {
+			stream << "SBC";
+		}
+		else {
+			stream << "SUB";
+		}
+	}
+	stream << " A," << destinationToString(d);
+	description = stream.str();
 }
 
 MathCommand::~MathCommand() {
@@ -96,9 +212,6 @@ void MathCommand::Inc(CPU *cpu) {
     } else {
         cycles = cpu->Requires16Bits(d) ? 8 : 4;
     }
-    stringstream stream;
-    stream << "INC " << destinationToString(d);
-    description = stream.str();
 
     if (cpu->Requires16Bits(d)) {
         uint16_t orig = cpu->Get16Bit(d);
@@ -169,9 +282,6 @@ void MathCommand::Dec(CPU *cpu) {
     } else {
         cycles = cpu->Requires16Bits(d) ? 8 : 4;
     }
-    stringstream stream;
-    stream << "DEC " << destinationToString(d);
-    description = stream.str();
 
     if (cpu->Requires16Bits(d)) {
         uint16_t orig = cpu->Get16Bit(d);
@@ -221,22 +331,7 @@ uint8_t aluAdd8(CPU *cpu, bool add, bool carry, uint8_t orig, uint8_t delta) {
 }
 
 void MathCommand::Delta8(CPU *cpu, Destination n, bool add, bool carry) {
-    stringstream stream;
-    if (add) {
-        if (carry) {
-            stream << "ADC";
-        } else {
-            stream << "ADD";
-        }
-    } else {
-        if (carry) {
-            stream << "SBC";
-        } else {
-            stream << "SUB";
-        }
-    }
-    stream << " A," << destinationToString(n);
-    description = stream.str();
+
 
     uint8_t orig = cpu->Get8Bit(Register_A);
     uint8_t delta = cpu->Get8Bit(n);
@@ -329,10 +424,6 @@ void MathCommand::Run(CPU *cpu) {
         return;
     }
 
-    if (col == 0x9 && (row < 4)) {
-        
-    }
-
     if (row == 0x8 || opcode == ADDAd8 || opcode == ADCAd8) {
         // ADD, ADC.
         bool carry = col > 7;
@@ -354,8 +445,6 @@ void MathCommand::Run(CPU *cpu) {
     switch (opcode)
     {
         case 0xE8:
-            cycles = 16;
-            description = "ADD SP, #";
             cpu->Set16Bit(Register_SP, AddSP(cpu));
             return;
     case 0x3c:
