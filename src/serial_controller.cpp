@@ -1,5 +1,6 @@
 #include "serial_controller.hpp"
 
+#include <cassert>
 #include <iostream>
 
 using namespace std;

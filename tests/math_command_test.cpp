@@ -224,6 +224,7 @@ TEST(MathCommandTest, ADD) {
 
     cpu->Step();
     ASSERT_EQ(cpu->cycles(), 4);
+	ASSERT_EQ(cpu->Get8Bit(Register_A), 0x00);
     EXPECT_FLAGS(true, true, false, true);
 
     cpu->Set8Bit(Register_A, 0x3C);
@@ -241,3 +242,35 @@ TEST(MathCommandTest, ADD) {
     EXPECT_FLAGS(false, false, false, false);
 }
 
+TEST(MathCommandTest, ADC) {
+	const uint8_t ADC_AE = 0x8B;
+	const uint8_t ADC_AN = 0xCE;
+	const uint8_t ADC_AHL = 0x8E;
+
+	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADC_AE, ADC_AN, 0x3B, ADC_AHL });
+	uint32_t cycles = cpu->cycles();
+	cpu->Set8Bit(Register_A, 0xE1);
+	cpu->Set8Bit(Register_E, 0x0F);
+	cpu->flags.c = true;
+
+	cpu->Step();
+	ASSERT_EQ(cpu->cycles(), 4);
+	ASSERT_EQ(cpu->Get8Bit(Register_A), 0xF1);
+	EXPECT_FLAGS(false, true, false, false);
+
+	cpu->Set8Bit(Register_A, 0xE1);
+	cpu->flags.c = true;
+	cpu->Step();
+	ASSERT_EQ(cpu->cycles(), 12);
+	ASSERT_EQ(cpu->Get8Bit(Register_A), 0x1D);
+	EXPECT_FLAGS(false, false, false, true);
+
+	cpu->Set8Bit(Register_A, 0xE1);
+	cpu->flags.c = true;
+	cpu->Set16Bit(Register_HL, 0x9998);
+	cpu->Set8Bit(Address_HL, 0x1E);
+	cpu->Step();
+	ASSERT_EQ(cpu->cycles(), 20);
+	ASSERT_EQ(cpu->Get8Bit(Register_A), 0x00);
+	EXPECT_FLAGS(true, true, false, true);
+}

@@ -112,10 +112,17 @@ std::string descriptionforPixel(Pixel p) {
 }
 
 MMU *getTestingMMU() {
+#if defined WIN32
     ROM *bootROM = new ROM();
-    assert(bootROM->LoadFile("../../boot.gb"));
+    assert(bootROM->LoadFile("../../../boot.gb"));
     ROM *cartridgeROM = new ROM();
-    assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+    assert(cartridgeROM->LoadFile("../../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+#else
+	ROM* bootROM = new ROM();
+	assert(bootROM->LoadFile("../../boot.gb"));
+	ROM* cartridgeROM = new ROM();
+	assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+#endif
 
     MMU *mmu = new MMU();
     mmu->SetROMs(bootROM, cartridgeROM);
