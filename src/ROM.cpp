@@ -42,6 +42,8 @@ CartridgeType ROM::GetCartridgeType() {
     uint16_t ctbyte = rom[0x147];
     switch (ctbyte)
     {
+        case 0x00:
+            return CartridgeType_ROM_only;
         case 0x01:
             return CartridgeType_ROM_MBC1;
         

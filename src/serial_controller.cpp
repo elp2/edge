@@ -47,6 +47,7 @@ void SerialController::set_sc(uint8_t byte) {
             line->push_back((char)sb());
         }
     } else {
-        assert(false);
+        cout << "Unexpected serial sc: " << hex << unsigned(byte) << endl;
+        // assert(false);
     }
 }
