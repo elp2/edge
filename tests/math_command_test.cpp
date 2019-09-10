@@ -211,3 +211,4 @@ TEST(MathCommandTest, AddSPNegative) {
     ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFFF0);
     EXPECT_FLAGS(false, false, false, false);
 }
+

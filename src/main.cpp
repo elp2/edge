@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     ROM *bootROM = new ROM();
     assert(bootROM->LoadFile("../../boot.gb"));
     ROM *cartridgeROM = new ROM();
-    assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+    assert(cartridgeROM->LoadFile("../../gb-test-roms/instr_timing/instr_timing.gb"));
 
     MMU *mmu = new MMU();
     mmu->SetROMs(bootROM, cartridgeROM);
