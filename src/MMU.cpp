@@ -107,7 +107,19 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
         }
         bank_ = byte;
         cout << "Switched to ROM bank: 0x" << hex << unsigned(bank_) << endl;
-        assert(bank_ < 4); // TODO.
+        int max_bank;
+        switch (cartridgeROM->GetROMSizeType())
+        {
+        case ROMSize_32k:
+            max_bank = 2;
+        case ROMSize_64k:
+            max_bank = 4;
+            break;
+        default:
+            assert(false);
+            break;
+        }
+        assert(bank_ < max_bank);
         return;
     } else if (address < 0x8000) {
         cout << "Can't Write to: ";

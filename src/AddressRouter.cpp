@@ -6,12 +6,14 @@
 #include "MMU.hpp"
 #include "PPU.hpp"
 #include "Utils.hpp"
+#include "serial_controller.hpp"
 
 using namespace std;
 
 AddressRouter::AddressRouter(MMU *mmu, PPU *ppu) {
     mmu_ = mmu;
     ppu_ = ppu;
+    serial_controller_ = new SerialController();
 }
 
 AddressOwner ownerForIOAddress(uint16_t address) {
@@ -23,7 +25,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     case 0xFF01:
     case 0xFF02:
         // Serials.
-        return AddressOwner_MMU;
+        return AddressOwner_Serial;
     case 0xFF04:
         // Divider.
         return AddressOwner_MMU;
@@ -139,6 +141,8 @@ uint8_t AddressRouter::GetByteAtAddressFromOwner(AddressOwner owner, uint16_t ad
         return mmu_->GetByteAt(address);
     case AddressOwner_PPU:
         return ppu_->GetByteAt(address);
+    case AddressOwner_Serial:
+        return serial_controller_->GetByteAt(address);
     default:
 		assert(false);
 		return 0x00;
@@ -157,7 +161,8 @@ void AddressRouter::SetByteAtAddressInOwner(AddressOwner owner, uint16_t address
         return mmu_->SetByteAt(address, byte);
     case AddressOwner_PPU:
         return ppu_->SetByteAt(address, byte);
-    
+    case AddressOwner_Serial:
+        return serial_controller_->SetByteAt(address, byte);
     default:
         break;
     }

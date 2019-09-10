@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(edge)
 
+enable_testing()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -33,6 +35,7 @@ add_library (edge_lib
     src/ReturnCommand.cpp
     src/ROM.cpp
     src/Screen.cpp
+    src/serial_controller.cpp
     src/StackCommand.cpp
     src/Sprite.cpp
     src/UnimplementedCommand.cpp

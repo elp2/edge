@@ -6,11 +6,13 @@ using namespace std;
 
 class MMU;
 class PPU;
+class SerialController;
 
 enum AddressOwner {
     AdressOwner_Unknown = 0,
     AddressOwner_MMU,
     AddressOwner_PPU,
+    AddressOwner_Serial,
 };
 
 // Redirects reads and writes to the MMU, PPU, Sound, and potentially other controllers.
@@ -29,6 +31,7 @@ class AddressRouter {
  private:
     MMU *mmu_;
     PPU *ppu_;
+    SerialController *serial_controller_;
     bool disassemblerMode_ = false;
 
     uint8_t GetByteAtAddressFromOwner(AddressOwner owner, uint16_t address);

@@ -287,7 +287,8 @@ uint8_t PPU::GetByteAt(uint16_t address) {
 void PPU::SetByteAt(uint16_t address, uint8_t byte) {
     if (address >= 0x8000 && address < 0xA000) {
         if (screen_->on() && !CanAccessVRAM()) {
-            cout << "Can not access Video RAM during " << hex << unsigned(state_) << endl;
+            // TODO - re enable this if relevant.x`
+            // cout << "Can not access Video RAM during " << hex << unsigned(state_) << endl;
         }
         video_ram_[address - 0x8000] = byte;
     } else if (address >= 0xFE00 && address < 0xFEA0) {

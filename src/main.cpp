@@ -25,8 +25,6 @@ int main(int argc, char* argv[]) {
     PPU *ppu = new PPU();
 
     CPU *cpu = new CPU(mmu, ppu);
-
-
    int status = SDL_Init(SDL_INIT_VIDEO);
     if (status == 0) {
         cout << "OK!";
@@ -60,11 +58,8 @@ int main(int argc, char* argv[]) {
     int x = 0;
     SDL_Event e;
     while (true) {
-        if (cpu->Get16Bit(Register_PC) == 0x89) {
-            // cpu->SetDebugPrint(true);
-        }
-        if (cpu->Get16Bit(Register_PC) == 0x00fe) {
-            cpu->Step();
+        if (cpu->Get16Bit(Register_PC) == 0x100) {
+            cpu->SetDebugPrint(true);
             cout << "CPU Cycles to 0x100: 0x" << hex << unsigned(cpu->Cycles()) << endl;
         }
         cpu->Step();
