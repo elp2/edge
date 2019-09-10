@@ -212,3 +212,32 @@ TEST(MathCommandTest, AddSPNegative) {
     EXPECT_FLAGS(false, false, false, false);
 }
 
+TEST(MathCommandTest, ADD) {
+    const uint8_t ADD_AB = 0x80;
+    const uint8_t ADD_AN = 0xC6;
+    const uint8_t ADD_AHL = 0x86;
+
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_AB, ADD_AN, 0xFF, ADD_AHL });
+    uint32_t cycles = cpu->cycles();
+    cpu->Set8Bit(Register_A, 0x3A);
+    cpu->Set8Bit(Register_B, 0xC6);
+
+    cpu->Step();
+    ASSERT_EQ(cpu->cycles(), 4);
+    EXPECT_FLAGS(true, true, false, true);
+
+    cpu->Set8Bit(Register_A, 0x3C);
+    cpu->Step();
+    ASSERT_EQ(cpu->cycles(), 12);
+    ASSERT_EQ(cpu->Get8Bit(Register_A), 0x3B);
+    EXPECT_FLAGS(false, true, false, true);
+
+    cpu->Set8Bit(Register_A, 0x3C);
+    cpu->Set16Bit(Register_HL, 0x9998);
+    cpu->Set8Bit(Address_HL, 0x12);
+    cpu->Step();
+    ASSERT_EQ(cpu->cycles(), 20);
+    ASSERT_EQ(cpu->Get8Bit(Register_A), 0x4E);
+    EXPECT_FLAGS(false, false, false, false);
+}
+

@@ -69,7 +69,6 @@ void MiscCommand::Run(CPU *cpu) {
         cpu->StopNextLoop();
         nextPCByte = cpu->Get8Bit(Eat_PC_Byte);
         assert(nextPCByte == 0x00);
-        cpu->AdvancePC();
         break;
     case 0xF3:
         cpu->DisableInterruptsNextLoop();
