@@ -9,8 +9,49 @@ class MathCommandTest : public ::testing::Test {
     ~MathCommandTest() {};
 };
 
-// TODO: INC
-// TODO: DEC
+TEST(MathCommandTest, INC) {
+    const uint8_t INC_A = 0x3C;
+    const uint8_t INC_HL = 0x34;
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ INC_A, INC_HL });
+    cpu->Set8Bit(Register_A, 0xFF);
+    uint32_t cycles = cpu->cycles();
+
+    cpu->Step();
+    EXPECT_EQ(cpu->Get8Bit(Register_A), 0);
+    EXPECT_FLAGS(true, true, false, false);
+    EXPECT_EQ(cpu->cycles(), 4);
+
+    // Ensure C is not affected.
+    cpu->flags.c = true;
+    cpu->Set16Bit(Register_HL, 0x9998);
+    cpu->Set8Bit(Address_HL, 0x50); 
+    cpu->Step();
+    EXPECT_EQ(cpu->Get8Bit(Address_HL), 0x51);
+    EXPECT_FLAGS(false, false, false, true);
+    EXPECT_EQ(cpu->cycles(), 16);
+}
+
+TEST(MathCommandTest, DEC) {
+    const uint8_t DEC_L = 0x2D;
+    const uint8_t DEC_HL = 0x35;
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ DEC_L, DEC_HL });
+    cpu->Set8Bit(Register_L, 0x01);
+    uint32_t cycles = cpu->cycles();
+
+    cpu->Step();
+    EXPECT_EQ(cpu->Get8Bit(Register_A), 0);
+    EXPECT_FLAGS(true, false, true, false);
+    EXPECT_EQ(cpu->cycles(), 4);
+
+    // Ensure C is not affected.
+    cpu->flags.c = true;
+    cpu->Set16Bit(Register_HL, 0x9998);
+    cpu->Set8Bit(Address_HL, 0x00); 
+    cpu->Step();
+    EXPECT_EQ(cpu->Get8Bit(Address_HL), 0xFF);
+    EXPECT_FLAGS(false, true, true, true);
+    EXPECT_EQ(cpu->cycles(), 16);
+}
 
 TEST(MathCommandTest, AddHLNoCarries) {
     const uint8_t ADDHLBC = 0x09;

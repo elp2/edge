@@ -220,12 +220,11 @@ void MathCommand::Inc(CPU *cpu) {
         // TODO: Test overflow.
     } else {
         uint8_t orig = cpu->Get8Bit(d);
-        uint8_t inc = orig + 1;
-        // TODO: Test overflow2.
-        cpu->flags.z = (inc == 0);
-        cpu->flags.n = false;
-        cpu->flags.h = NIBBLELOW(orig) == 0xf; // TODO test set if carry2.
-        // c not affected.
+        bool c = cpu->flags.c;
+        uint8_t inc = aluAdd8(cpu, true, false, orig, 1);
+        // C unaffected.
+        cpu->flags.c = c;
+
         cpu->Set8Bit(d, inc);
     }
 }
@@ -290,12 +289,10 @@ void MathCommand::Dec(CPU *cpu) {
         // TODO: Test overflow.
     } else {
         uint8_t orig = cpu->Get8Bit(d);
-        uint8_t dec = orig - 1;
-        // TODO: Test overflow2.
-        cpu->flags.z = (dec == 0);
-        cpu->flags.n = false;
-        cpu->flags.h = NIBBLELOW(orig) == 0x00; // TODO test set if carry2.
-        // c not affected.
+        bool c = cpu->flags.c;
+        uint8_t dec = aluAdd8(cpu, false, false, orig, 1);
+        cpu->flags.c = c; // C unaffected.
+
         cpu->Set8Bit(d, dec);
     }
 }
