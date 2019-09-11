@@ -42,8 +42,13 @@ string bitIndexCommandName(string base, uint8_t startingRow, uint8_t row, uint8_
 
 void CBCommand::TestBit(uint8_t row, uint8_t column, CPU *cpu) {
     this->description = bitIndexCommandName("BIT", 4, row, column);
-    uint8_t testBit = bitForRowColumn(4, row, column);
-    cpu->flags.z = ((testBit & cpu->Get8Bit(destinationForColumn(column))) == 0);
+    uint8_t test_bit = bitForRowColumn(4, row, column);
+
+	Destination d = destinationForColumn(column);
+	uint8_t to_test = cpu->Get8Bit(d);
+	uint8_t anded = test_bit & to_test;
+
+    cpu->flags.z = !anded;
     cpu->flags.n = false;
     cpu->flags.h = true;
     // c unchanged.
@@ -54,21 +59,17 @@ void CBCommand::ResetBit(uint8_t row, uint8_t column, CPU *cpu) {
     uint8_t resetBit = bitForRowColumn(8, row, column);
     resetBit = ~resetBit;
 
-    cout << "ResetBit: " << resetBit << endl;
-
     Destination d = destinationForColumn(column);
     cpu->Set8Bit(d, resetBit & cpu->Get8Bit(d));
 }
 
 void CBCommand::SetBit(uint8_t row, uint8_t column, CPU *cpu) {
     this->description = bitIndexCommandName("SET", 0xc, row, column);
-    uint8_t setBit = bitForRowColumn(0xc, row, column);
-    setBit = ~setBit;
-
-    cout << "setBit: " << setBit << endl;
+    uint8_t setBit = bitForRowColumn(0xC, row, column);
 
     Destination d = destinationForColumn(column);
-    cpu->Set8Bit(d, setBit | cpu->Get8Bit(d));
+	uint8_t setted = setBit | cpu->Get8Bit(d);
+    cpu->Set8Bit(d, setted);
 }
 
 void CBCommand::Swap(uint8_t column, CPU *cpu) {
@@ -175,7 +176,7 @@ void CBCommand::Run(CPU *cpu) {
     case 0xc:
     case 0xd:
     case 0xe:
-    case 0xef:
+    case 0xf:
         return SetBit(row, column, cpu);
     default:
         cout << "No CB for 0x" << hex << unsigned(row) << hex << unsigned(column) << endl;

@@ -15,7 +15,7 @@ class Command {
  
     virtual void Run(CPU *cpu) { (void)cpu; };
 
-    int cycles;
-    uint8_t opcode;
+    int cycles = 0;
+    uint8_t opcode = 0;
     string description;
 };

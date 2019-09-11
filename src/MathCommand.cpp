@@ -94,8 +94,8 @@ MathCommand::MathCommand(uint8_t opcode) {
 		return;
 	}
 
-	bool carry;
-	bool add;
+	bool carry = false;
+	bool add = false;
 	Destination d;
 	if (row == 0x8 || opcode == ADDAd8 || opcode == ADCAd8) {
 		// ADD, ADC.
