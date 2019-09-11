@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 
+#include <cmath>
+
 #include "CPU.hpp"
 #include "Utils.hpp"
 
@@ -86,3 +88,21 @@ TEST(CBCommandTest, ResetBit) {
 		check_flags = !check_flags;
 	}
 }
+
+TEST(CBCommandTest, SwapNibbles) {
+	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t> { 0xCB, 0x33 });
+	uint8_t e = 0;
+
+	for (int i = 0; i < 8; i++) {
+		cpu->Set8Bit(Register_E, e);
+		cpu->Step();
+		uint8_t swapped = cpu->Get8Bit(Register_E);
+
+		ASSERT_EQ(NIBBLEHIGH(e), NIBBLELOW(swapped));
+		ASSERT_EQ(NIBBLELOW(e), NIBBLEHIGH(swapped));
+		EXPECT_FLAGS(e == 0, false, false, false);
+		cpu->JumpRelative(-2);
+		e++;
+	}
+}
+
