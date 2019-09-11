@@ -20,4 +20,7 @@ class MathCommand : public Command {
 
 uint16_t AddSP(CPU *cpu);
 
+// Adds or subtracts, and sets Z, N, H, C flags on CPU appropriately.
+uint8_t aluAdd8(CPU *cpu, bool add, bool carry, uint8_t orig, uint8_t delta);
+
 void registerMathCommands(AbstractCommandFactory *factory);
