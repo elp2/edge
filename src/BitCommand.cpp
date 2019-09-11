@@ -6,6 +6,7 @@
 
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
+#include "MathCommand.hpp"
 #include "MMU.hpp"
 #include "Utils.hpp"
 
@@ -32,13 +33,8 @@ void BitCommand::CP(CPU *cpu, Destination d) {
     uint8_t n = cpu->Get8Bit(d);
 
     description = "CP A,?";
-    // VERY SLOW!    
-    // description = detailedDescription("CP ", Register_A, d, a, n);
 
-    cpu->flags.z = (a == n);
-    cpu->flags.n = true;
-    cpu->flags.h = a <= n; // TODO Test a>n A=n, a<n
-    cpu->flags.c = a > n;
+    aluAdd8(cpu, false, false, a, n);
 }
 
 void xorAWithDestination(CPU *cpu, Destination d) {
