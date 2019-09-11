@@ -9,11 +9,6 @@ class MathCommandTest : public ::testing::Test {
     ~MathCommandTest() {};
 };
 
-// TODO: ADD
-// TODO: ADC
-
-// TODO: SUB
-
 // TODO: INC
 // TODO: DEC
 
@@ -275,6 +270,37 @@ TEST(MathCommandTest, ADC) {
 	EXPECT_FLAGS(true, true, false, true);
 }
 
+
+TEST(MathCommandTest, SUB) {
+    const uint8_t SUB_E = 0x93;
+    const uint8_t SUB_N = 0xD6;
+    const uint8_t SUB_AHL = 0x96;
+
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ SUB_E, SUB_N, 0x0F, SUB_AHL });
+    uint32_t cycles = cpu->cycles();
+    cpu->Set8Bit(Register_A, 0x3E);
+    cpu->Set8Bit(Register_E, 0x3E);
+
+    cpu->Step();
+    ASSERT_EQ(cpu->cycles(), 4);
+	ASSERT_EQ(cpu->Get8Bit(Register_A), 0x00);
+    EXPECT_FLAGS(true, false, true, false);
+
+    cpu->Set8Bit(Register_A, 0x3E);
+    cpu->Step();
+    ASSERT_EQ(cpu->cycles(), 12);
+    ASSERT_EQ(cpu->Get8Bit(Register_A), 0x2F);
+    EXPECT_FLAGS(false, true, true, false);
+
+    cpu->Set8Bit(Register_A, 0x3E);
+    cpu->Set16Bit(Register_HL, 0x9998);
+    cpu->Set8Bit(Address_HL, 0x40);
+    cpu->Step();
+    ASSERT_EQ(cpu->cycles(), 20);
+    ASSERT_EQ(cpu->Get8Bit(Register_A), 0xFE);
+    EXPECT_FLAGS(false, false, true, true);
+}
+
 TEST(MathCommandTest, AddDAA) {
 	const uint8_t ADD_AB = 0x80;
 	const uint8_t DAA = 0x27;
@@ -306,6 +332,54 @@ TEST(MathCommandTest, AddDAA) {
 
 					EXPECT_EQ(cpu->Get8Bit(Register_A), expected8);
 					EXPECT_FLAGS(expected8 == 0, false, false, carry);
+					uint8_t relative = -2;
+					cpu->JumpRelative(relative);
+				}
+			}
+		}
+	}
+}
+
+TEST(MathCommandTest, SUBDAA) {
+	const uint8_t SUB_AB = 0x90;
+	const uint8_t DAA = 0x27;
+
+	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ SUB_AB, DAA });
+	
+    // O = ones, T = tens for a and b.
+	for (uint8_t oa = 0; oa < 9; oa++) {
+		for (uint8_t ta = 0; ta < 9; ta++) {
+			for (uint8_t ob = 0; ob < 9; ob++) {
+				for (uint8_t tb = 0; tb < 9; tb++) {
+					int expected = 10 * ta + oa - (10 * tb + ob);
+					bool carry = expected < 0;
+					if (carry) {
+						expected += 100;
+					}
+					uint8_t expected_o = expected % 10;
+					uint8_t expected_t = expected / 10;
+					uint8_t expected8 = (expected_t << 4) | expected_o;
+
+					uint8_t a = (ta << 4) | oa;
+					uint8_t b = (tb << 4) | ob;
+					cpu->Set8Bit(Register_A, a);
+					cpu->Set8Bit(Register_B, b);
+
+					cpu->Step();
+					uint8_t subbed = cpu->Get8Bit(Register_A);
+                    if (subbed == 0xF0) {
+
+                    }
+
+					cpu->Step();
+
+                    uint8_t actual = cpu->Get8Bit(Register_A);
+                    if (actual != expected8) {
+                        cout << hex <<unsigned(a) << " b: " << hex << unsigned(b) << " == ? " << hex << unsigned(expected8) << " act: " << hex << unsigned(actual) << " SUB: " << hex << unsigned(subbed) << endl;
+                        assert(false);
+                    }
+					ASSERT_EQ(actual, expected8);
+					// TODO : EXPECT_FLAGS(expected8 == 0, false, true, carry);
 					uint8_t relative = -2;
 					cpu->JumpRelative(relative);
 				}
