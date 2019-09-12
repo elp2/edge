@@ -9,9 +9,9 @@ class MMU;
 class PPU;
 class SerialController;
 
-class SDL_Renderer;
-class SDL_Texture;
-class SDL_Window;
+struct SDL_Renderer;
+struct SDL_Texture;
+struct SDL_Window;
 
 using namespace std;
 class System {

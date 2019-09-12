@@ -63,14 +63,13 @@ void System::InitSDL() {
 
 void System::Advance(int stepped) {
     const int frame_cycles = 70224 / 4;
-    int cycles = 0;
 
     ppu_->Advance(stepped);
 
     cycles_ += stepped;
     if (cycles_ >= frame_cycles) {
         FrameEnded();
-        cycles = 0;
+        cycles_ = 0;
         uint64_t end_ms = SDL_GetPerformanceCounter();
         cout << "Frame: " << (end_ms - frame_start_ms) / 1000 << endl;
         frame_start_ms = end_ms;
