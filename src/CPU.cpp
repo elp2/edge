@@ -10,7 +10,7 @@
 #include "PPU.hpp"
 
 CPU::CPU(MMU *mmu, PPU *ppu) {
-    ppu_ = ppu;
+    // TODO: Create AR in the System and pass in here, not MMU and PPU.
     addressRouter_ = new AddressRouter(mmu, ppu);
     commandFactory_ = new CommandFactory();
     cbCommandFactory_ = new CBCommandFactory();
@@ -32,8 +32,9 @@ Command *CPU::CommandForOpcode(uint8_t opcode) {
     }
 }
 
-void CPU::Step() {
+int CPU::Step() {
     // Take actions requested in previous cycle.
+    // TODO these actually need a countdown since they happen 2 instructions later.
     if (disableInterruptsNextLoop_) {
         interruptsEnabled_ = false;
         disableInterruptsNextLoop_ = false;
@@ -56,16 +57,17 @@ void CPU::Step() {
 
     Command *command = CommandForOpcode(opcode);
     command->Run(this);
-    cycles_ += command->cycles;
+    int stepped = command->cycles;
+    cycles_ += stepped;
 
     if (debugPrint_) {
         cout << command->description << " ; PC=" << commandPC << endl;
         Debugger();
     }
 
-    assert(command->cycles < 33 && command->cycles > 0);
+    assert(stepped < 33 && stepped > 0);
 
-    ppu_->Advance(command->cycles);
+    return stepped;
 }
 
 bool CPU::Requires16Bits(Destination destination) {
@@ -381,12 +383,13 @@ void CPU::AdvancePC() {
 }
 
 void CPU::Reset() {
+    pc_ = 0;
     // Initialized on start, but most programs will move it themselves anyway.
     sp_ = 0xfffe;
-    flags.z = 0;
-    flags.h = 0;
-    flags.n = 0;
-    flags.c = 0;
+    flags.z = false;
+    flags.h = false;
+    flags.n = false;
+    flags.c = false;
 
     interruptsEnabled_ = true;
 

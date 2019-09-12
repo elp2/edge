@@ -46,6 +46,7 @@ target_link_libraries(edge_lib ${SDL2_LIBRARIES})
 
 
 add_executable(edge WIN32
+    src/system.cpp
     src/main.cpp)
 target_link_libraries(edge edge_lib)
 target_link_libraries(edge ${SDL2_LIBRARIES})

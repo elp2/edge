@@ -24,7 +24,6 @@ class PPU;
 class CPU {
  private:
     AddressRouter *addressRouter_;
-    PPU *ppu_;
     CommandFactory *commandFactory_;
     CBCommandFactory *cbCommandFactory_;
     Command *CommandForOpcode(uint8_t opcode);
@@ -63,7 +62,7 @@ class CPU {
 
     uint8_t ReadOpcodeAtPC();
     void AdvancePC();
-    void Step();
+    int Step();
 
     bool Requires16Bits(Destination d);
     uint8_t Get8Bit(Destination d);
