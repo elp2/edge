@@ -5,6 +5,10 @@
 #include "Palette.hpp"
 #include "Pixel.hpp"
 
+const int SCREEN_WIDTH = 160;
+const int SCREEN_HEIGHT = 144;
+const int SCREEN_PIXELS = SCREEN_WIDTH * SCREEN_HEIGHT;
+
 using namespace std;
 
 class Screen {

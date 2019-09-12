@@ -12,10 +12,9 @@
 #include "MMU.hpp"
 #include "PPU.hpp"
 #include "serial_controller.hpp"
+#include "Screen.hpp"
 #include "Utils.hpp"
 
-const int SCREEN_WIDTH = 160;
-const int SCREEN_HEIGHT = 144;
 uint64_t frame_start_ms;
 
 System::System(string rom_filename) {
