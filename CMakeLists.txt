@@ -24,6 +24,7 @@ add_library (edge_lib
     src/Command.cpp
     src/CommandFactory.cpp
     src/CPU.cpp
+    src/interrupt_controller.cpp
     src/JumpCommand.cpp
     src/LoadCommand.cpp
     src/MathCommand.cpp
@@ -99,6 +100,7 @@ add_executable(tests
     tests/call_command_test.cpp
     tests/cb_command_test.cpp
     tests/cpu_registers_test.cpp
+    tests/interrupt_controller_test.cpp
     tests/jump_command_test.cpp
     tests/math_command_test.cpp
     tests/misc_command_test.cpp
@@ -108,5 +110,6 @@ add_executable(tests
     tests/stack_test.cpp)
 target_include_directories(tests PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(tests gtest_main)
+target_link_libraries(tests gmock)
 target_link_libraries(tests edge_lib)
 add_test(NAME basic_tests COMMAND tests)
