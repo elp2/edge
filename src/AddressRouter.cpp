@@ -10,10 +10,10 @@
 
 using namespace std;
 
-AddressRouter::AddressRouter(MMU *mmu, PPU *ppu) {
+AddressRouter::AddressRouter(MMU *mmu, PPU *ppu, SerialController *serial_controller) {
     mmu_ = mmu;
     ppu_ = ppu;
-    serial_controller_ = new SerialController();
+    serial_controller_ = serial_controller;
 }
 
 AddressOwner ownerForIOAddress(uint16_t address) {

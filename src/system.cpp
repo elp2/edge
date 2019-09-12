@@ -11,6 +11,7 @@
 #include "CPU.hpp"
 #include "MMU.hpp"
 #include "PPU.hpp"
+#include "serial_controller.hpp"
 #include "Utils.hpp"
 
 const int SCREEN_WIDTH = 160;
@@ -20,7 +21,10 @@ uint64_t frame_start_ms;
 System::System(string rom_filename) {
     mmu_ = GetMMU(rom_filename);
     ppu_ = new PPU();
-    cpu_ = new CPU(mmu_, ppu_);
+	serial_controller_ = new SerialController();
+	router_ = new AddressRouter(mmu_, ppu_, serial_controller_);
+	cpu_ = new CPU(router_);
+
     InitSDL();
     frame_start_ms = SDL_GetPerformanceCounter();
 }

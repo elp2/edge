@@ -18,12 +18,10 @@ struct flags_t {
 };
 
 class AddressRouter;
-class MMU;
-class PPU;
 
 class CPU {
  private:
-    AddressRouter *addressRouter_;
+    AddressRouter *address_router_;
     CommandFactory *commandFactory_;
     CBCommandFactory *cbCommandFactory_;
     Command *CommandForOpcode(uint8_t opcode);
@@ -49,7 +47,7 @@ class CPU {
  public:
     flags_t flags;
 
-    CPU(MMU *mmu, PPU *ppu);
+    CPU(AddressRouter *address_router);
     ~CPU();
 
     // Resets the CPU to base state.
