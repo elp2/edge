@@ -36,6 +36,16 @@ class InterruptController : public InterruptHandler {
     uint8_t interrupt_request() { return interrupt_request_; };
     uint8_t interrupt_enabled_flags() { return interrupt_enabled_flags_; };
 
+    void Advance(int cycles);
+    void InterruptToPC(uint8_t pc);
+
+    void SetByteAt(uint16_t address, uint8_t byte);
+    uint8_t GetByteAt(uint16_t address);
+
+    void DisableInterrupts();
+    void EnableInterrupts();
+
+    // Only from tests.
     void set_interrupts_enabled(bool enabled) { interrupts_enabed_ = enabled; };
     bool interrupts_enabled() { return interrupts_enabed_; };
 
@@ -45,4 +55,7 @@ class InterruptController : public InterruptHandler {
 
     uint8_t interrupt_request_ = 0x00;
     uint8_t interrupt_enabled_flags_ = 0x00;
+
+    int disable_interrupts_in_loops_ = 0;
+    int enable_interrupts_in_loops_ = 0;    
 };

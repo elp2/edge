@@ -4,6 +4,7 @@
 
 using namespace std;
 
+class InterruptController;
 class MMU;
 class PPU;
 class SerialController;
@@ -13,12 +14,13 @@ enum AddressOwner {
     AddressOwner_MMU,
     AddressOwner_PPU,
     AddressOwner_Serial,
+    AddressOwner_Interrupt,
 };
 
 // Redirects reads and writes to the MMU, PPU, Sound, and potentially other controllers.
 class AddressRouter {
  public:
-    AddressRouter(MMU* mmu, PPU* ppu, SerialController* serial_controller);
+    AddressRouter(MMU* mmu, PPU* ppu, SerialController* serial_controller, InterruptController *interrupt_controller);
     ~AddressRouter() = default;
 
     uint8_t GetByteAt(uint16_t address);
@@ -32,6 +34,7 @@ class AddressRouter {
     MMU *mmu_;
     PPU *ppu_;
     SerialController *serial_controller_;
+    InterruptController *interrupt_controller_;
     bool disassemblerMode_ = false;
 
     uint8_t GetByteAtAddressFromOwner(AddressOwner owner, uint16_t address);

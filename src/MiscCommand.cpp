@@ -103,10 +103,10 @@ void MiscCommand::Run(CPU *cpu) {
         assert(nextPCByte == 0x00);
         break;
     case 0xF3:
-        cpu->DisableInterruptsNextLoop();
+        cpu->DisableInterrupts();
         break;
     case 0xFB:
-        cpu->EnableInterruptsNextLoop();
+        cpu->EnableInterrupts();
         break;
     
     default:

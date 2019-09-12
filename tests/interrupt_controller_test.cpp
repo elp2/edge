@@ -11,10 +11,10 @@ class MockInterruptExecutor : public InterruptExecutor {
     MOCK_METHOD(void, InterruptToPC, (uint8_t pc), (override));
 };
 
-class InterruptRouterTest : public ::testing::Test {
+class InterruptControllerTest : public ::testing::Test {
  protected:
-    InterruptRouterTest() {};
-    ~InterruptRouterTest() {};
+    InterruptControllerTest() {};
+    ~InterruptControllerTest() {};
     void SetUp() override {
         controller_ = new InterruptController();
         controller_->set_executor(&mock_executor_);
@@ -24,12 +24,12 @@ class InterruptRouterTest : public ::testing::Test {
     InterruptController *controller_;
 };
 
-TEST_F(InterruptRouterTest, InterruptsDisabled) {
+TEST_F(InterruptControllerTest, InterruptsDisabled) {
     EXPECT_CALL(mock_executor_, InterruptToPC(_)).Times(0);
     controller_->GenerateInterrupt(Interrupt_VBlank);
 }
 
-TEST_F(InterruptRouterTest, InterruptVblankNotEnabled) {
+TEST_F(InterruptControllerTest, InterruptVblankNotEnabled) {
     EXPECT_CALL(mock_executor_, InterruptToPC(_)).Times(0);
 
     controller_->set_interrupts_enabled(true);
@@ -37,7 +37,7 @@ TEST_F(InterruptRouterTest, InterruptVblankNotEnabled) {
     EXPECT_TRUE(controller_->interrupts_enabled());
 }
 
-TEST_F(InterruptRouterTest, InterruptVblankEnabled) {
+TEST_F(InterruptControllerTest, InterruptVblankEnabled) {
     EXPECT_CALL(mock_executor_, InterruptToPC(0x40));
     controller_->set_interrupts_enabled(true);
     controller_->set_interrupt_enabled_flags(Interrupt_VBlank);
@@ -46,12 +46,34 @@ TEST_F(InterruptRouterTest, InterruptVblankEnabled) {
     EXPECT_FALSE(controller_->interrupts_enabled());
 }
 
-TEST_F(InterruptRouterTest, InterruptVblankDoesntTriggerForLCDC) {
+TEST_F(InterruptControllerTest, InterruptVblankDoesntTriggerForLCDC) {
     EXPECT_CALL(mock_executor_, InterruptToPC(_)).Times(0);
 
     controller_->set_interrupts_enabled(true);
     controller_->set_interrupt_enabled_flags(Interrupt_LCDC);
     controller_->GenerateInterrupt(Interrupt_VBlank);
 
+    EXPECT_TRUE(controller_->interrupts_enabled());
+}
+
+TEST_F(InterruptControllerTest, DisablesInterruptsAfterCycles) {
+    controller_->set_interrupts_enabled(true);
+
+    controller_->DisableInterrupts();
+    EXPECT_TRUE(controller_->interrupts_enabled());
+    controller_->Advance(10);
+    EXPECT_TRUE(controller_->interrupts_enabled());
+    controller_->Advance(10);
+    EXPECT_FALSE(controller_->interrupts_enabled());
+}
+
+TEST_F(InterruptControllerTest, EnablesInterruptsAfterCycles) {
+    controller_->set_interrupts_enabled(false);
+
+    controller_->EnableInterrupts();
+    EXPECT_FALSE(controller_->interrupts_enabled());
+    controller_->Advance(10);
+    EXPECT_FALSE(controller_->interrupts_enabled());
+    controller_->Advance(10);
     EXPECT_TRUE(controller_->interrupts_enabled());
 }

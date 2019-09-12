@@ -9,6 +9,7 @@
 #include "BitCommand.hpp"
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
+#include "interrupt_controller.hpp"
 #include "MMU.hpp"
 #include "PPU.hpp"
 #include "serial_controller.hpp"
@@ -21,8 +22,11 @@ System::System(string rom_filename) {
     mmu_ = GetMMU(rom_filename);
     ppu_ = new PPU();
 	serial_controller_ = new SerialController();
-	router_ = new AddressRouter(mmu_, ppu_, serial_controller_);
+    interrupt_controller_ = new InterruptController();
+
+	router_ = new AddressRouter(mmu_, ppu_, serial_controller_, interrupt_controller_);
 	cpu_ = new CPU(router_);
+    cpu_->SetInterruptController(interrupt_controller_);
 
     InitSDL();
     frame_start_ms = SDL_GetPerformanceCounter();
@@ -68,13 +72,13 @@ void System::Advance(int stepped) {
     const int frame_cycles = 70224 / 4;
 
     ppu_->Advance(stepped);
+    interrupt_controller_->Advance(stepped);
 
     cycles_ += stepped;
     if (cycles_ >= frame_cycles) {
         FrameEnded();
         cycles_ = 0;
         uint64_t end_ms = SDL_GetPerformanceCounter();
-        cout << "Frame: " << (end_ms - frame_start_ms) / 1000 << endl;
         frame_start_ms = end_ms;
     }
 }

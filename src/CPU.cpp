@@ -6,6 +6,7 @@
 
 #include "AddressRouter.hpp"
 #include "Command.hpp"
+#include "interrupt_controller.hpp"
 #include "Utils.hpp"
 #include "PPU.hpp"
 
@@ -33,13 +34,7 @@ Command *CPU::CommandForOpcode(uint8_t opcode) {
 int CPU::Step() {
     // Take actions requested in previous cycle.
     // TODO these actually need a countdown since they happen 2 instructions later.
-    if (disableInterruptsNextLoop_) {
-        interruptsEnabled_ = false;
-        disableInterruptsNextLoop_ = false;
-    } else if (enableInterruptsNextLoop_) {
-        interruptsEnabled_ = true;
-        enableInterruptsNextLoop_ = false;
-    } else if (haltNextLoop_) {
+    if (haltNextLoop_) {
         cout << "TODO: Halt!";
         haltNextLoop_ = false;
         assert(false); // TODO!
@@ -389,15 +384,29 @@ void CPU::Reset() {
     flags.n = false;
     flags.c = false;
 
-    interruptsEnabled_ = true;
-
     haltNextLoop_ = false;
     stopNextLoop_ = false;
-    disableInterruptsNextLoop_ = false;
-    enableInterruptsNextLoop_ = false;
 
     cycles_ = 0;
     a_ = b_ = c_ = d_ = e_ = h_ = l_ = 0;
+}
+
+void CPU::SetInterruptController(InterruptController *interrupt_controller) {
+    interrupt_controller_ = interrupt_controller;
+    interrupt_controller_->set_executor(this);
+}
+
+void CPU::DisableInterrupts() {
+    interrupt_controller_->DisableInterrupts();
+}
+
+void CPU::EnableInterrupts() {
+    interrupt_controller_->EnableInterrupts();
+}
+
+void CPU::InterruptToPC(uint8_t pc) {
+    Push16Bit(pc_);
+    JumpAddress(pc);
 }
 
 void CPU::Debugger() {

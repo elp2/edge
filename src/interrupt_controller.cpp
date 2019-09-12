@@ -2,6 +2,11 @@
 
 #include <cassert>
 
+const int INTERRUPTS_ENABLE_DISABLE_LOOPS = 2;
+
+const uint16_t IF_ADDRESS = 0xFF0F;
+const uint16_t IE_ADDRESS = 0xFFFF;
+
 InterruptController::InterruptController() {
 
 }
@@ -39,4 +44,57 @@ void InterruptController::GenerateInterrupt(Interrupt interrupt) {
     }
     interrupts_enabed_ = false; // Must be re-enabled during the event loop.
     executor_->InterruptToPC(rst_pc);
+}
+
+void InterruptController::Advance(int cycles) {
+    if (disable_interrupts_in_loops_ > 0) {
+        if (disable_interrupts_in_loops_ == 1) {
+            interrupts_enabed_ = false;
+        }
+        disable_interrupts_in_loops_--;
+    }
+    if (enable_interrupts_in_loops_ > 0) {
+        if (enable_interrupts_in_loops_ == 1) {
+            interrupts_enabed_ = true;
+        }
+        enable_interrupts_in_loops_--;
+    }
+}
+
+void InterruptController::DisableInterrupts() {
+    disable_interrupts_in_loops_ = INTERRUPTS_ENABLE_DISABLE_LOOPS;
+    enable_interrupts_in_loops_ = 0;
+}
+
+void InterruptController::EnableInterrupts() {
+    enable_interrupts_in_loops_ = INTERRUPTS_ENABLE_DISABLE_LOOPS;
+    disable_interrupts_in_loops_ = 0;
+}
+
+void InterruptController::SetByteAt(uint16_t address, uint8_t byte) {
+    switch (address)
+    {
+    case IF_ADDRESS:
+        set_interrupt_request(byte);
+        break;
+    case IE_ADDRESS:
+        set_interrupt_enabled_flags(byte);
+        break;
+    default:
+        assert(false);
+        break;
+    }
+}
+
+uint8_t InterruptController::GetByteAt(uint16_t address) {
+    switch (address)
+    {
+    case IF_ADDRESS:
+        return interrupt_request();
+    case IE_ADDRESS:
+        return interrupt_enabled_flags();
+    default:
+        assert(false);
+        break;
+    }
 }

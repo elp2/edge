@@ -5,6 +5,7 @@
 
 class AddressRouter;
 class CPU;
+class InterruptController;
 class MMU;
 class PPU;
 class SerialController;
@@ -26,6 +27,7 @@ class System {
     CPU *cpu_;
     PPU *ppu_;
     AddressRouter *router_;
+    InterruptController *interrupt_controller_;
     SerialController *serial_controller_;
 
     // TODO: These should be in the screen.

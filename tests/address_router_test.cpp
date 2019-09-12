@@ -15,7 +15,7 @@ class AddressRouterTest : public ::testing::Test {
 TEST(AddressRouterTest, PPU) {
     PPU *ppu = new PPU();
     MMU *mmu = getTestingMMU();
-    AddressRouter *addressRouter = new AddressRouter(mmu, ppu, NULL);
+    AddressRouter *addressRouter = new AddressRouter(mmu, ppu, NULL, NULL);
 
     addressRouter->SetByteAt(0x8000, 0xed);
     ASSERT_EQ(ppu->GetByteAt(0x8000), 0xed);
@@ -28,7 +28,7 @@ TEST(AddressRouterTest, PPU) {
 TEST(AddressRouterTest, MMU) {
     PPU *ppu = new PPU();
     MMU *mmu = getTestingMMU();
-    AddressRouter *addressRouter = new AddressRouter(mmu, ppu, NULL);
+    AddressRouter *addressRouter = new AddressRouter(mmu, ppu, NULL, NULL);
 
     mmu->SetByteAt(0xFF00, 0x35);
     ASSERT_EQ(mmu->GetByteAt(0xFF00), addressRouter->GetByteAt(0xFF00));
