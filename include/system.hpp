@@ -5,6 +5,7 @@
 
 class AddressRouter;
 class CPU;
+class InputController;
 class InterruptController;
 class MMU;
 class PPU;
@@ -27,6 +28,7 @@ class System {
     CPU *cpu_;
     PPU *ppu_;
     AddressRouter *router_;
+	InputController* input_controller_;
     InterruptController *interrupt_controller_;
     SerialController *serial_controller_;
 

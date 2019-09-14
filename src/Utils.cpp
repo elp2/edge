@@ -132,14 +132,14 @@ MMU *getTestingMMU() {
 CPU *getTestingCPU() {
     MMU *mmu = getTestingMMU();
     PPU *ppu = new PPU();
-	AddressRouter* address_router = new AddressRouter(mmu, ppu, NULL, NULL);
+	AddressRouter* address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL);
     return new CPU(address_router);
 }
 
 CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions) {
     MMU *mmu = getTestingMMU();
     PPU *ppu = new PPU();
-	AddressRouter *address_router = new AddressRouter(mmu, ppu, NULL, NULL);
+	AddressRouter *address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL);
     CPU *cpu = new CPU(address_router);
 
     uint16_t ram_start = 0xC000;

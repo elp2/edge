@@ -9,6 +9,7 @@
 #include "BitCommand.hpp"
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
+#include "input_controller.h"
 #include "interrupt_controller.hpp"
 #include "MMU.hpp"
 #include "PPU.hpp"
@@ -21,10 +22,13 @@ uint64_t frame_start_ms;
 System::System(string rom_filename) {
     mmu_ = GetMMU(rom_filename);
     ppu_ = new PPU();
+
 	serial_controller_ = new SerialController();
     interrupt_controller_ = new InterruptController();
+	input_controller_ = new InputController();
+	input_controller_->SetInterruptHandler(interrupt_controller_);
+	router_ = new AddressRouter(mmu_, ppu_, serial_controller_, interrupt_controller_, input_controller_);
 
-	router_ = new AddressRouter(mmu_, ppu_, serial_controller_, interrupt_controller_);
 	cpu_ = new CPU(router_);
     cpu_->SetInterruptController(interrupt_controller_);
 
@@ -71,6 +75,9 @@ void System::InitSDL() {
 void System::Advance(int stepped) {
     const int frame_cycles = 70224 / 4;
 
+	if (input_controller_->Advance(stepped)) {
+		input_controller_->PollAndApplyEvents();
+	}
     ppu_->Advance(stepped);
     interrupt_controller_->Advance(stepped);
 
@@ -84,14 +91,6 @@ void System::Advance(int stepped) {
 }
 
 void System::FrameEnded() {
-    SDL_Event e;
-    while(SDL_PollEvent( &e ) != 0) {
-        if( e.type == SDL_QUIT ) {
-            cout << "SDL_QUIT" << endl;
-            exit(0);
-        }
-    }
-
     SDL_UpdateTexture(texture_, NULL, pixels_, SCREEN_WIDTH * sizeof(Uint32));
     SDL_RenderClear(renderer_);
     SDL_RenderCopy(renderer_, texture_, NULL, NULL);

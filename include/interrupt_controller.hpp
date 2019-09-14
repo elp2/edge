@@ -7,7 +7,7 @@ enum Interrupt : uint8_t {
     Interrupt_LCDC = 0x02,
     Interrupt_TimerOverflow = 0x04,
     Interrupt_SerialTransferCompletion = 0x08,
-    Interrupt_Keypad = 0x10,
+    Interrupt_Input = 0x10,
 };
 
 class InterruptExecutor {
@@ -20,7 +20,7 @@ class InterruptExecutor {
 
 class InterruptHandler {
  public:
-    void GenerateInterrupt(Interrupt interrupt);
+	virtual void GenerateInterrupt(Interrupt interrupt) = 0;
 };
 
 class InterruptController : public InterruptHandler {

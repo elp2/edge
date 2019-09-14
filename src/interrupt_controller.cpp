@@ -35,7 +35,7 @@ void InterruptController::GenerateInterrupt(Interrupt interrupt) {
         case Interrupt_SerialTransferCompletion:
             rst_pc = 0x58;
             break;
-        case Interrupt_Keypad:
+        case Interrupt_Input:
             rst_pc = 0x60;
             break;        
         default:
@@ -95,6 +95,6 @@ uint8_t InterruptController::GetByteAt(uint16_t address) {
         return interrupt_enabled_flags();
     default:
         assert(false);
-        break;
+		return 0x00;
     }
 }
