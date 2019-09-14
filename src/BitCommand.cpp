@@ -218,13 +218,13 @@ void BitCommand::Run(CPU *cpu) {
     case 0xfe:
         CP(cpu, Eat_PC_Byte);
         return;
-    case 0x07:
-    case 0x17:
+    case 0x07: // RLCA
+    case 0x17: // RLA
         RL(cpu, Register_A, opcode == 0x17);
         return;
-    case 0x0f:
-    case 0x1f:
-        RR(cpu, Register_A, opcode == 0x1f);
+    case 0x0F: // RRCA
+    case 0x1F: // RRA
+        RR(cpu, Register_A, opcode == 0x1F);
         return;
     default:
         cout << "Unknown bit command: 0x" << hex << unsigned(opcode);
