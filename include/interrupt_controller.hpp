@@ -20,9 +20,10 @@ class InterruptExecutor {
 
 class InterruptHandler {
  public:
-    void GenerateInterrupt(Interrupt interrupt);
+    virtual void GenerateInterrupt(Interrupt interrupt) = 0; // TODO Rename to "HANDLE"!
 };
 
+// TODO: Interrupt Priority ordering 1-5.
 class InterruptController : public InterruptHandler {
  public:
     InterruptController();

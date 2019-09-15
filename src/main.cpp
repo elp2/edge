@@ -3,7 +3,7 @@
 #include "system.hpp"
 
 int main(int argc, char* argv[]) {
-	// System* system = new System("../../gb-test-roms/cpu_instrs/individual/01-special.gb"); // 696ED68F DAA Failed #6.
+	// System* system = new System("../../gb-test-roms/cpu_instrs/individual/01-special.gb"); // 69 6E D6 8F(69 6E D6 8F?) DAA Failed #6.
 	// System* system = new System("../../gb-test-roms/cpu_instrs/individual/03-op sp,hl.gb"); // HANG
 	// System *system = new System("../../gb-test-roms/cpu_instrs/individual/04-op r,imm.gb"); // PASS
 	// System *system = new System("../../gb-test-roms/cpu_instrs/individual/05-op rp.gb"); // PASS

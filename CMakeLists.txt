@@ -21,7 +21,6 @@ add_library (edge_lib
     src/BitCommand.cpp
     src/CallCommand.cpp
     src/CBCommand.cpp
-    src/Command.cpp
     src/CommandFactory.cpp
     src/CPU.cpp
     src/interrupt_controller.cpp
@@ -39,6 +38,7 @@ add_library (edge_lib
     src/serial_controller.cpp
     src/StackCommand.cpp
     src/Sprite.cpp
+    src/timer_controller.cc
     src/UnimplementedCommand.cpp
     src/Utils.cpp)
 target_include_directories(edge_lib PUBLIC ${SDL2_INCLUDE_DIR})
@@ -107,7 +107,8 @@ add_executable(tests
     tests/mmu_test.cpp
     tests/ppu_test.cpp
     tests/sprite_test.cpp
-    tests/stack_test.cpp)
+    tests/stack_test.cpp
+    tests/timer_controller_test.cc)
 target_include_directories(tests PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(tests gtest_main)
 target_link_libraries(tests gmock)
