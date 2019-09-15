@@ -23,6 +23,7 @@ add_library (edge_lib
     src/CBCommand.cpp
     src/CommandFactory.cpp
     src/CPU.cpp
+    src/input_controller.cc
     src/interrupt_controller.cpp
     src/JumpCommand.cpp
     src/LoadCommand.cpp
@@ -100,6 +101,7 @@ add_executable(tests
     tests/call_command_test.cpp
     tests/cb_command_test.cpp
     tests/cpu_registers_test.cpp
+    tests/input_controller_test.cc
     tests/interrupt_controller_test.cpp
     tests/jump_command_test.cpp
     tests/math_command_test.cpp
