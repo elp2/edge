@@ -55,7 +55,12 @@ void PixelFIFO::Append(Pixel pixel) {
 }
 
 bool PixelFIFO::Advance(Screen *screen) {
-    assert(row_ + ppu_->scy() == y_);
+	
+	if (row_ + ppu_->scy() != y_) {
+		cout << "SCY Changed unexpectedly. row: " << hex << unsigned(row_);
+		cout << " scy: " << hex << unsigned(ppu_->scy());
+		cout << " != y: " << hex << unsigned(y_) << endl;
+	}
     if (fetch_->cycles_remaining_ > 0) {
         fetch_->cycles_remaining_--;
         if (fetch_->cycles_remaining_ == 0) {

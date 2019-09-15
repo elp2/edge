@@ -21,19 +21,14 @@ LoadCommand::~LoadCommand() {
 void LoadCommand::Run(CPU *cpu) {
     bool from16Bit = cpu->Requires16Bits(from);
     bool to16Bit = cpu->Requires16Bits(to);
-    if (from16Bit) {
-        if (to16Bit) {
-            cpu->Set16Bit(to, cpu->Get16Bit(from));
-        } else {
-			// TODO: Is this possible? If so, write tests and silence compile warning.
-            cpu->Set8Bit(to, cpu->Get16Bit(from));
-        }
+	if (from16Bit != to16Bit) {
+		assert(false);
+		return;
+	}
+    if (from16Bit && to16Bit) {
+        cpu->Set16Bit(to, cpu->Get16Bit(from));
     } else {
-        if (to16Bit) {
-            cpu->Set16Bit(to, cpu->Get8Bit(from));
-        } else {
-            cpu->Set8Bit(to, cpu->Get8Bit(from));
-        }
+        cpu->Set8Bit(to, cpu->Get8Bit(from));
     }
 }
 
@@ -57,24 +52,24 @@ class SpecialLoadCommand : public Command {
         uint16_t address;
         switch (opcode)
         {
-        case 0xf2:
+        case 0xF2:
             cpu->Set8Bit(Register_A, cpu->Get8Bit(Address_0xFF00_Register_C));
             break;
-        case 0xf0:
+        case 0xF0:
             cpu->Set8Bit(Register_A, cpu->Get8Bit(Address_0xFF00_Byte));
             break;
-        case 0xe2:
+        case 0xE2:
             cpu->Set8Bit(Address_0xFF00_Register_C, cpu->Get8Bit(Register_A));
             break;
-        case 0xe0:
+        case 0xE0:
             cpu->Set8Bit(Address_0xFF00_Byte, cpu->Get8Bit(Register_A));
             break;
-        case 0x3a:
+        case 0x3A:
             address = cpu->Get16Bit(Register_HL);
-            cpu->Set8Bit(Register_A, cpu->Get16Bit(Register_HL));
+            cpu->Set8Bit(Register_A, cpu->Get8Bit(Address_HL));
             cpu->Set16Bit(Register_HL, address - 1);
             break;
-        case 0x2a:
+        case 0x2A:
             address = cpu->Get16Bit(Register_HL);
             cpu->Set8Bit(Register_A, cpu->Get8Bit(Address_HL));
             cpu->Set16Bit(Register_HL, address + 1);
