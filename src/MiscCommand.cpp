@@ -19,54 +19,26 @@ MiscCommand::~MiscCommand() {
 
 void DAA(CPU* cpu) {
 	uint8_t a = cpu->Get8Bit(Register_A);
-	bool carry = cpu->flags.c;
-	int low_dec = NIBBLELOW(a);
-	int high_dec = NIBBLEHIGH(a);
-
 	if (cpu->flags.n) {
-        if (carry) {
-            if (cpu->flags.h && high_dec >= 0x6 && low_dec >= 0x6) {
-                a += 0x9A;
-            } else if (!cpu->flags.h && high_dec >= 0x6 && low_dec < 0xA) {
-                a += 0xA0;
-            }
-        } else {
-            if (cpu->flags.h) {
-                if (low_dec >= 0x6) {
-                    a += 0xFA;
-                }
-            }
-        }
-	} else {
+		if (cpu->flags.c) {
+			a -= 0x60;
+		}
 		if (cpu->flags.h) {
-			low_dec += 16;
-			// Higher decimal got a free increase since low nibble add spilled over.
-			high_dec--;
+			a -= 0x06;
 		}
-		if (low_dec >= 10) {
-			low_dec %= 10;
-			high_dec++;
+	} else {
+		if (cpu->flags.c || a > 0x99) {
+			a += 0x60;
+			cpu->flags.c = true;
 		}
-		if (carry) {
-			high_dec += 16;
+		if (cpu->flags.h || NIBBLELOW(a) > 0x9) {
+			a += 0x6;
 		}
-		if (high_dec >= 10) {
-			high_dec %= 10;
-			carry = true;
-		}
-        assert(high_dec < 10 && high_dec >= 0);
-        assert(low_dec < 10 && low_dec >= 0);
-        uint8_t h = high_dec;
-        uint8_t l = low_dec;
-        a = (h << 4) | l;
 	}
 
-
-	cpu->flags.z = a == 0;
-	// cpu->flags.n not affected.
-	cpu->flags.h = false; // Half carry only makes sense for Decimal Adjustment.
-	cpu->flags.c = carry;
+	cpu->flags.z = (a == 0);
 	cpu->Set8Bit(Register_A, a);
+	cpu->flags.h = false;
 }
 
 void MiscCommand::Run(CPU *cpu) {
