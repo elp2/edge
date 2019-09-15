@@ -6,15 +6,14 @@
 
 #include "AddressRouter.hpp"
 #include "Command.hpp"
+#include "interrupt_controller.hpp"
 #include "Utils.hpp"
 #include "PPU.hpp"
 
-CPU::CPU(MMU *mmu, PPU *ppu) {
-    ppu_ = ppu;
-    addressRouter_ = new AddressRouter(mmu, ppu);
+CPU::CPU(AddressRouter* address_router) {
     commandFactory_ = new CommandFactory();
     cbCommandFactory_ = new CBCommandFactory();
-    debugPrint_ = false;
+	address_router_ = address_router;
 
     Reset();
 }
@@ -32,15 +31,10 @@ Command *CPU::CommandForOpcode(uint8_t opcode) {
     }
 }
 
-void CPU::Step() {
+int CPU::Step() {
     // Take actions requested in previous cycle.
-    if (disableInterruptsNextLoop_) {
-        interruptsEnabled_ = false;
-        disableInterruptsNextLoop_ = false;
-    } else if (enableInterruptsNextLoop_) {
-        interruptsEnabled_ = true;
-        enableInterruptsNextLoop_ = false;
-    } else if (haltNextLoop_) {
+    // TODO these actually need a countdown since they happen 2 instructions later.
+    if (haltNextLoop_) {
         cout << "TODO: Halt!";
         haltNextLoop_ = false;
         assert(false); // TODO!
@@ -56,16 +50,17 @@ void CPU::Step() {
 
     Command *command = CommandForOpcode(opcode);
     command->Run(this);
-    cycles_ += command->cycles;
+    int stepped = command->cycles;
+    cycles_ += stepped;
 
     if (debugPrint_) {
         cout << command->description << " ; PC=" << commandPC << endl;
         Debugger();
     }
 
-    assert(command->cycles < 33 && command->cycles > 0);
+    assert(stepped < 33 && stepped > 0);
 
-    ppu_->Advance(command->cycles);
+    return stepped;
 }
 
 bool CPU::Requires16Bits(Destination destination) {
@@ -92,7 +87,7 @@ bool CPU::Requires16Bits(Destination destination) {
 }
 
 uint8_t CPU::Get8Bit(Destination destination) {
-    uint8_t pcByte;
+    uint8_t pc_byte;
 	uint16_t word;
 	switch (destination)
 	{
@@ -113,29 +108,29 @@ uint8_t CPU::Get8Bit(Destination destination) {
     case Register_L:
         return l_;
     case Address_0xFF00_Byte:
-        return addressRouter_->GetByteAt(0xff00 + Get8Bit(Eat_PC_Byte));
+        return address_router_->GetByteAt(0xff00 + Get8Bit(Eat_PC_Byte));
     case Address_0xFF00_Register_C:
-        return addressRouter_->GetByteAt(0xff00 + Get8Bit(Register_C));        
+        return address_router_->GetByteAt(0xff00 + Get8Bit(Register_C));        
     case Eat_PC_Byte: {
-        pcByte = addressRouter_->GetByteAt(pc_);
+        pc_byte = address_router_->GetByteAt(pc_);
         AdvancePC();
-        return pcByte;
+        return pc_byte;
     case Address_BC:
-        return addressRouter_->GetByteAt(Get16Bit(Register_BC));
+        return address_router_->GetByteAt(Get16Bit(Register_BC));
         break;
     case Address_DE:
-        return addressRouter_->GetByteAt(Get16Bit(Register_DE));
+        return address_router_->GetByteAt(Get16Bit(Register_DE));
         break;
     case Address_HL:
-        return addressRouter_->GetByteAt(Get16Bit(Register_HL));
+        return address_router_->GetByteAt(Get16Bit(Register_HL));
         break;
     case Address_nn:
-        word = addressRouter_->GetWordAt(pc_);
+        word = address_router_->GetWordAt(pc_);
         AdvancePC();
         AdvancePC();
-        return addressRouter_->GetByteAt(word);
+        return address_router_->GetByteAt(word);
     case Address_SP:
-        return addressRouter_->GetByteAt(Get16Bit(Register_SP));
+        return address_router_->GetByteAt(Get16Bit(Register_SP));
         break;
     }
     default:
@@ -180,7 +175,7 @@ uint16_t CPU::Get16Bit(Destination destination) {
     case Register_PC:
         return pc_;
     case Eat_PC_Word:
-        word = addressRouter_->GetWordAt(pc_);
+        word = address_router_->GetWordAt(pc_);
         AdvancePC();
         AdvancePC();
         return word;
@@ -222,27 +217,27 @@ void CPU::Set8Bit(Destination destination, uint8_t value) {
         l_ = value;
         break;
     case Address_BC:
-        addressRouter_->SetByteAt(Get16Bit(Register_BC), value);
+        address_router_->SetByteAt(Get16Bit(Register_BC), value);
         break;
     case Address_DE:
-        addressRouter_->SetByteAt(Get16Bit(Register_DE), value);
+        address_router_->SetByteAt(Get16Bit(Register_DE), value);
         break;
     case Address_HL:
-        addressRouter_->SetByteAt(Get16Bit(Register_HL), value);
+        address_router_->SetByteAt(Get16Bit(Register_HL), value);
         break;
     case Address_SP:
         cout << "Consider moving the SP on set? How is it happening elsewhere?" << endl;
         assert(false);
-        addressRouter_->SetByteAt(Get16Bit(Register_SP), value);
+        address_router_->SetByteAt(Get16Bit(Register_SP), value);
         break;
     case Address_nn:
-        addressRouter_->SetByteAt(Get16Bit(Eat_PC_Word), value);
+        address_router_->SetByteAt(Get16Bit(Eat_PC_Word), value);
         break;
     case Address_0xFF00_Byte:
-        addressRouter_->SetByteAt(0xff00 + Get8Bit(Eat_PC_Byte), value);
+        address_router_->SetByteAt(0xff00 + Get8Bit(Eat_PC_Byte), value);
         break;
     case Address_0xFF00_Register_C:
-        addressRouter_->SetByteAt(0xff00 + Get8Bit(Register_C), value);
+        address_router_->SetByteAt(0xff00 + Get8Bit(Register_C), value);
         break;
     case Eat_PC_Byte:
         // TODO: Is this even valid/necessary?
@@ -294,7 +289,7 @@ void CPU::Set16Bit(Destination destination, uint16_t value) {
         sp_ = value;
         break;
     case Eat_PC_Word:
-        addressRouter_->SetWordAt(pc_, value);
+        address_router_->SetWordAt(pc_, value);
         assert(false);
         break;
     case Address_BC:
@@ -303,7 +298,7 @@ void CPU::Set16Bit(Destination destination, uint16_t value) {
     case Address_SP:
     case Address_nn:
         address = Get16Bit(destination);
-        addressRouter_->SetWordAt(address, value);
+        address_router_->SetWordAt(address, value);
         break;
     default:
         cout << "Unknown 16 bit set: " << hex << unsigned(destination) << endl;
@@ -313,18 +308,18 @@ void CPU::Set16Bit(Destination destination, uint16_t value) {
 
 uint8_t CPU::ReadOpcodeAtPC() {
     if (disasemblerMode_) {
-        addressRouter_->EnableDisassemblerMode(false);
-        uint8_t opcode = addressRouter_->GetByteAt(pc_);
-        addressRouter_->EnableDisassemblerMode(true);
+        address_router_->EnableDisassemblerMode(false);
+        uint8_t opcode = address_router_->GetByteAt(pc_);
+        address_router_->EnableDisassemblerMode(true);
         return opcode;
     }
-    return addressRouter_->GetByteAt(pc_);
+    return address_router_->GetByteAt(pc_);
 }
 
 void CPU::Push8Bit(uint8_t byte) {
     // Stack pointer grows down before anything is pushed.
     sp_ -= 1;
-    addressRouter_->SetByteAt(sp_, byte);
+    address_router_->SetByteAt(sp_, byte);
 }
 
 void CPU::Push16Bit(uint16_t word) {
@@ -336,7 +331,7 @@ void CPU::Push16Bit(uint16_t word) {
 
 uint8_t CPU::Pop8Bit() {
     uint16_t oldSp = sp_;
-    uint8_t byte = addressRouter_->GetByteAt(sp_);
+    uint8_t byte = address_router_->GetByteAt(sp_);
     sp_ += 1;
     assert(sp_ > oldSp);
     return byte;
@@ -350,7 +345,7 @@ uint16_t CPU::Pop16Bit() {
 
 void CPU::EnableDisassemblerMode() {
     disasemblerMode_ = true;
-    addressRouter_->EnableDisassemblerMode(true);
+    address_router_->EnableDisassemblerMode(true);
 }
 
 void CPU::JumpAddress(uint16_t address) {
@@ -381,22 +376,37 @@ void CPU::AdvancePC() {
 }
 
 void CPU::Reset() {
+    pc_ = 0;
     // Initialized on start, but most programs will move it themselves anyway.
     sp_ = 0xfffe;
-    flags.z = 0;
-    flags.h = 0;
-    flags.n = 0;
-    flags.c = 0;
-
-    interruptsEnabled_ = true;
+    flags.z = false;
+    flags.h = false;
+    flags.n = false;
+    flags.c = false;
 
     haltNextLoop_ = false;
     stopNextLoop_ = false;
-    disableInterruptsNextLoop_ = false;
-    enableInterruptsNextLoop_ = false;
 
     cycles_ = 0;
     a_ = b_ = c_ = d_ = e_ = h_ = l_ = 0;
+}
+
+void CPU::SetInterruptController(InterruptController *interrupt_controller) {
+    interrupt_controller_ = interrupt_controller;
+    interrupt_controller_->set_executor(this);
+}
+
+void CPU::DisableInterrupts() {
+    interrupt_controller_->DisableInterrupts();
+}
+
+void CPU::EnableInterrupts() {
+    interrupt_controller_->EnableInterrupts();
+}
+
+void CPU::InterruptToPC(uint8_t pc) {
+    Push16Bit(pc_);
+    JumpAddress(pc);
 }
 
 void CPU::Debugger() {

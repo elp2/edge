@@ -130,3 +130,28 @@ TEST(BitCommandsTest, CP2) {;
     EXPECT_EQ(cpu->Get8Bit(Register_A), 0x3C);
     EXPECT_FLAGS(false, false, true, true);
 }
+
+TEST(BitCommandsTest, RLCLikeRLCA) {
+    const uint8_t RLCA = 0x07;
+    const uint8_t CB = 0xCB;
+
+    CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ RLCA, CB, RLCA });
+
+    for (int i = 0; i < 256; i++) {
+        for (int c = 0; c < 2; c++) {
+            uint8_t a = i;
+            cpu->Set8Bit(Register_A, a);
+            cpu->flags.c = c;
+            cpu->Step();
+            int rlc_a = cpu->Get8Bit(Register_A);
+            bool flags_c = cpu->flags.c;
+
+            cpu->Set8Bit(Register_A, a);
+            cpu->flags.c = c;
+            cpu->Step();
+            ASSERT_EQ(cpu->flags.c, flags_c);
+            ASSERT_EQ(cpu->Get8Bit(Register_A), rlc_a);
+            cpu->JumpRelative(-3);
+        }
+    }
+}

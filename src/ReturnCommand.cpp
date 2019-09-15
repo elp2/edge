@@ -46,7 +46,7 @@ void ReturnCommand::Run(CPU *cpu) {
             break;
         case 0xd9:
             cpu->JumpAddress(cpu->Pop16Bit());
-            cpu->EnableInterruptsNextLoop();
+            cpu->EnableInterrupts();
             break;
 
     default:

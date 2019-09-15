@@ -7,6 +7,7 @@
 #include "Command.hpp"
 #include "CommandFactory.hpp"
 #include "Destination.hpp"
+#include "interrupt_controller.hpp"
 
 using namespace std;
 
@@ -18,18 +19,15 @@ struct flags_t {
 };
 
 class AddressRouter;
-class MMU;
-class PPU;
+class InterruptController;
 
-class CPU {
+class CPU : public InterruptExecutor {
  private:
-    AddressRouter *addressRouter_;
-    PPU *ppu_;
+    AddressRouter *address_router_;
     CommandFactory *commandFactory_;
     CBCommandFactory *cbCommandFactory_;
+    InterruptController *interrupt_controller_;
     Command *CommandForOpcode(uint8_t opcode);
-
-    bool interruptsEnabled_ = false;
 
     uint8_t a_, b_, c_, d_, e_, h_, l_ = 0;
 
@@ -45,12 +43,10 @@ class CPU {
 
     bool haltNextLoop_ = false;
     bool stopNextLoop_ = false;
-    bool disableInterruptsNextLoop_ = false;
-    bool enableInterruptsNextLoop_ = false;
  public:
     flags_t flags;
 
-    CPU(MMU *mmu, PPU *ppu);
+    CPU(AddressRouter *address_router);
     ~CPU();
 
     // Resets the CPU to base state.
@@ -63,7 +59,7 @@ class CPU {
 
     uint8_t ReadOpcodeAtPC();
     void AdvancePC();
-    void Step();
+    int Step();
 
     bool Requires16Bits(Destination d);
     uint8_t Get8Bit(Destination d);
@@ -89,10 +85,14 @@ class CPU {
     // Special Actions.
     void HaltNextLoop() { haltNextLoop_ = true; };
     void StopNextLoop() { stopNextLoop_ = true; };
-    void DisableInterruptsNextLoop() { disableInterruptsNextLoop_ = true; };
-    void EnableInterruptsNextLoop() { enableInterruptsNextLoop_ = true; };
+    void DisableInterrupts();
+    void EnableInterrupts();
 
     void SetDebugPrint(bool debugPrint) { debugPrint_ = debugPrint; };
 
+    void SetInterruptController(InterruptController *interrupt_controller);
+
     uint64_t Cycles() { return cycles_; };
+
+    void InterruptToPC(uint8_t pc);
 };

@@ -3,6 +3,8 @@
 #include <cassert>
 #include <iostream>
 
+#include "input_controller.h"
+#include "interrupt_controller.hpp"
 #include "MMU.hpp"
 #include "PPU.hpp"
 #include "Utils.hpp"
@@ -10,18 +12,20 @@
 
 using namespace std;
 
-AddressRouter::AddressRouter(MMU *mmu, PPU *ppu) {
+AddressRouter::AddressRouter(MMU *mmu, PPU *ppu, SerialController *serial_controller, InterruptController *interrupt_controller, InputController *input_controller) {
     mmu_ = mmu;
     ppu_ = ppu;
-    serial_controller_ = new SerialController();
+    serial_controller_ = serial_controller;
+    interrupt_controller_ = interrupt_controller;
+	input_controller_ = input_controller;
 }
 
 AddressOwner ownerForIOAddress(uint16_t address) {
     switch (address)
     {
     case 0xFF00:
-        // P! Joy Pad
-        return AddressOwner_MMU;
+        // P0 Joy Pad.
+        return AddressOwner_Input;
     case 0xFF01:
     case 0xFF02:
         // Serials.
@@ -39,8 +43,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
         // TAC Timer Control.
         return AddressOwner_MMU;
     case 0xFF0F:
-        // Return IF Interrupt flag.
-        return AddressOwner_MMU;
+        return AddressOwner_Interrupt;
     case 0xFF10:
     case 0xFF11:
     case 0xFF12:
@@ -101,7 +104,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
         // ???
     case 0xFFFF:
     // Interrupt Enable.
-    return AddressOwner_MMU;
+    return AddressOwner_Interrupt;
     default:
         cout << "Unknown i/o address: 0x" << hex << unsigned(address) << endl;
 		return AddressOwner_MMU;
@@ -143,6 +146,10 @@ uint8_t AddressRouter::GetByteAtAddressFromOwner(AddressOwner owner, uint16_t ad
         return ppu_->GetByteAt(address);
     case AddressOwner_Serial:
         return serial_controller_->GetByteAt(address);
+    case AddressOwner_Interrupt:
+        return interrupt_controller_->GetByteAt(address);
+	case AddressOwner_Input:
+		return input_controller_->GetByteAt(address);
     default:
 		assert(false);
 		return 0x00;
@@ -163,7 +170,12 @@ void AddressRouter::SetByteAtAddressInOwner(AddressOwner owner, uint16_t address
         return ppu_->SetByteAt(address, byte);
     case AddressOwner_Serial:
         return serial_controller_->SetByteAt(address, byte);
+    case AddressOwner_Interrupt:
+        return interrupt_controller_->SetByteAt(address, byte);
+	case AddressOwner_Input:
+		return input_controller_->SetByteAt(address, byte);
     default:
+		assert(false);
         break;
     }
 }

@@ -7,7 +7,6 @@
 #include "Screen.hpp"
 #include "Utils.hpp"
 
-const int PIXELS_PER_ROW = 160;
 const int FETCH_CYCLES = 3;
 
 PixelFIFO::PixelFIFO(PPU *ppu) {
@@ -81,7 +80,7 @@ bool PixelFIFO::Advance(Screen *screen) {
     screen->DrawPixel(PeekFront());
     PopFront();
     x_++;
-    return (++pixels_outputted_ == PIXELS_PER_ROW);
+    return (++pixels_outputted_ == SCREEN_WIDTH);
 }
 
 void PixelFIFO::ApplyFetch() {

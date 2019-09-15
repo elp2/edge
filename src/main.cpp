@@ -1,89 +1,18 @@
 #include "SDL.h"
 
-#include <cassert>
-#include <iostream>
-
-#include "AddressRouter.hpp"
-#include "BitCommand.hpp"
-#include "CommandFactory.hpp"
-#include "CPU.hpp"
-#include "MMU.hpp"
-#include "PPU.hpp"
-#include "Utils.hpp"
+#include "system.hpp"
 
 int main(int argc, char* argv[]) {
-    const int SCREEN_WIDTH = 160;
-    const int SCREEN_HEIGHT = 144;
-
-    ROM *bootROM = new ROM();
-    assert(bootROM->LoadFile("../../boot.gb"));
-    ROM *cartridgeROM = new ROM();
-    assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
-    // assert(cartridgeROM->LoadFile("../../gb-test-roms/instr_timing/instr_timing.gb"));
-    // assert(cartridgeROM->LoadFile("../../gb-test-roms/dmg_sound/dmg_sound.gb"));
-
-    MMU *mmu = new MMU();
-    mmu->SetROMs(bootROM, cartridgeROM);
-    PPU *ppu = new PPU();
-
-    CPU *cpu = new CPU(mmu, ppu);
-   int status = SDL_Init(SDL_INIT_VIDEO);
-    if (status == 0) {
-        cout << "OK!";
-    } else {
-        const char * error = SDL_GetError();
-        cout << "Error: " << error << endl;
-    }
-
-    SDL_Window *window = SDL_CreateWindow(
-        "EDGE",
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        SCREEN_WIDTH * 2,
-        SCREEN_HEIGHT * 2,
-        0
-    );
-
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-    SDL_Texture *texture = SDL_CreateTexture(renderer,
-        SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, SCREEN_WIDTH, SCREEN_HEIGHT);
-    
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
-
-    cpu->JumpAddress(0x00);
-
-    uint32_t pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
-    ppu->SetTexturePixels(pixels);
-
-    const int frame_cycles = 70224 / 4;
-    int cycles = 0;
-    int x = 0;
-    SDL_Event e;
-    while (true) {
-        if (cpu->Get16Bit(Register_PC) == 0x100) {
-            // cpu->SetDebugPrint(true);
-            cout << "CPU Cycles to 0x100: 0x" << hex << unsigned(cpu->Cycles()) << endl;
-        }
-        cpu->Step();
-
-        cycles += 10;
-        if (cycles >= frame_cycles) {
-            while(SDL_PollEvent( &e ) != 0) {
-                if( e.type == SDL_QUIT ) {
-                    cout << "SDL_QuIT" << endl;
-                    return 0;
-                }
-            }
-
-            cycles = 0;
-            SDL_UpdateTexture(texture, NULL, pixels, SCREEN_WIDTH * sizeof(Uint32));
-            SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, texture, NULL, NULL);
-            SDL_RenderPresent(renderer);
-        }
-    }
-
-    cout << "Finished at PC: 0x" << hex << unsigned(cpu->Get16Bit(Register_PC)) << endl;
-
-	return 1;
+	// System* system = new System("../../gb-test-roms/cpu_instrs/individual/01-special.gb"); // 69 6E D6 8F(69 6E D6 8F?) DAA Failed #6.
+	// System* system = new System("../../gb-test-roms/cpu_instrs/individual/03-op sp,hl.gb"); // HANG
+	// System *system = new System("../../gb-test-roms/cpu_instrs/individual/04-op r,imm.gb"); // PASS
+	// System *system = new System("../../gb-test-roms/cpu_instrs/individual/05-op rp.gb"); // PASS
+	// System* system = new System("../../gb-test-roms/cpu_instrs/individual/06-ld r,r.gb"); // PASS
+	// System* system = new System("../../gb-test-roms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb"); // FLASH
+	// System* system = new System("../../gb-test-roms/cpu_instrs/individual/08-misc instrs.gb"); // FLASH
+	// System *system = new System("../../gb-test-roms/cpu_instrs/individual/09-op r,r.gb"); // 0x07 17 0f 1f Failed.
+	// System* system = new System("../../gb-test-roms/cpu_instrs/individual/10-bit ops.gb"); // PASS
+	System* system = new System("../../gb-test-roms/cpu_instrs/individual/11-op a,(hl).gb"); // 3A 27 FAILED
+	system->Main();
+    return 0;
 }

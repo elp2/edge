@@ -29,13 +29,11 @@ void Screen::DrawPixel(Pixel pixel) {
 			color = 0xFF0000FF;
 			break;
     }
-    assert(x_ + y_ * 160 < 160 * 144);
-    pixels_[x_ + y_ * 160] = color;
+	int pixel_index = x_ + y_ * SCREEN_WIDTH;
+    assert(pixel_index < SCREEN_PIXELS);
+    pixels_[pixel_index] = color;
     x_++;
 
-    // if (pixel.two_bit_color_ != 0) {
-    //     debugger_ = true;
-    // }
     if (debugger_) {
         if (pixel.two_bit_color_ == 0x00) {
             cout << " ";
