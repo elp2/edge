@@ -159,6 +159,7 @@ uint16_t CPU::Get16Bit(Destination destination) {
     case Address_SP:
     case Address_nn:
     case Address_0xFF00_Byte:
+	case Address_nn_16bit:
     case Address_0xFF00_Register_C:
         cout << "Tried reading 0x" << hex << unsigned(destination) << " as a 16 bit value." << endl;
         assert(false);
@@ -300,6 +301,11 @@ void CPU::Set16Bit(Destination destination, uint16_t value) {
         address = Get16Bit(destination);
         address_router_->SetWordAt(address, value);
         break;
+	case Address_nn_16bit:
+		address = Get16Bit(Eat_PC_Word);
+		address_router_->SetByteAt(address, LOWER8(value));
+		address_router_->SetByteAt(address + 1, HIGHER8(value));
+		break;
     default:
         cout << "Unknown 16 bit set: " << hex << unsigned(destination) << endl;
         assert(false);

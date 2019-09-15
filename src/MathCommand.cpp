@@ -401,7 +401,8 @@ uint16_t AddSP(CPU *cpu) {
 
     if (sp_after < 0x10) {
         cout << "SP too low after adding: " << hex << unsigned(sp_after) << endl;
-        assert(false);
+		// TODO - this doesn't seem safe since pushing on would write over ROM?
+        // assert(false);
     }
     return sp_after;
 }

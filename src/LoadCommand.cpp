@@ -82,7 +82,9 @@ class SpecialLoadCommand : public Command {
             cpu->Set8Bit(Address_HL, cpu->Get8Bit(Register_A));
             cpu->Set16Bit(Register_HL, cpu->Get16Bit(Register_HL) + 1);
             break;
-
+		case 0x08:
+			cpu->Set16Bit(Address_nn_16bit, cpu->Get16Bit(Register_SP));
+			break;
         default:
             cout << "Unexpected opcode for Special Load: 0x" << hex << opcode;
             assert(1);
@@ -104,11 +106,12 @@ void registerSpecialLoadCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new SpecialLoadCommand(0xf0, "LD A,($FF00+n)", 12));
 
     factory->RegisterCommand(new SpecialLoadCommand(0xf8, "LDHL SP,n", 12));
+	factory->RegisterCommand(new SpecialLoadCommand(0x08, "LD (nn),SP", 20));
 }
 
 void register16BitLoadCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new LoadCommand(0xF9, "LD SP,HL", Register_SP, Register_HL, 8));
-    factory->RegisterCommand(new LoadCommand(0x08, "LD (nn),SP", Address_nn, Register_SP, 20));    
+        
 }
 
 void registerLoadCommands(AbstractCommandFactory *factory) {
