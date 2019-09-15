@@ -20,7 +20,7 @@ class InterruptExecutor {
 
 class InterruptHandler {
  public:
-    virtual void GenerateInterrupt(Interrupt interrupt) = 0; // TODO Rename to "HANDLE"!
+    virtual void HandleInterrupt(Interrupt interrupt) = 0;
 };
 
 // TODO: Interrupt Priority ordering 1-5.
@@ -29,7 +29,7 @@ class InterruptController : public InterruptHandler {
     InterruptController();
     ~InterruptController() = default;
 
-    void GenerateInterrupt(Interrupt interrupt);
+    void HandleInterrupt(Interrupt interrupt);
 
     void set_executor(InterruptExecutor *executor) { executor_ = executor; };
     void set_interrupt_request(uint8_t value) { interrupt_request_ = value; };

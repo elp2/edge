@@ -12,7 +12,7 @@ using testing::_;
 class MockInterruptHandler : public InterruptHandler {
  public:
     MockInterruptHandler() {};
-    MOCK_METHOD(void, GenerateInterrupt, (Interrupt interrupt), (override));
+    MOCK_METHOD(void, HandleInterrupt, (Interrupt interrupt), (override));
 };
 
 class TimerControllerTest : public ::testing::Test {
@@ -29,7 +29,7 @@ class TimerControllerTest : public ::testing::Test {
 };
 
 TEST_F(TimerControllerTest, GetAndSetValues) {
-    EXPECT_CALL(mock_handler_, GenerateInterrupt(_)).Times(0);
+    EXPECT_CALL(mock_handler_, HandleInterrupt(_)).Times(0);
     uint8_t tima = 0x57;
     uint8_t tma = 0xF0;
     uint8_t tac = 0x06;

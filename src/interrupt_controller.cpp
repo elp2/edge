@@ -11,7 +11,7 @@ InterruptController::InterruptController() {
 
 }
 
-void InterruptController::GenerateInterrupt(Interrupt interrupt) {
+void InterruptController::HandleInterrupt(Interrupt interrupt) {
     if (!interrupts_enabed_) {
         return;
     }

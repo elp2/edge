@@ -26,14 +26,14 @@ class InterruptControllerTest : public ::testing::Test {
 
 TEST_F(InterruptControllerTest, InterruptsDisabled) {
     EXPECT_CALL(mock_executor_, InterruptToPC(_)).Times(0);
-    controller_->GenerateInterrupt(Interrupt_VBlank);
+    controller_->HandleInterrupt(Interrupt_VBlank);
 }
 
 TEST_F(InterruptControllerTest, InterruptVblankNotEnabled) {
     EXPECT_CALL(mock_executor_, InterruptToPC(_)).Times(0);
 
     controller_->set_interrupts_enabled(true);
-    controller_->GenerateInterrupt(Interrupt_VBlank);
+    controller_->HandleInterrupt(Interrupt_VBlank);
     EXPECT_TRUE(controller_->interrupts_enabled());
 }
 
@@ -41,7 +41,7 @@ TEST_F(InterruptControllerTest, InterruptVblankEnabled) {
     EXPECT_CALL(mock_executor_, InterruptToPC(0x40));
     controller_->set_interrupts_enabled(true);
     controller_->set_interrupt_enabled_flags(Interrupt_VBlank);
-    controller_->GenerateInterrupt(Interrupt_VBlank);
+    controller_->HandleInterrupt(Interrupt_VBlank);
 
     EXPECT_FALSE(controller_->interrupts_enabled());
 }
@@ -51,7 +51,7 @@ TEST_F(InterruptControllerTest, InterruptVblankDoesntTriggerForLCDC) {
 
     controller_->set_interrupts_enabled(true);
     controller_->set_interrupt_enabled_flags(Interrupt_LCDC);
-    controller_->GenerateInterrupt(Interrupt_VBlank);
+    controller_->HandleInterrupt(Interrupt_VBlank);
 
     EXPECT_TRUE(controller_->interrupts_enabled());
 }
