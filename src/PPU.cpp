@@ -56,27 +56,28 @@ void PPU::SetTexturePixels(uint32_t *pixels) {
     screen_->SetTexturePixels(pixels);
 }
 
-void PPU::Advance(int machineCycles) {
+void PPU::Advance(int machine_cycles) {
     if (!screen_->on()) {
         // Nothing for the PPU to output if the screen's not on.
         return;
     }
 
     // Machine cycles is for the 1.05 MHZ CPU, we are working with the 4.19 MHZ GPU.
-    int clockCycles = machineCycles * 4;
+    int clock_cycles = machine_cycles * 4;
     
     // Naive version - immediately do all the things for that particular cycle once.
-    while(clockCycles) {
-        // Iterating one at a time should be OK since we shouldn't be jumping
-        // more than 30 or so cycles at a time.
+    while(clock_cycles) {
+		int cycles_until_frame = FRAME_CYCLES - cycles_;
+		int max_cycles = min(cycles_until_frame, clock_cycles);
+		int advanced;
         if (cycles_ < VISIBLE_CYCLES) {
-            VisibleCycle();
+            advanced = VisibleCycle(max_cycles);
         } else {
-            InvisibleCycle();
+            advanced = InvisibleCycle(max_cycles);
         }
 
-        cycles_++;
-        clockCycles--;
+        cycles_ += advanced;
+		clock_cycles -= advanced;
         if (cycles_ == FRAME_CYCLES) {
             cycles_ = 0;
             EndVBlank();
@@ -84,41 +85,75 @@ void PPU::Advance(int machineCycles) {
     }
 }
 
-void PPU::InvisibleCycle() {
+int PPU::InvisibleCycle(int max_cycles) {
+	int advanced = 0;
     if (cycles_ == VISIBLE_CYCLES) {
         EndHBlank();
         BeginVBlank();
+		advanced = 1;
+		max_cycles--;
     }
-    int invisible_cycles = cycles_ - VISIBLE_CYCLES;
-    if (invisible_cycles % ROW_CYCLES == 0) {
-        set_ly(invisible_cycles / ROW_CYCLES + ROWS);
-    }
+	while (max_cycles) {
+		int invisible_cycles = cycles_ - VISIBLE_CYCLES;
+		if (invisible_cycles % ROW_CYCLES == 0) {
+			set_ly(invisible_cycles / ROW_CYCLES + ROWS);
+		}
+		max_cycles--;
+		advanced++;
+	}
+	return advanced;
 }
 
-void PPU::VisibleCycle() {
+int PPU::VisibleCycle(int remaining_cycles) {
     int row = cycles_ / ROW_CYCLES;
     int row_cycles = cycles_ % ROW_CYCLES;
+	int max_cycles = min(remaining_cycles, ROW_CYCLES - row_cycles);
+	int advanced = 0;
 
     if (row_cycles == 0) {
         EndHBlank();
         state_ = OAM_Search;
         OAMSearchY(row);
-    } else if (row_cycles < OAM_SEARCH_CYCLES) {
-        // NOP.
-    } else if (row_cycles == OAM_SEARCH_CYCLES) {
-        state_ = Pixel_Transfer;
-        fifo_->NewRow(row);
-        fifo_->Advance(screen_);
-    } else {
-        if (state_ == HBlank) {            
-            // NOP.
-        } else {
-            // Keep advancing the FIFO until it signals that it's done.
-            if (fifo_->Advance(screen_)) {
-                BeginHBlank();
-            }
-        }
+
+		advanced++;
+		row_cycles++;
+		max_cycles--;
     }
+	
+	if (row_cycles < OAM_SEARCH_CYCLES) {
+		int oam_progress = min(OAM_SEARCH_CYCLES - row_cycles, max_cycles);
+		advanced += oam_progress;
+		row_cycles += oam_progress;
+		max_cycles -= oam_progress;
+	}
+	if (row_cycles == OAM_SEARCH_CYCLES && max_cycles > 0) {
+		state_ = Pixel_Transfer;
+		fifo_->NewRow(row);
+		fifo_->Advance(screen_);
+
+		max_cycles--;
+		advanced++;
+		row_cycles++;
+	}
+
+	while (max_cycles && state_ != HBlank) {
+		row_cycles++;
+		advanced++;
+		max_cycles--;
+		if (fifo_->Advance(screen_)) {
+			BeginHBlank();
+		}
+    }
+
+	assert(row_cycles != ROW_CYCLES);
+	if (max_cycles) {
+		int hblank_progress = min(max_cycles, ROW_CYCLES - row_cycles);
+		row_cycles += hblank_progress;
+		advanced += hblank_progress;
+		max_cycles -= hblank_progress;
+	}
+
+	return advanced;
 }
 
 void PPU::SetIORAM(uint16_t address, uint8_t value) {

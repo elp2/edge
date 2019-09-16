@@ -49,8 +49,8 @@ class PPU {
         int cycles_;
         Sprite *row_sprites_;
 
-        void VisibleCycle();
-        void InvisibleCycle();
+        int VisibleCycle(int clockCycles);
+        int InvisibleCycle(int clockCycles);
         void DrawRow(int row);
 
         void BeginHBlank();
