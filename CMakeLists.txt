@@ -104,6 +104,7 @@ add_executable(tests
     tests/input_controller_test.cc
     tests/interrupt_controller_test.cpp
     tests/jump_command_test.cpp
+    tests/load_command_test.cc
     tests/math_command_test.cpp
     tests/misc_command_test.cpp
     tests/mmu_test.cpp
