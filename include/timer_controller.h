@@ -19,14 +19,14 @@ class TimerController {
  private:
     InterruptHandler *interrupt_handler_;
     // TIMA.
-    int count_ = 0;
+    uint8_t tima_ = 0;
 
     // TMA.
-    int modulo_ = 0; 
+    uint8_t modulo_ = 0; 
 
     // TAC.
     bool active_ = false;
-    int cycles_per_count_ = 0;
+    int advance_per_cycle_ = 0;
 
     // DIV.
     uint16_t div_counter_ = 0;
