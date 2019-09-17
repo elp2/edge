@@ -4,6 +4,12 @@
 #include <iostream>
 #include "SDL.h"
 
+const uint32_t DARKEST_GREEN = 0xFF0F380F;
+const uint32_t DARK_GREEN = 0xFF306230;
+const uint32_t LIGHT_GREEN = 0xFF8BAC0F;
+const uint32_t LIGHEST_GREEN = 0xFF9BBC0F;
+const uint8_t DEFAULT_PALETTE = 0xE4; // 11100100.
+
 Screen::Screen() {
     InitSDL();
 }
@@ -30,25 +36,30 @@ void Screen::InitSDL() {
     SDL_RenderPresent(renderer_);
 
     pixels_ = new uint32_t[SCREEN_WIDTH * SCREEN_HEIGHT];
+    palettes_ = new uint32_t[3];
+    palettes_[0] = palettes_[1] = palettes_[2] = DEFAULT_PALETTE;
 }
 
 void Screen::DrawPixel(Pixel pixel) {
-    uint32_t color = 0xFF0000FF;
-    switch(pixel.two_bit_color_) {
+    uint8_t palette_pixel = palettes_[pixel.palette_];
+    palette_pixel >>= (pixel.two_bit_color_ * 2);
+
+    uint32_t color = 0;
+    switch(palette_pixel & 0x3) {
         case 0x00:
-            color = 0xFFFF0000;
+            color = LIGHEST_GREEN;
             break;
         case 0x01:
-            color = 0xFF00FF00;
+            color = LIGHT_GREEN;
             break;
         case 0x02:
-            color = 0xFF0000FF;
+            color = DARK_GREEN;
             break;
         case 0x03:
-            color = 0XFFFFFFFF;
+            color = DARKEST_GREEN;
             break;
 		default:
-			color = 0xFF0000FF;
+			color = 0xFFFF69B4; // Hot pink error.
 			break;
     }
 	int pixel_index = x_ + y_ * SCREEN_WIDTH;
@@ -90,6 +101,5 @@ void Screen::VBlankEnded() {
 }
 
 void Screen::SetPalette(Palette palette, uint8_t value) {
-    (void)palette;
-    (void)value;
+    palettes_[palette] = value;
 }

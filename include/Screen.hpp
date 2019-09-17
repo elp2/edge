@@ -20,6 +20,7 @@ class Screen {
     bool on_ = false;
     bool debugger_ = false;
     uint32_t *pixels_;
+    uint32_t *palettes_;
     int x_ = 0;
     int y_ = 0;
 
@@ -27,6 +28,8 @@ class Screen {
     SDL_Renderer *renderer_;
     SDL_Texture *texture_;  
     SDL_Window *window_;
+
+
 
  public:
     Screen();
