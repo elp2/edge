@@ -52,10 +52,6 @@ PPU::PPU() {
     fifo_ = new PixelFIFO(this);
 }
 
-void PPU::SetTexturePixels(uint32_t *pixels) {
-    screen_->SetTexturePixels(pixels);
-}
-
 void PPU::Advance(int machine_cycles) {
     if (!screen_->on()) {
         // Nothing for the PPU to output if the screen's not on.
@@ -392,12 +388,11 @@ void PPU::EndHBlank() {
 
 void PPU::BeginVBlank() {
     state_ = VBlank;
-    screen_->VBlank();
-    // TODO VBlank begin.
+    screen_->VBlankBegan();
 }
 
 void PPU::EndVBlank() {
-    // TODO VBlank end.
+    screen_->VBlankEnded();
 }
 
 int PPU::SpriteHeight() {

@@ -127,20 +127,20 @@ void CBCommand::Run(CPU *cpu) {
     case 0x0:
         if (column < 0x8) {
             description = noIndexCommandName("RLC", d);
-            return RL(cpu, d, false);
+            return RL(cpu, d, false, true);
         } else {
             description = noIndexCommandName("RRC", d);
-            return RR(cpu, d, false);
+            return RR(cpu, d, false, true);
         }
         assert(false);
         break;
     case 0x1:
         if (column < 0x8) {
             description = noIndexCommandName("RL", d);
-            return RL(cpu, d, true);
+            return RL(cpu, d, true, true);
         } else {
             description = noIndexCommandName("RR", d);
-            return RR(cpu, d, true);
+            return RR(cpu, d, true, true);
         }
         assert(false);
         break;        

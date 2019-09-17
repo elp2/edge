@@ -15,7 +15,7 @@ class BitCommand : public Command {
     void Run(CPU *cpu);
 };
 
-void RL(CPU *cpu, Destination d, bool carry);
-void RR(CPU *cpu, Destination d, bool carry);
+void RL(CPU *cpu, Destination d, bool through_carry, bool cb);
+void RR(CPU *cpu, Destination d, bool through_carry, bool cb);
 
 void registerBitCommands(AbstractCommandFactory *factory);
