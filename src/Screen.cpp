@@ -38,6 +38,8 @@ void Screen::InitSDL() {
     pixels_ = new uint32_t[SCREEN_WIDTH * SCREEN_HEIGHT];
     palettes_ = new uint32_t[3];
     palettes_[0] = palettes_[1] = palettes_[2] = DEFAULT_PALETTE;
+    frame_start_ms_ = SDL_GetTicks();
+    frames_ = 0;
 }
 
 void Screen::DrawPixel(Pixel pixel) {
@@ -67,13 +69,6 @@ void Screen::DrawPixel(Pixel pixel) {
     pixels_[pixel_index] = color;
     x_++;
 
-    if (debugger_) {
-        if (pixel.two_bit_color_ == 0x00) {
-            cout << " ";
-        } else {
-            cout << hex << unsigned(pixel.two_bit_color_);
-        }
-    }
     assert(on_);
 }
 
@@ -81,16 +76,10 @@ void Screen::NewLine() {
     y_++;
     x_ = 0;
     assert(on_);
-    if (debugger_) {
-        cout << "|" << endl;
-    }
 }
 
 void Screen::VBlankBegan() {
-    y_ = 0;    
-    if (debugger_) {
-        cout << "------------------------------------" << endl;
-    }
+    y_ = 0;
 }
 
 void Screen::VBlankEnded() {
@@ -98,6 +87,14 @@ void Screen::VBlankEnded() {
     SDL_RenderClear(renderer_);
     SDL_RenderCopy(renderer_, texture_, NULL, NULL);
     SDL_RenderPresent(renderer_);
+    if (++frames_ == 60) {
+        if (debugger_) {
+            unsigned int sixty_frames_ms = SDL_GetTicks() - frame_start_ms_;
+            cout << "1 second: avg " << dec << unsigned((1000 * sixty_frames_ms) / 60) << " ms / frame." << endl;
+        }
+        frames_ = 0;
+        frame_start_ms_ = SDL_GetTicks();
+    }
 }
 
 void Screen::SetPalette(Palette palette, uint8_t value) {

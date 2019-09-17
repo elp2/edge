@@ -28,8 +28,8 @@ class Screen {
     SDL_Renderer *renderer_;
     SDL_Texture *texture_;  
     SDL_Window *window_;
-
-
+    unsigned int frame_start_ms_ = 0;
+    int frames_ = 0;
 
  public:
     Screen();
