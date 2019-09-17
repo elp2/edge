@@ -36,8 +36,6 @@ class PPU {
         uint8_t scx();
         uint8_t scy();
 
-        void SetTexturePixels(uint32_t *pixels);
-
     private:
         uint8_t *oam_ram_;
         uint8_t *video_ram_;
