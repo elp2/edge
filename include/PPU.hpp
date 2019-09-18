@@ -6,12 +6,14 @@
 
 #include "Sprite.hpp"
 
+class InterruptHandler;
 class PixelFIFO;
 class Screen;
 
 using namespace std;
 
-enum PPUState {
+enum PPUState
+{
     Unknown = 0,
     OAM_Search,
     Pixel_Transfer,
@@ -19,88 +21,90 @@ enum PPUState {
     VBlank,
 };
 
-class PPU {
-    public:
-        PPU();
-        ~PPU() = default;
+class PPU
+{
+public:
+    PPU();
+    ~PPU() = default;
 
-        void Advance(int cycles);
+    void Advance(int cycles);
 
-        PPUState State() { return state_; };
+    PPUState State() { return state_; };
 
-        uint8_t GetByteAt(uint16_t address);
-        void SetByteAt(uint16_t address, uint8_t byte);
+    uint8_t GetByteAt(uint16_t address);
+    void SetByteAt(uint16_t address, uint8_t byte);
 
-        uint16_t BackgroundTile(int tile_x, int tile_y);
+    uint16_t BackgroundTile(int tile_x, int tile_y);
+    uint16_t WindowTile(int x, int y);
 
-        uint8_t scx();
-        uint8_t scy();
+    uint8_t scx();
+    uint8_t scy();
 
-    private:
-        uint8_t *oam_ram_;
-        uint8_t *video_ram_;
-        uint8_t *io_ram_;
-        Screen *screen_;
-        PixelFIFO *fifo_;
+	void SetInterruptHandler(InterruptHandler *handler) { interrupt_handler_ = handler; };
 
-        PPUState state_;
-        int cycles_;
-        Sprite *row_sprites_;
+private:
+    uint8_t *oam_ram_;
+    uint8_t *video_ram_;
+    uint8_t *io_ram_;
+    Screen *screen_;
+    PixelFIFO *fifo_;
+	InterruptHandler* interrupt_handler_;
 
-        void VisibleCycle();
-        void InvisibleCycle();
-        void DrawRow(int row);
+    PPUState state_;
+    int cycles_;
+    Sprite *row_sprites_;
 
-        void BeginHBlank();
-        void EndHBlank();
+    void VisibleCycle();
+    void InvisibleCycle();
+    void DrawRow(int row);
 
-        void BeginVBlank();
-        void EndVBlank();
+    void BeginHBlank();
+    void EndHBlank();
 
-        bool CanAccessVRAM();
-        bool CanAccessOAM();
+    void BeginVBlank();
+    void EndVBlank();
 
-        void SetIORAM(uint16_t address, uint8_t value);
-        uint8_t GetIORAM(uint16_t address);
+    bool CanAccessVRAM();
+    bool CanAccessOAM();
 
-        void set_lcdc(uint8_t value);
-        uint8_t lcdc();
+    void SetIORAM(uint16_t address, uint8_t value);
+    uint8_t GetIORAM(uint16_t address);
 
-        void set_stat(uint8_t value);
-        uint8_t stat();
+    void set_lcdc(uint8_t value);
+    uint8_t lcdc();
 
-        void set_scx(uint8_t value);
+    void set_stat(uint8_t value);
+    uint8_t stat();
 
-        void set_scy(uint8_t value);
+    void set_scx(uint8_t value);
 
-        void set_ly(uint8_t value);
-        uint8_t ly();
+    void set_scy(uint8_t value);
 
-        void set_lyc(uint8_t value);
-        uint8_t lyc();
+    void set_ly(uint8_t value);
+    uint8_t ly();
 
-        void set_dma(uint8_t value);
-        uint8_t dma();
+    void set_lyc(uint8_t value);
+    uint8_t lyc();
 
-        void set_wy(uint8_t value);
-        uint8_t wy();
+    void set_dma(uint8_t value);
+    uint8_t dma();
 
-        void set_wx(uint8_t value);
-        uint8_t wx();
+    void set_wy(uint8_t value);
+    uint8_t wy();
 
-		uint8_t bgp();
-		uint8_t obp0();
-		uint8_t obp1();
+    void set_wx(uint8_t value);
+    uint8_t wx();
 
-        void set_bgp(uint8_t address);
-        void set_obp0(uint8_t address);
-        void set_obp1(uint8_t address);
+    uint8_t bgp();
+    uint8_t obp0();
+    uint8_t obp1();
 
+    void set_bgp(uint8_t address);
+    void set_obp0(uint8_t address);
+    void set_obp1(uint8_t address);
 
-        bool DisplayWindow();
-        int SpriteHeight();
-        bool DisplaySprites();
+    bool DisplayWindow();
 
-        // Performs the OAM Search function, finding up to 10 sprites visible at this row.
-        void OAMSearchY(int row);
+    // Performs the OAM Search function, finding up to 10 sprites visible at this row.
+    void OAMSearchY(int row);
 };

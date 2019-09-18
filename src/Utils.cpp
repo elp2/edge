@@ -105,6 +105,10 @@ string destinationToString(Destination d) {
     return "?";
 }
 
+bool bit_set(uint8_t byte, int bit) {
+	return (byte >> bit) & 0x1;
+}
+
 std::string descriptionforPixel(Pixel p) {
     stringstream stream;
     stream << hex << unsigned(p.two_bit_color_) << " P:" << p.palette_;

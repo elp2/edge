@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <iostream>
 
+#include "interrupt_controller.hpp"
 #include "PixelFIFO.hpp"
 #include "PPU.hpp"
 #include "Screen.hpp"
@@ -147,6 +148,9 @@ uint8_t PPU::ly() {
 
 void PPU::set_ly(uint8_t value) {
 	SetIORAM(LY_ADDRESS, value);
+	if (value == lyc() && bit_set(lcdc(), 6)) {
+		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+	}
 }
 
 void PPU::set_lyc(uint8_t value) {
@@ -216,22 +220,42 @@ uint8_t PPU::lcdc() {
 }
 
 void PPU::set_lcdc(uint8_t value) {
-    bool screen_on = value & 80;
+    bool screen_on = bit_set(value, 7);
     screen_->set_on(screen_on);
-    // window_tile_map_base_address_ = value & 0x40 ? 0x9C00 : 0x9800;
-    // // TODO read window display 0x20.
-    // background_tile_data_base_address_ = value & 0x10 ? 0x8000 : 0x8800;
-    // background_tile_map_display_base_address = value &0x8 ? 0x9C00 : 0x9800;
-    // Sprite height should be handled.
-    // BG & window.
-    // bool sprites = value & 0x2;
-    // bool bg = value & 0x1
+	if (!screen_on && state_ != VBlank) {
+		cout << "Turning off screen must happen in vblank." << endl;
+		assert(false);
+	}
 
 	SetIORAM(LCDC_ADDRESS, value);
 }
 
 uint8_t PPU::stat() {
-    return GetIORAM(STAT_ADDRESS);
+	// Take bits 3-6 for the coincidence
+	uint8_t stat = GetIORAM(STAT_ADDRESS) & 0x78;
+
+	if (lyc() == ly()) {
+		stat |= 0x4;
+	}
+
+	switch (state_) {
+		case HBlank:
+			stat |= 0x0;
+			break;
+		case VBlank:
+			stat |= 0x1;
+			break;
+		case OAM_Search:
+			stat |= 0x2;
+			break;
+		case Pixel_Transfer:
+			stat |= 0x3;
+			break;
+		default:
+			break;
+	}
+
+    return stat;
 }
 
 void PPU::set_stat(uint8_t value) {
@@ -344,24 +368,24 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
 void PPU::BeginHBlank() {
     screen_->NewLine();
     state_ = HBlank;
-    // TODO HBlank register.
+	if (bit_set(lcdc(), 3)) {
+		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+	}
 }
 
 void PPU::EndHBlank() {
-    // TODO HBlank End register.
 }
 
 void PPU::BeginVBlank() {
     state_ = VBlank;
     screen_->VBlankBegan();
+	if (bit_set(lcdc(), 4)) {
+		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+	}
 }
 
 void PPU::EndVBlank() {
     screen_->VBlankEnded();
-}
-
-int PPU::SpriteHeight() {
-    return 0x4 == (GetByteAt(LCDC_ADDRESS) & 0x4) ? 16 : 8;
 }
 
 bool PPU::CanAccessOAM() {
@@ -373,16 +397,26 @@ bool PPU::CanAccessVRAM() {
     return state_ != Pixel_Transfer;
 }
 
-bool PPU::DisplaySprites() {
-    return 0x2 == (GetByteAt(LCDC_ADDRESS) & 0x2);
-}
-
 bool PPU::DisplayWindow() {
     return 0x20 == (GetByteAt(LCDC_ADDRESS) & 0x20);
 }
 
 void PPU::OAMSearchY(int row) {
     const int NUM_OAM_SPRITES = 40;
+	if (bit_set(lcdc(), 5)) {
+		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+	}
+
+	if (!(bit_set(lcdc(), 1))) {
+		// OBJ (Sprites) disabled.
+		return;
+	}
+
+	bool tall_sprites = bit_set(lcdc(), 2);
+	if (tall_sprites) {
+		// TODO: Support tall sprites.
+		assert(false);
+	}
 
 	int sprites_found = 0;
     for (int i = 0; i < NUM_OAM_SPRITES; i++) {
@@ -410,12 +444,12 @@ uint16_t PPU::BackgroundTile(int x, int y) {
     int tile_map_y = (y / 8) % TILES_PER_ROW;
 
     int tile_index = (tile_map_x + tile_map_y * TILES_PER_ROW);
-    uint16_t tile_map_address_base = lcdc() & 0x4 ? 0x9C00 : 0x9800;
+    uint16_t tile_map_address_base = bit_set(lcdc(), 3) ? 0x9C00 : 0x9800;
     uint16_t tile_map_address_ = tile_map_address_base + tile_index;
     uint8_t tile_number = GetByteAt(tile_map_address_);
 
     uint16_t tile_data_address;
-    uint16_t tile_data_base_address = lcdc() & 0x10 ? 0x8000 : 0x8800;
+    uint16_t tile_data_base_address = bit_set(lcdc(), 4) ? 0x8000 : 0x8800;
     int8_t signed_tile_number;
     switch (tile_data_base_address)
     {
@@ -434,4 +468,10 @@ uint16_t PPU::BackgroundTile(int x, int y) {
     tile_data_address += (y % 8) * 2;
     uint16_t tile_data = buildMsbLsb16(GetByteAt(tile_data_address), GetByteAt(tile_data_address + 1));
     return tile_data;
+}
+
+uint16_t PPU::WindowTile(int x, int y) {
+	uint16_t window_map_address_base = bit_set(lcdc(), 6) ? 0x9800 : 0x9C00;
+	assert(false);
+	return GetByteAt(window_map_address_base);
 }

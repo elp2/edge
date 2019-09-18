@@ -20,6 +20,8 @@
     EXPECT_EQ(cpu->flags.n, ne); \
     EXPECT_EQ(cpu->flags.c, ce);
 
+bool bit_set(uint8_t byte, int bit);
+
 uint16_t buildMsbLsb16(uint8_t msb, uint8_t lsb);
 
 // See http://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html.
