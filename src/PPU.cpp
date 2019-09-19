@@ -86,8 +86,6 @@ int PPU::InvisibleCycle(int max_cycles) {
     if (cycles_ == VISIBLE_CYCLES) {
         EndHBlank();
         BeginVBlank();
-		advanced = 1;
-		max_cycles--;
     }
 	while (max_cycles) {
 		int invisible_cycles = cycles_ - VISIBLE_CYCLES;
