@@ -60,6 +60,7 @@ bool PixelFIFO::Advance(Screen *screen) {
 		cout << "SCY Changed unexpectedly. row: " << hex << unsigned(row_);
 		cout << " scy: " << hex << unsigned(ppu_->scy());
 		cout << " != y: " << hex << unsigned(y_) << endl;
+		assert(false);
 	}
     if (fetch_->cycles_remaining_ > 0) {
         fetch_->cycles_remaining_--;

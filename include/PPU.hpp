@@ -51,11 +51,18 @@ private:
 	InterruptHandler* interrupt_handler_;
 
     PPUState state_;
-    int cycles_;
-    Sprite *row_sprites_;
 
-    int VisibleCycle(int clockCycles);
-    int InvisibleCycle(int clockCycles);
+	// How many cycles have been done in a frame for the 4.19 MHZ GPU.
+    int frame_cycles_ = 0;
+	// How many cycles we are advancing for the 4.19 MHZ GPU.
+	int advance_cycles_ = 0;
+	void AdvanceFrame(int frame_cycles);
+    
+
+	Sprite *row_sprites_;
+
+    void VisibleCycle(int clockCycles);
+    void InvisibleCycle(int clockCycles);
     void DrawRow(int row);
 
     void BeginHBlank();
