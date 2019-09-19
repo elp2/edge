@@ -169,11 +169,11 @@ void PPU::set_scx(uint8_t value) {
 }
 
 uint8_t PPU::scy() {
-    return GetIORAM(SCY_ADDRESS);
+	return scy_;
 }
 
 void PPU::set_scy(uint8_t value) {
-	SetIORAM(SCY_ADDRESS, value);
+	scy_ = value;
 }
 
 uint8_t PPU::ly() {

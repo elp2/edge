@@ -85,7 +85,8 @@ private:
 
     void set_scx(uint8_t value);
 
-    void set_scy(uint8_t value);
+	void set_scy(uint8_t value);
+	uint8_t scy_;
 
     void set_ly(uint8_t value);
     uint8_t ly();
