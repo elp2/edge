@@ -23,7 +23,7 @@ const int VISIBLE_CYCLES = ROWS * ROW_CYCLES;
 const int VBLANK_ROWS = 10;
 const int VBLANK_CYCLES = VBLANK_ROWS * ROW_CYCLES;
 
-const int FRAME_CYCLES = VISIBLE_CYCLES + VBLANK_CYCLES;
+const int TOTAL_FRAME_CYCLES = VISIBLE_CYCLES + VBLANK_CYCLES;
 
 const uint16_t LCDC_ADDRESS = 0xFF40;
 const uint16_t STAT_ADDRESS = 0xFF41;
@@ -46,76 +46,110 @@ PPU::PPU() {
     video_ram_ = (uint8_t *)calloc(0x2000, sizeof(uint8_t));
     io_ram_ = (uint8_t*)calloc(0xD, sizeof(uint8_t));
 
-    cycles_ = 0;
+    frame_cycles_ = 0;
     state_ = OAM_Search;
     row_sprites_ = (Sprite *)calloc(10, sizeof(Sprite));
     screen_ = new Screen();
     fifo_ = new PixelFIFO(this);
 }
 
-void PPU::Advance(int machineCycles) {
+void PPU::Advance(int machine_cycles) {
     if (!screen_->on()) {
         // Nothing for the PPU to output if the screen's not on.
         return;
     }
 
     // Machine cycles is for the 1.05 MHZ CPU, we are working with the 4.19 MHZ GPU.
-    int clockCycles = machineCycles * 4;
+	advance_cycles_ = machine_cycles * 4;
     
     // Naive version - immediately do all the things for that particular cycle once.
-    while(clockCycles) {
-        // Iterating one at a time should be OK since we shouldn't be jumping
-        // more than 30 or so cycles at a time.
-        if (cycles_ < VISIBLE_CYCLES) {
-            VisibleCycle();
+    while(advance_cycles_) {
+        if (frame_cycles_ < VISIBLE_CYCLES) {
+			int cycles_until_invis = VISIBLE_CYCLES - frame_cycles_;
+			int max_cycles = min(cycles_until_invis, advance_cycles_);
+            VisibleCycle(max_cycles);
         } else {
-            InvisibleCycle();
+			int cycles_until_frame = TOTAL_FRAME_CYCLES - frame_cycles_;
+			int max_cycles = min(cycles_until_frame, advance_cycles_);
+            InvisibleCycle(max_cycles);
         }
 
-        cycles_++;
-        clockCycles--;
-        if (cycles_ == FRAME_CYCLES) {
-            cycles_ = 0;
+        if (frame_cycles_ == TOTAL_FRAME_CYCLES) {
+            frame_cycles_ = 0;
             EndVBlank();
         }
+		assert(frame_cycles_ < TOTAL_FRAME_CYCLES);
     }
 }
 
-void PPU::InvisibleCycle() {
-    if (cycles_ == VISIBLE_CYCLES) {
+void PPU::AdvanceFrame(int frame_cycles) {
+	advance_cycles_ -= frame_cycles;
+	frame_cycles_ += frame_cycles;
+	assert(frame_cycles <= TOTAL_FRAME_CYCLES);
+	assert(advance_cycles_ >= 0);
+}
+
+void PPU::InvisibleCycle(int max_cycles) {
+    if (frame_cycles_ == VISIBLE_CYCLES) {
         EndHBlank();
         BeginVBlank();
     }
-    int invisible_cycles = cycles_ - VISIBLE_CYCLES;
-    if (invisible_cycles % ROW_CYCLES == 0) {
-        set_ly(invisible_cycles / ROW_CYCLES + ROWS);
-    }
+	while (max_cycles) {
+		int invisible_cycles = frame_cycles_ - VISIBLE_CYCLES;
+		if (invisible_cycles % ROW_CYCLES == 0) {
+			set_ly(invisible_cycles / ROW_CYCLES + ROWS);
+		}
+		AdvanceFrame(1);
+		max_cycles--;
+	}
 }
 
-void PPU::VisibleCycle() {
-    int row = cycles_ / ROW_CYCLES;
-    int row_cycles = cycles_ % ROW_CYCLES;
+void PPU::VisibleCycle(int remaining_cycles) {
+	assert(remaining_cycles > 0);
+
+    int row = frame_cycles_ / ROW_CYCLES;
+    int row_cycles = frame_cycles_ % ROW_CYCLES;
+	int max_cycles = min(remaining_cycles, ROW_CYCLES - row_cycles);
 
     if (row_cycles == 0) {
         EndHBlank();
         state_ = OAM_Search;
         OAMSearchY(row);
-    } else if (row_cycles < OAM_SEARCH_CYCLES) {
-        // NOP.
-    } else if (row_cycles == OAM_SEARCH_CYCLES) {
-        state_ = Pixel_Transfer;
-        fifo_->NewRow(row);
-        fifo_->Advance(screen_);
-    } else {
-        if (state_ == HBlank) {            
-            // NOP.
-        } else {
-            // Keep advancing the FIFO until it signals that it's done.
-            if (fifo_->Advance(screen_)) {
-                BeginHBlank();
-            }
-        }
     }
+	
+	if (row_cycles < OAM_SEARCH_CYCLES) {
+		int oam_progress = min(OAM_SEARCH_CYCLES - row_cycles, max_cycles);
+
+		max_cycles -= oam_progress;
+		row_cycles += oam_progress;
+		AdvanceFrame(oam_progress);
+	}
+
+	if (max_cycles > 0 && row_cycles == OAM_SEARCH_CYCLES) {
+		state_ = Pixel_Transfer;
+		fifo_->NewRow(row);
+		fifo_->Advance(screen_);
+	}
+
+	while (max_cycles > 0 && state_ != HBlank) {
+		if (fifo_->Advance(screen_)) {
+			BeginHBlank();
+		}
+
+		max_cycles--;
+		row_cycles++;
+		AdvanceFrame(1);
+	}
+
+	assert(row_cycles != ROW_CYCLES);
+	if (max_cycles > 0) {
+		int hblank_progress = min(max_cycles, ROW_CYCLES - row_cycles);
+
+		max_cycles -= hblank_progress;
+		row_cycles += hblank_progress;
+		AdvanceFrame(hblank_progress);
+	}
+	assert(max_cycles == 0);
 }
 
 void PPU::SetIORAM(uint16_t address, uint8_t value) {
@@ -135,11 +169,12 @@ void PPU::set_scx(uint8_t value) {
 }
 
 uint8_t PPU::scy() {
-    return GetIORAM(SCY_ADDRESS);
+	return scy_;
 }
 
 void PPU::set_scy(uint8_t value) {
-	SetIORAM(SCY_ADDRESS, value);
+	assert(CanAccessVRAM());
+	scy_ = value;
 }
 
 uint8_t PPU::ly() {
