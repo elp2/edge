@@ -173,6 +173,7 @@ uint8_t PPU::scy() {
 }
 
 void PPU::set_scy(uint8_t value) {
+	assert(CanAccessVRAM());
 	scy_ = value;
 }
 
