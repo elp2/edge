@@ -75,30 +75,28 @@ void InterruptController::EnableInterrupts() {
 }
 
 void InterruptController::SetByteAt(uint16_t address, uint8_t byte) {
-    switch (address)
-    {
-    case IF_ADDRESS:
-        set_interrupt_request(byte);
-        break;
-    case IE_ADDRESS:
-        set_interrupt_enabled_flags(byte);
-        break;
-    default:
-        assert(false);
-        break;
+    switch (address) {
+		case IF_ADDRESS:
+			set_interrupt_request(byte);
+			break;
+		case IE_ADDRESS:
+			set_interrupt_enabled_flags(byte);
+			break;
+		default:
+			assert(false);
+			break;
     }
 }
 
 uint8_t InterruptController::GetByteAt(uint16_t address) {
-    switch (address)
-    {
-    case IF_ADDRESS:
-        return interrupt_request();
-    case IE_ADDRESS:
-        return interrupt_enabled_flags();
-    default:
-        assert(false);
-		return 0x00;
+    switch (address) {
+		case IF_ADDRESS:
+			return interrupt_request();
+		case IE_ADDRESS:
+			return interrupt_enabled_flags();
+		default:
+			assert(false);
+			return 0x00;
     }
 }
 

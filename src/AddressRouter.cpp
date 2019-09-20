@@ -103,8 +103,8 @@ AddressOwner ownerForIOAddress(uint16_t address) {
         return AddressOwner_PPU;
         // ???
     case 0xFFFF:
-    // Interrupt Enable.
-    return AddressOwner_Interrupt;
+		// Interrupt Enable.
+		return AddressOwner_Interrupt;
     default:
         cout << "Unknown i/o address: 0x" << hex << unsigned(address) << endl;
 		return AddressOwner_MMU;
@@ -126,7 +126,7 @@ AddressOwner ownerForAddress(uint16_t address) {
         return AddressOwner_PPU; // OAM.
     } else if (address < 0xff00) {
         return AddressOwner_MMU; // Empty i/o.
-    } else if (address < 0xff4c) {
+    } else if (address < 0xFF4C || address == 0xFFFF) {
         return ownerForIOAddress(address);
     } else if (address < 0xff80) {
         return AddressOwner_MMU; // Empty i/o (2)

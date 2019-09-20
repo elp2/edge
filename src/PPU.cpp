@@ -414,7 +414,9 @@ void PPU::EndHBlank() {
 void PPU::BeginVBlank() {
     state_ = VBlank;
     screen_->VBlankBegan();
+	interrupt_handler_->HandleInterrupt(Interrupt_VBlank);
 	if (bit_set(lcdc(), 4)) {
+		// TODO - how do we compare?
 		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
 	}
 }
