@@ -1,6 +1,9 @@
 #include "interrupt_controller.hpp"
 
 #include <cassert>
+#include "SDL.h"
+
+#include "input_controller.h"
 
 const int INTERRUPTS_ENABLE_DISABLE_LOOPS = 2;
 
@@ -97,4 +100,13 @@ uint8_t InterruptController::GetByteAt(uint16_t address) {
         assert(false);
 		return 0x00;
     }
+}
+
+void InterruptController::HaltUntilInput() {
+	if (!interrupts_enabed_) {
+		return;
+	}
+	while (!input_controller_->PollAndApplyEvents()) {
+		SDL_Delay(5);
+	}
 }

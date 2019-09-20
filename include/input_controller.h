@@ -12,8 +12,8 @@ class InputController {
 	
 	void SetInterruptHandler(InterruptHandler* handler);
 	bool Advance(int cycles);
-	void HandleEvent(SDL_Event e);
-	void PollAndApplyEvents();
+	bool HandleEvent(SDL_Event e);
+	bool PollAndApplyEvents();
 
 	void SetByteAt(uint16_t address, uint8_t byte);
 	uint8_t GetByteAt(uint16_t);

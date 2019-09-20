@@ -35,9 +35,8 @@ int CPU::Step() {
     // Take actions requested in previous cycle.
     // TODO these actually need a countdown since they happen 2 instructions later.
     if (haltNextLoop_) {
-        cout << "TODO: Halt!";
-        haltNextLoop_ = false;
-        assert(false); // TODO!
+		haltNextLoop_ = false;
+		interrupt_controller_->HaltUntilInput();
     } else if (stopNextLoop_) {
         cout << "TODO: Stop!";
         stopNextLoop_ = false;
