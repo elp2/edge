@@ -31,7 +31,6 @@ const uint16_t SCY_ADDRESS = 0xFF42;
 const uint16_t SCX_ADDRESS = 0xFF43;
 const uint16_t LY_ADDRESS = 0xFF44;
 const uint16_t LYC_ADDRESS = 0xFF45;
-const uint16_t DMA_ADDRESS = 0xFF46;
 const uint16_t BGP_ADDRESS = 0xFF47;
 const uint16_t OBP0_ADDRESS = 0xFF48;
 const uint16_t OBP1_ADDRESS = 0xFF49;
@@ -40,6 +39,10 @@ const uint16_t WX_ADDRESS = 0xFF4B;
 
 const int TILES_PER_ROW = 32;
 const int BYTES_PER_8X8_TILE = 16;
+
+const uint16_t OAM_RAM_ADDRESS = 0xFE00;
+const int NUM_OAM_SPRITES = 40;
+const int OAM_SPRITE_BYTES = 4; // Technically only uses the first 28 bits.
 
 PPU::PPU() { 
     oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
@@ -196,17 +199,6 @@ uint8_t PPU::lyc() {
     return GetIORAM(LYC_ADDRESS);
 }
 
-void PPU::set_dma(uint8_t value) {
-	cout << "Attempted OAM DMA! TODO!" << endl;
-    assert(false); // TODO.
-	SetIORAM(DMA_ADDRESS, value);
-}
-
-uint8_t PPU::dma() {
-	cout << "Sketchy: Reading DMA." << endl;
-    return GetIORAM(DMA_ADDRESS);
-}
-
 void PPU::set_wy(uint8_t value) {
 	SetIORAM(WY_ADDRESS, value);
 }
@@ -301,7 +293,7 @@ uint8_t PPU::GetByteAt(uint16_t address) {
     if (address >= 0x8000 && address < 0xA000) {
         return video_ram_[address - 0x8000];
     } else if (address >= 0xFE00 && address < 0xFEA0) {
-        return oam_ram_[address - 0xFE00];
+        return oam_ram_[address - OAM_RAM_ADDRESS];
     } else if (address >= 0xFF40 && address < 0xFF4C) {
 		switch (address) {
             case LCDC_ADDRESS:
@@ -316,8 +308,6 @@ uint8_t PPU::GetByteAt(uint16_t address) {
                 return ly();
             case LYC_ADDRESS:
                 return lyc();
-            case DMA_ADDRESS:
-                return dma();
             case BGP_ADDRESS:
             case OBP0_ADDRESS:
             case OBP1_ADDRESS:
@@ -370,10 +360,7 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
                 break;
             case LYC_ADDRESS:
                 set_lyc(byte);
-                break;
-            case DMA_ADDRESS:
-                set_dma(byte);
-                break;		
+                break;	
             case BGP_ADDRESS:
                 set_bgp(byte);
                 break;
@@ -439,7 +426,6 @@ bool PPU::DisplayWindow() {
 }
 
 void PPU::OAMSearchY(int row) {
-    const int NUM_OAM_SPRITES = 40;
 	if (bit_set(lcdc(), 5)) {
 		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
 	}

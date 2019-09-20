@@ -12,6 +12,12 @@
 
 using namespace std;
 
+const uint16_t DMA_ADDRESS = 0xFF46;
+
+const uint16_t OAM_RAM_ADDRESS = 0xFE00;
+const int NUM_OAM_SPRITES = 40;
+const int OAM_SPRITE_BYTES = 4; // Technically only uses the first 28 bits.
+
 AddressRouter::AddressRouter(MMU *mmu, PPU *ppu, SerialController *serial_controller, InterruptController *interrupt_controller, InputController *input_controller) {
     mmu_ = mmu;
     ppu_ = ppu;
@@ -94,7 +100,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     case 0xFF43:
     case 0xFF44:
     case 0xFF45:
-    case 0xFF46:
+    // case 0xFF46: DMA is handled by the Address Router itself.
     case 0xFF47:
     case 0xFF48:
     case 0xFF49:
@@ -126,7 +132,9 @@ AddressOwner ownerForAddress(uint16_t address) {
         return AddressOwner_PPU; // OAM.
     } else if (address < 0xff00) {
         return AddressOwner_MMU; // Empty i/o.
-    } else if (address < 0xFF4C || address == 0xFFFF) {
+	} else if (address == DMA_ADDRESS) {
+		return AddressOwner_DMA;
+	} else if (address < 0xFF4C || address == 0xFFFF) {
         return ownerForIOAddress(address);
     } else if (address < 0xff80) {
         return AddressOwner_MMU; // Empty i/o (2)
@@ -150,6 +158,8 @@ uint8_t AddressRouter::GetByteAtAddressFromOwner(AddressOwner owner, uint16_t ad
         return interrupt_controller_->GetByteAt(address);
 	case AddressOwner_Input:
 		return input_controller_->GetByteAt(address);
+	case AddressOwner_DMA:
+		return dma_base_;
     default:
 		assert(false);
 		return 0x00;
@@ -174,6 +184,8 @@ void AddressRouter::SetByteAtAddressInOwner(AddressOwner owner, uint16_t address
         return interrupt_controller_->SetByteAt(address, byte);
 	case AddressOwner_Input:
 		return input_controller_->SetByteAt(address, byte);
+	case AddressOwner_DMA:
+		return PerformDMA(byte);
     default:
 		assert(false);
         break;
@@ -215,4 +227,15 @@ void AddressRouter::SetWordAt(uint16_t address, uint16_t word) {
 
     SetByteAtAddressInOwner(owner_lsb, address, LOWER8(word));
     SetByteAtAddressInOwner(owner_msb, address + 1, HIGHER8(word));
+}
+
+void AddressRouter::PerformDMA(uint8_t dma_base) {
+	dma_base_ = dma_base;
+
+	uint16_t dma_address = dma_base_;
+	dma_address <<= 8;
+	// This takes 160 cycles, but we're assuming the CPU is doing its loop.
+	for (int i = 0; i < NUM_OAM_SPRITES * OAM_SPRITE_BYTES; i++) {
+		SetByteAt(OAM_RAM_ADDRESS + i, GetByteAt(dma_address + i));
+	}
 }

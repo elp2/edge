@@ -94,9 +94,6 @@ private:
     void set_lyc(uint8_t value);
     uint8_t lyc();
 
-    void set_dma(uint8_t value);
-    uint8_t dma();
-
     void set_wy(uint8_t value);
     uint8_t wy();
 
