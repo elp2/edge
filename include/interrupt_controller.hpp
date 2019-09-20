@@ -48,8 +48,9 @@ class InterruptController : public InterruptHandler {
     void DisableInterrupts();
     void EnableInterrupts();
 
-	void HaltUntilInput();
+	void HaltUntilInterrupt();
 	void set_input_controller(InputController* input_controller) { input_controller_ = input_controller; };
+	bool IsHalted() { return is_halted_; };
 
     // Only from tests.
     void set_interrupts_enabled(bool enabled) { interrupts_enabed_ = enabled; };
@@ -66,4 +67,5 @@ class InterruptController : public InterruptHandler {
     int enable_interrupts_in_loops_ = 0;    
 
 	InputController* input_controller_;
+	bool is_halted_ = false;
 };

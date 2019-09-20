@@ -15,10 +15,13 @@ InterruptController::InterruptController() {
 }
 
 void InterruptController::HandleInterrupt(Interrupt interrupt) {
-    if (!interrupts_enabed_) {
-        return;
-    }
-    if (!(interrupt_enabled_flags_ & interrupt)) {
+	if (!(interrupt_enabled_flags_ & interrupt)) {
+		return;
+	}
+
+	is_halted_ = false;
+
+	if (!interrupts_enabed_) {
         return;
     }
 
@@ -100,11 +103,6 @@ uint8_t InterruptController::GetByteAt(uint16_t address) {
     }
 }
 
-void InterruptController::HaltUntilInput() {
-	if (!interrupts_enabed_) {
-		return;
-	}
-	while (!input_controller_->PollAndApplyEvents()) {
-		SDL_Delay(5);
-	}
+void InterruptController::HaltUntilInterrupt() {
+	is_halted_ = true;
 }

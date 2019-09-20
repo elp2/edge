@@ -32,17 +32,25 @@ Command *CPU::CommandForOpcode(uint8_t opcode) {
 }
 
 int CPU::Step() {
-    // Take actions requested in previous cycle.
-    // TODO these actually need a countdown since they happen 2 instructions later.
-    if (haltNextLoop_) {
+	// Take actions requested in previous cycle.
+	// TODO these actually need a countdown since they happen 2 instructions later.
+	if (haltNextLoop_) {
 		haltNextLoop_ = false;
-		interrupt_controller_->HaltUntilInput();
-    } else if (stopNextLoop_) {
-        cout << "TODO: Stop!";
-        stopNextLoop_ = false;
-        assert(false); // TODO!
-    }
+		interrupt_controller_->HaltUntilInterrupt(); // halt until interrupt.
+	} else if (stopNextLoop_) {
+		cout << "TODO: Stop!";
+		stopNextLoop_ = false;
+		assert(false); // TODO!
+	}
 
+	if (interrupt_controller_->IsHalted()) {
+		return 16;
+	} else {
+		return RunNextCommand();
+	}
+}
+
+int CPU::RunNextCommand() {
     uint16_t commandPC = pc_;
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
