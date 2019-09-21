@@ -448,10 +448,10 @@ void PPU::OAMSearchY(int row) {
         int offset = 4 * i;
 		
 		uint8_t sprite_x = oam_ram_[offset + 0];
+		uint8_t sprite_y = oam_ram_[offset + 1];
 		if (sprite_x == 0 && sprite_y == 0) {
 			continue;
 		}
-		uint8_t sprite_y = oam_ram_[offset + 1];
 		if (SpriteYIntersectsRow(sprite_y, row, SPRITE_HEIGHT)) {
 			row_sprites_[sprites_found].x_ = sprite_x;
 			row_sprites_[sprites_found].y_ = sprite_y;
