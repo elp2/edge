@@ -17,6 +17,7 @@ enum AddressOwner {
     AddressOwner_Serial,
     AddressOwner_Interrupt,
 	AddressOwner_Input,
+	AddressOwner_DMA,
 };
 
 // Redirects reads and writes to the MMU, PPU, Sound, and potentially other controllers.
@@ -39,7 +40,9 @@ class AddressRouter {
     InterruptController *interrupt_controller_;
 	InputController *input_controller_;
     bool disassemblerMode_ = false;
+	uint8_t dma_base_ = 0x00;
 
     uint8_t GetByteAtAddressFromOwner(AddressOwner owner, uint16_t address);
     void SetByteAtAddressInOwner(AddressOwner owner, uint16_t address, uint8_t byte);
+	void PerformDMA(uint8_t dma_base);
 };

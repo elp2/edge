@@ -95,4 +95,5 @@ class CPU : public InterruptExecutor {
     uint64_t Cycles() { return cycles_; };
 
     void InterruptToPC(uint8_t pc);
+	int RunNextCommand();
 };

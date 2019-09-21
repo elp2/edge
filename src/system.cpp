@@ -27,6 +27,8 @@ System::System(string rom_filename) {
 	input_controller_->SetInterruptHandler(interrupt_controller_);
 	router_ = new AddressRouter(mmu_, ppu_, serial_controller_, interrupt_controller_, input_controller_);
 
+	interrupt_controller_->set_input_controller(input_controller_);
+
 	ppu_->SetInterruptHandler(interrupt_controller_);
 
 	cpu_ = new CPU(router_);

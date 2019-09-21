@@ -10,6 +10,8 @@ enum Interrupt : uint8_t {
     Interrupt_Input = 0x10,
 };
 
+class InputController;
+
 class InterruptExecutor {
  public:
     virtual ~InterruptExecutor() = default;
@@ -46,6 +48,10 @@ class InterruptController : public InterruptHandler {
     void DisableInterrupts();
     void EnableInterrupts();
 
+	void HaltUntilInterrupt();
+	void set_input_controller(InputController* input_controller) { input_controller_ = input_controller; };
+	bool IsHalted() { return is_halted_; };
+
     // Only from tests.
     void set_interrupts_enabled(bool enabled) { interrupts_enabed_ = enabled; };
     bool interrupts_enabled() { return interrupts_enabed_; };
@@ -59,4 +65,7 @@ class InterruptController : public InterruptHandler {
 
     int disable_interrupts_in_loops_ = 0;
     int enable_interrupts_in_loops_ = 0;    
+
+	InputController* input_controller_;
+	bool is_halted_ = false;
 };

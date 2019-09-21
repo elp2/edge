@@ -72,27 +72,28 @@ bool InputController::Advance(int cycles) {
 	}
 }
 
-void InputController::PollAndApplyEvents() {
+bool InputController::PollAndApplyEvents() {
 	SDL_Event e;
+	bool event_handled = false;
 	while (SDL_PollEvent(&e) != 0) {
 		if (e.type == SDL_QUIT) {
 			std::cout << "SDL_QUIT" << std::endl;
 			exit(0);
-		}
-		else {
-			HandleEvent(e);
+		} else {
+			event_handled |= HandleEvent(e);
 		}
 	}
+	return event_handled;
 }
 
-void InputController::HandleEvent(SDL_Event event) {
+bool InputController::HandleEvent(SDL_Event event) {
 	if (event.type != SDL_KEYDOWN && event.type != SDL_KEYUP) {
-		return;
+		return false;
 	}
 	SDL_KeyboardEvent kevent = event.key;
 	int index = KeyIndex(kevent.keysym.scancode);
 	if (index == -1) {
-		return;
+		return false;
 	}
 	if (event.type == SDL_KEYDOWN && !triggered_[index]) {
 		cycles_held_[index] = 1;
@@ -101,6 +102,7 @@ void InputController::HandleEvent(SDL_Event event) {
 		cycles_held_[index] = 0;
 		triggered_[index] = false;
 	}
+	return true;
 }
 
 void InputController::SetInterruptHandler(InterruptHandler* handler) {

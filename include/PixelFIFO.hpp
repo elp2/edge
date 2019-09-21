@@ -4,8 +4,12 @@
 
 #include "Palette.hpp"
 #include "Pixel.hpp"
+#include "Sprite.hpp"
 
 using namespace std;
+
+class PPU;
+class Screen;
 
 enum FetchStrategy {
     ReplaceFetchStrategy = 0,
@@ -19,10 +23,9 @@ struct Fetch
     int cycles_remaining_;
     // Whether we should overlay the front 8 pixels for a sprite.
     FetchStrategy strategy_;
+	Sprite sprite_;
 };
 
-class PPU;
-class Screen;
 
 class PixelFIFO {
  private:
@@ -39,7 +42,14 @@ class PixelFIFO {
 
     Fetch *fetch_ = NULL;
 
-    void StartFetch();
+	void StartSpriteFetch(Sprite sprite);
+	Sprite* row_sprites_;
+	// Which index are we due to potentially fetch next.
+	int sprite_index_ = 0;
+	void OverlaySpriteFetch(int i);
+
+	void StartFetch();
+    void StartBackgroundFetch();
     void ApplyFetch();
     void Reset();
     void PopFront();
@@ -51,6 +61,6 @@ class PixelFIFO {
     ~PixelFIFO() = default;
 
     // Starts the new row 0->144.
-    void NewRow(int row);
+    void NewRow(int row, Sprite *row_sprites);
     bool Advance(Screen *screen);
 };

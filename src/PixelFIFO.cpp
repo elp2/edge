@@ -24,13 +24,14 @@ void PixelFIFO::Reset() {
     fifo_start_ = 0;
 }
 
-void PixelFIFO::NewRow(int row) {
+void PixelFIFO::NewRow(int row, Sprite *row_sprites) {
     if (fifo_ != NULL) {
         free(fifo_);
         fifo_ = NULL;
     }
     Reset();
     row_ = row;
+	row_sprites_ = row_sprites;
     y_ = row_ + ppu_->scy();
     scx_shift_ = ppu_->scx() % 8;
     x_ = ppu_->scx() - scx_shift_;
@@ -63,9 +64,12 @@ bool PixelFIFO::Advance(Screen *screen) {
             ApplyFetch();
         }
     }
-    if (fifo_length_ <= 8 && fetch_->cycles_remaining_ == 0) {
-        StartFetch();
-    }
+	StartFetch();
+	if (fetch_->cycles_remaining_ > 0 && 
+		(fetch_->strategy_ == OverlayFirst8FetchStrategy || fetch_->strategy_ == ReplaceFetchStrategy)) {
+		// Need to keep the fetch running.
+		return false;
+	}
 
     if (!fifo_length_) {
         return false;
@@ -81,6 +85,7 @@ bool PixelFIFO::Advance(Screen *screen) {
     screen->DrawPixel(PeekFront());
     PopFront();
     x_++;
+	sprite_index_ = 0;
     return (++pixels_outputted_ == SCREEN_WIDTH);
 }
 
@@ -96,14 +101,39 @@ void PixelFIFO::ApplyFetch() {
             assert(fifo_length_ != 0);
             break;
         case OverlayFirst8FetchStrategy:
-            cout << "TODO: Sprite!" << endl;
-            assert(false);
+			assert(fifo_length_ >= 8);
+			if (bit_set(fetch_->sprite_.flags_, 5)) {
+				// X flipped, apply bits backwards.
+				for (int i = 7; i >= 0; i--) {
+					OverlaySpriteFetch(i);
+				}
+			}
+			else {
+				for (int i = 0; i < 8; i++) {
+					OverlaySpriteFetch(i);
+				}
+			}
             break;
         case ReplaceFetchStrategy:
             cout << "TODO: Replace Fetch" << endl;
             assert(false);
             break;
     }
+}
+
+void PixelFIFO::OverlaySpriteFetch(int i) {
+	Pixel sp = fetch_->pixels_[i];
+	int pos = (fifo_start_ + i) % 16;
+	Pixel fp = fifo_[pos];
+	if (fp.palette_ == BackgroundWindowPalette) {
+		// TODO: Priority.
+		if (sp.two_bit_color_ != 0x00) {
+			if (fp.palette_ != BackgroundWindowPalette) {
+				fifo_[pos] = sp;
+			}
+		}
+	}
+
 }
 
 void PixelList(uint16_t pixels, Palette palette, Pixel *list) {
@@ -118,6 +148,39 @@ void PixelList(uint16_t pixels, Palette palette, Pixel *list) {
 }
 
 void PixelFIFO::StartFetch() {
+	if (fetch_->cycles_remaining_ != 0) {
+		// Fetch already active.
+		return;
+	}
+	if (fifo_length_ <= 8) {
+		StartBackgroundFetch();
+	} else {
+		for (int i = sprite_index_; i < 10; i++) {
+			if (row_sprites_[i].x_ == 0) {
+				return;
+			}
+			if (row_sprites_[i].x_ == x_) {
+				StartSpriteFetch(row_sprites_[i]);
+				// Next time don't consider this sprite again.
+				sprite_index_++;
+				return;
+			}
+		}
+	}
+}
+
+void PixelFIFO::StartSpriteFetch(Sprite sprite) {
+	fetch_->cycles_remaining_ = FETCH_CYCLES;
+
+	uint16_t sprite_row_pixels = ppu_->SpritePixels(sprite, y_ - sprite.y_);
+	Palette p = bit_set(sprite.flags_, 4) ? SpritePalette1 : SpritePalette0;
+
+	PixelList(sprite_row_pixels, p, fetch_->pixels_);
+	fetch_->strategy_ = OverlayFirst8FetchStrategy;
+	fetch_->sprite_ = sprite;
+}
+
+void PixelFIFO::StartBackgroundFetch() {
     fetch_->cycles_remaining_ = FETCH_CYCLES;
     
     // TODO: Find the right next tile based on where we are.

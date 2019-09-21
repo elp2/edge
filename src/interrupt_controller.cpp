@@ -1,6 +1,9 @@
 #include "interrupt_controller.hpp"
 
 #include <cassert>
+#include "SDL.h"
+
+#include "input_controller.h"
 
 const int INTERRUPTS_ENABLE_DISABLE_LOOPS = 2;
 
@@ -12,10 +15,13 @@ InterruptController::InterruptController() {
 }
 
 void InterruptController::HandleInterrupt(Interrupt interrupt) {
-    if (!interrupts_enabed_) {
-        return;
-    }
-    if (!(interrupt_enabled_flags_ & interrupt)) {
+	if (!(interrupt_enabled_flags_ & interrupt)) {
+		return;
+	}
+
+	is_halted_ = false;
+
+	if (!interrupts_enabed_) {
         return;
     }
 
@@ -72,29 +78,31 @@ void InterruptController::EnableInterrupts() {
 }
 
 void InterruptController::SetByteAt(uint16_t address, uint8_t byte) {
-    switch (address)
-    {
-    case IF_ADDRESS:
-        set_interrupt_request(byte);
-        break;
-    case IE_ADDRESS:
-        set_interrupt_enabled_flags(byte);
-        break;
-    default:
-        assert(false);
-        break;
+    switch (address) {
+		case IF_ADDRESS:
+			set_interrupt_request(byte);
+			break;
+		case IE_ADDRESS:
+			set_interrupt_enabled_flags(byte);
+			break;
+		default:
+			assert(false);
+			break;
     }
 }
 
 uint8_t InterruptController::GetByteAt(uint16_t address) {
-    switch (address)
-    {
-    case IF_ADDRESS:
-        return interrupt_request();
-    case IE_ADDRESS:
-        return interrupt_enabled_flags();
-    default:
-        assert(false);
-		return 0x00;
+    switch (address) {
+		case IF_ADDRESS:
+			return interrupt_request();
+		case IE_ADDRESS:
+			return interrupt_enabled_flags();
+		default:
+			assert(false);
+			return 0x00;
     }
+}
+
+void InterruptController::HaltUntilInterrupt() {
+	is_halted_ = true;
 }

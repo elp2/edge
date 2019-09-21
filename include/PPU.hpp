@@ -9,6 +9,7 @@
 class InterruptHandler;
 class PixelFIFO;
 class Screen;
+struct Sprite;
 
 using namespace std;
 
@@ -36,6 +37,9 @@ public:
 
     uint16_t BackgroundTile(int tile_x, int tile_y);
     uint16_t WindowTile(int x, int y);
+
+	// Sprite, y is 0-sprite_height.
+	uint16_t SpritePixels(Sprite sprite, int sprite_y);
 
     uint8_t scx();
     uint8_t scy();
@@ -93,9 +97,6 @@ private:
 
     void set_lyc(uint8_t value);
     uint8_t lyc();
-
-    void set_dma(uint8_t value);
-    uint8_t dma();
 
     void set_wy(uint8_t value);
     uint8_t wy();
