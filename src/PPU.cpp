@@ -130,7 +130,7 @@ void PPU::VisibleCycle(int remaining_cycles) {
 
 	if (max_cycles > 0 && row_cycles == OAM_SEARCH_CYCLES) {
 		state_ = Pixel_Transfer;
-		fifo_->NewRow(row);
+		fifo_->NewRow(row, row_sprites_);
 		fifo_->Advance(screen_);
 	}
 
@@ -248,7 +248,8 @@ uint8_t PPU::lcdc() {
 
 void PPU::set_lcdc(uint8_t value) {
     bool screen_on = bit_set(value, 7);
-    screen_->set_on(screen_on);
+    assert(screen_on);
+	screen_->set_on(screen_on);
 	if (!screen_on && state_ != VBlank) {
 		cout << "Turning off screen must happen in vblank." << endl;
 		assert(false);
@@ -435,9 +436,10 @@ void PPU::OAMSearchY(int row) {
 		return;
 	}
 
+	const int SPRITE_HEIGHT = 8;
 	bool tall_sprites = bit_set(lcdc(), 2);
 	if (tall_sprites) {
-		// TODO: Support tall sprites.
+		// TODO: Support tall sprites here and fetching.
 		assert(false);
 	}
 
@@ -446,18 +448,26 @@ void PPU::OAMSearchY(int row) {
         int offset = 4 * i;
 		
 		uint8_t sprite_x = oam_ram_[offset + 0];
+		if (sprite_x == 0 && sprite_y == 0) {
+			continue;
+		}
 		uint8_t sprite_y = oam_ram_[offset + 1];
-		if (SpriteYIntersectsRow(sprite_x, sprite_y, row)) {
+		if (SpriteYIntersectsRow(sprite_y, row, SPRITE_HEIGHT)) {
 			row_sprites_[sprites_found].x_ = sprite_x;
 			row_sprites_[sprites_found].y_ = sprite_y;
 			row_sprites_[sprites_found].tile_number_ = oam_ram_[offset + 2];
 			row_sprites_[sprites_found].flags_ = oam_ram_[offset + 3];
+			sprites_found++;
 		}
-		sprites_found++;
 		if (sprites_found == 10) {
-			return;
+			break;
 		}
     }
+	if (sprites_found < 10) {
+		// Use an invisible sprite to bound.
+		row_sprites_[sprites_found].x_ = 0;
+		row_sprites_[sprites_found].y_ = 0;
+	}
 }
 
 uint16_t PPU::BackgroundTile(int x, int y) {
@@ -491,6 +501,19 @@ uint16_t PPU::BackgroundTile(int x, int y) {
     tile_data_address += (y % 8) * 2;
     uint16_t tile_data = buildMsbLsb16(GetByteAt(tile_data_address), GetByteAt(tile_data_address + 1));
     return tile_data;
+}
+
+uint16_t PPU::SpritePixels(Sprite sprite, int sprite_y) {
+	uint16_t pixels = 0;
+	
+	if (bit_set(sprite.flags_, 6)) {
+		sprite_y = 7 - sprite_y;
+	}
+
+	uint16_t sprite_tile_address = 0x8000 + sprite.tile_number_ * BYTES_PER_8X8_TILE;
+	sprite_tile_address += (sprite_y % 8) * 2;
+	uint16_t tile_data = buildMsbLsb16(GetByteAt(sprite_tile_address), GetByteAt(sprite_tile_address + 1));
+	return tile_data;
 }
 
 uint16_t PPU::WindowTile(int x, int y) {
