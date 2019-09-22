@@ -10,8 +10,10 @@ class InterruptController;
 class MMU;
 class PPU;
 class SerialController;
+class TimerController;
 
 using namespace std;
+
 class System {
  public:
     System(string rom_filename);
@@ -27,6 +29,7 @@ class System {
 	InputController* input_controller_;
     InterruptController *interrupt_controller_;
     SerialController *serial_controller_;
+	TimerController *timer_controller_;
 
     MMU *GetMMU(string rom_filename);
     void Advance(int stepped);

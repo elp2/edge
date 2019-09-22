@@ -248,7 +248,7 @@ uint8_t PPU::lcdc() {
 
 void PPU::set_lcdc(uint8_t value) {
     bool screen_on = bit_set(value, 7);
-    assert(screen_on);
+    //assert(screen_on);
 	screen_->set_on(screen_on);
 	if (!screen_on && state_ != VBlank) {
 		cout << "Turning off screen must happen in vblank." << endl;

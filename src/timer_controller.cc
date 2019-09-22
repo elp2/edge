@@ -28,7 +28,7 @@ void TimerController::SetByteAt(uint16_t address, uint8_t byte) {
         modulo_ = byte;
         break;
     case 0XFF07: {
-        active_ = byte &0x04;        
+        active_ = byte & 0x04;      
         switch (byte & 0x03) {
             case 0x00:
                 advance_per_cycle_ = STEPS_FOR_4KHZ;

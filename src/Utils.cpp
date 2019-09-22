@@ -136,15 +136,22 @@ MMU *getTestingMMU() {
 CPU *getTestingCPU() {
     MMU *mmu = getTestingMMU();
     PPU *ppu = new PPU();
-	AddressRouter* address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL);
-    return new CPU(address_router);
+	AddressRouter* address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL);
+	CPU* cpu = new CPU(address_router);
+	InterruptController* interrupt_controller = new InterruptController();
+	cpu->SetInterruptController(interrupt_controller);
+
+    return cpu;
 }
 
 CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions) {
     MMU *mmu = getTestingMMU();
     PPU *ppu = new PPU();
-	AddressRouter *address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL);
+	AddressRouter *address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL);
     CPU *cpu = new CPU(address_router);
+
+	InterruptController* interrupt_controller = new InterruptController();
+	cpu->SetInterruptController(interrupt_controller);
 
     uint16_t ram_start = 0xC000;
     cpu->JumpAddress(ram_start);

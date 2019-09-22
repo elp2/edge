@@ -51,7 +51,10 @@ int CPU::Step() {
 }
 
 int CPU::RunNextCommand() {
-    uint16_t commandPC = pc_;
+    uint16_t command_pc = pc_;
+	if (command_pc == 0x100) {
+		debugPrint_ = true;
+	}
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
 
@@ -61,7 +64,7 @@ int CPU::RunNextCommand() {
     cycles_ += stepped;
 
     if (debugPrint_) {
-        cout << command->description << " ; PC=" << commandPC << endl;
+        cout << command->description << " ; PC=" << command_pc << endl;
         Debugger();
     }
 
@@ -336,8 +339,6 @@ void CPU::Push8Bit(uint8_t byte) {
 }
 
 void CPU::Push16Bit(uint16_t word) {
-    // TODO is this the right order???
-    // Test.
     Push8Bit(LOWER8(word));
     Push8Bit(HIGHER8(word));
 }

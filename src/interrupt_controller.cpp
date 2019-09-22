@@ -1,6 +1,7 @@
 #include "interrupt_controller.hpp"
 
 #include <cassert>
+#include <iostream>
 #include "SDL.h"
 
 #include "input_controller.h"
@@ -31,23 +32,31 @@ void InterruptController::HandleInterrupt(Interrupt interrupt) {
     switch (interrupt) {
         case Interrupt_VBlank:
             rst_pc = 0x40;
+            set_interrupt_request(0b1);
             break;
         case Interrupt_LCDC:
             rst_pc = 0x48;
+            set_interrupt_request(0b10);
             break;
         case Interrupt_TimerOverflow:
             rst_pc = 0x50;
+            set_interrupt_request(0b100);
             break;
         case Interrupt_SerialTransferCompletion:
+            assert(false); // Unimplemented!
             rst_pc = 0x58;
+            set_interrupt_request(0b1000);
             break;
         case Interrupt_Input:
             rst_pc = 0x60;
+            set_interrupt_request(0b10000);
             break;        
         default:
             assert(false);
             break;
     }
+	assert(rst_pc != 0x00);
+	std::cout << "Resetting to pc: " << std::hex << unsigned(rst_pc) << std::endl;
     interrupts_enabed_ = false; // Must be re-enabled during the event loop.
     executor_->InterruptToPC(rst_pc);
 }

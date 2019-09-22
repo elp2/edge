@@ -3,6 +3,9 @@
 
 #include "interrupt_controller.hpp"
 
+const uint16_t IF_ADDRESS = 0xFF0F;
+const uint16_t IE_ADDRESS = 0xFFFF;
+
 using testing::_;
 
 class MockInterruptExecutor : public InterruptExecutor {
@@ -76,4 +79,15 @@ TEST_F(InterruptControllerTest, EnablesInterruptsAfterCycles) {
     EXPECT_FALSE(controller_->interrupts_enabled());
     controller_->Advance(10);
     EXPECT_TRUE(controller_->interrupts_enabled());
+}
+
+TEST_F(InterruptControllerTest, InterruptTimer) {
+	EXPECT_CALL(mock_executor_, InterruptToPC(0x50));
+	controller_->set_interrupts_enabled(true);
+	controller_->set_interrupt_enabled_flags(Interrupt_TimerOverflow);
+	controller_->HandleInterrupt(Interrupt_TimerOverflow);
+
+	ASSERT_EQ(controller_->GetByteAt(IF_ADDRESS), 0b100);
+
+	EXPECT_FALSE(controller_->interrupts_enabled());
 }

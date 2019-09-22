@@ -14,6 +14,7 @@
 #include "MMU.hpp"
 #include "PPU.hpp"
 #include "serial_controller.hpp"
+#include "timer_controller.h"
 #include "Screen.hpp"
 #include "Utils.hpp"
 
@@ -25,7 +26,10 @@ System::System(string rom_filename) {
     interrupt_controller_ = new InterruptController();
 	input_controller_ = new InputController();
 	input_controller_->SetInterruptHandler(interrupt_controller_);
-	router_ = new AddressRouter(mmu_, ppu_, serial_controller_, interrupt_controller_, input_controller_);
+	timer_controller_ = new TimerController();
+	timer_controller_->SetInterruptHandler(interrupt_controller_);
+
+	router_ = new AddressRouter(mmu_, ppu_, serial_controller_, interrupt_controller_, input_controller_, timer_controller_);
 
 	interrupt_controller_->set_input_controller(input_controller_);
 
@@ -52,6 +56,7 @@ void System::Advance(int stepped) {
 	}
     ppu_->Advance(stepped);
     interrupt_controller_->Advance(stepped);
+	timer_controller_->Advance(stepped);
 }
 
 void System::Main() {
