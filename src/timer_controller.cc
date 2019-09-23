@@ -98,7 +98,7 @@ void TimerController::Advance(int cycles) {
         uint8_t previous_tima = tima_;
         tima_ += advance_per_cycle_;
         if (tima_ < previous_tima) {
-            interrupt_handler_->HandleInterrupt(Interrupt_TimerOverflow);
+            interrupt_handler_->RequestInterrupt(Interrupt_TimerOverflow);
             tima_ = modulo_;
         }
         --cycles;

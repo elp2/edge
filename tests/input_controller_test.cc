@@ -15,7 +15,7 @@ const uint8_t P0_RESET = 0x30;
 class MockInterruptHandler : public InterruptHandler {
 public:
 	MockInterruptHandler() {};
-	MOCK_METHOD(void, HandleInterrupt, (Interrupt interrupt), (override));
+	MOCK_METHOD(void, RequestInterrupt, (Interrupt interrupt), (override));
 };
 
 class InputControllerTest : public ::testing::Test {
@@ -39,20 +39,20 @@ class InputControllerTest : public ::testing::Test {
 };
 
 TEST_F(InputControllerTest, NoAdvanceNoVisibleOrInterrupt) {
-	EXPECT_CALL(mock_handler_, HandleInterrupt(_)).Times(0);
+	EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);
 	controller_->SetByteAt(P0_ADDRESS, P0_P15);
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_J));
 }
 
 TEST_F(InputControllerTest, InterruptsForKeydown) {
-	EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_Input)).Times(1);
+	EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_Input)).Times(1);
 	controller_->SetByteAt(P0_ADDRESS, P0_P15);
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_J));
 	controller_->Advance(1001);
 }
 
 TEST_F(InputControllerTest, ReadsKeyDown) {
-	EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_Input)).Times(1);
+	EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_Input)).Times(1);
 	controller_->SetByteAt(P0_ADDRESS, P0_P15);
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_J));
 	controller_->Advance(1001);
@@ -61,7 +61,7 @@ TEST_F(InputControllerTest, ReadsKeyDown) {
 
 
 TEST_F(InputControllerTest, Reads2KeyDown) {
-	EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_Input)).Times(1);
+	EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_Input)).Times(1);
 	controller_->SetByteAt(P0_ADDRESS, P0_P14);
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_A));
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_S));
@@ -70,7 +70,7 @@ TEST_F(InputControllerTest, Reads2KeyDown) {
 }
 
 TEST_F(InputControllerTest, KeyUps) {
-	EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_Input)).Times(1);
+	EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_Input)).Times(1);
 	controller_->SetByteAt(P0_ADDRESS, P0_P14);
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_A));
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_S));
@@ -82,7 +82,7 @@ TEST_F(InputControllerTest, KeyUps) {
 }
 
 TEST_F(InputControllerTest, IgnoresUnknonwKeys) {
-	EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_Input)).Times(0);
+	EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_Input)).Times(0);
 	controller_->SetByteAt(P0_ADDRESS, P0_P14);
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_Z));
 	controller_->Advance(1001);
@@ -92,7 +92,7 @@ TEST_F(InputControllerTest, IgnoresUnknonwKeys) {
 }
 
 TEST_F(InputControllerTest, InterruptsMultipleTimes) {
-	EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_Input)).Times(2);
+	EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_Input)).Times(2);
 	controller_->SetByteAt(P0_ADDRESS, P0_P14);
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_A));
 	controller_->Advance(1001);

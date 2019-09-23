@@ -55,8 +55,14 @@ void System::Advance(int stepped) {
 		input_controller_->PollAndApplyEvents();
 	}
     ppu_->Advance(stepped);
-    interrupt_controller_->Advance(stepped);
 	timer_controller_->Advance(stepped);
+
+	interrupt_controller_->Advance(stepped);
+	int interrupt_steps = interrupt_controller_->HandleInterruptRequest();
+	// TODO: Refactor advancing if we advance for interrupts.
+	// At the very least, we'd have to advance the other stuff, but not the interrupt controller.
+	// Advancing the IC is how we turn the flags on/off. Have a separate "CPU Stepped" version?
+	assert(interrupt_steps == 0);
 }
 
 void System::Main() {

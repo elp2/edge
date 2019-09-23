@@ -187,7 +187,7 @@ uint8_t PPU::ly() {
 void PPU::set_ly(uint8_t value) {
 	SetIORAM(LY_ADDRESS, value);
 	if (value == lyc() && bit_set(lcdc(), 6)) {
-		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 }
 
@@ -392,7 +392,7 @@ void PPU::BeginHBlank() {
     screen_->NewLine();
     state_ = HBlank;
 	if (bit_set(lcdc(), 3)) {
-		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 }
 
@@ -402,10 +402,10 @@ void PPU::EndHBlank() {
 void PPU::BeginVBlank() {
     state_ = VBlank;
     screen_->VBlankBegan();
-	interrupt_handler_->HandleInterrupt(Interrupt_VBlank);
+	interrupt_handler_->RequestInterrupt(Interrupt_VBlank);
 	if (bit_set(lcdc(), 4)) {
 		// TODO - how do we compare?
-		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 }
 
@@ -428,7 +428,7 @@ bool PPU::DisplayWindow() {
 
 void PPU::OAMSearchY(int row) {
 	if (bit_set(lcdc(), 5)) {
-		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 
 	if (!(bit_set(lcdc(), 1))) {
