@@ -5,6 +5,10 @@
 
 #include "interrupt_controller.hpp"
 
+using std::cout;
+using std::hex;
+using std::endl;
+
 const int CYCLES_PER_SECOND = 1048576;
 const int STEPS_FOR_4KHZ = 256 / (CYCLES_PER_SECOND / 4096);
 const int STEPS_FOR_262KHZ = 256 / (CYCLES_PER_SECOND / 262144);
@@ -51,6 +55,9 @@ void TimerController::SetByteAt(uint16_t address, uint8_t byte) {
         assert(false);
         break;
     }
+	cout << "Timer updated  " << hex << unsigned(address) << " = " << hex << unsigned(byte);
+	cout << " Active: " << active_ << " TIMA : " << hex << unsigned(tima_);
+	cout << " div:" << hex << unsigned(div_counter_) << " APC: " << advance_per_cycle_ << endl;
 }
 
 uint8_t TimerController::GetByteAt(uint16_t address) {
