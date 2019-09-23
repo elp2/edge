@@ -25,7 +25,7 @@ enum AddressOwner {
 // Redirects reads and writes to the MMU, PPU, Sound, and potentially other controllers.
 class AddressRouter {
  public:
-	 AddressRouter::AddressRouter(MMU* mmu, PPU* ppu, SerialController* serial_controller, InterruptController* interrupt_controller, InputController* input_controller, TimerController* timer_controller);
+	AddressRouter(MMU* mmu, PPU* ppu, SerialController* serial_controller, InterruptController* interrupt_controller, InputController* input_controller, TimerController* timer_controller);
     ~AddressRouter() = default;
 
     uint8_t GetByteAt(uint16_t address);

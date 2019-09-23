@@ -92,15 +92,16 @@ TEST_F(TimerControllerTest, TimerDoesntInterruptWithoutOverflow) {
     EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);    
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
     controller_->Advance(1);
-    ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x1);
+    ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
     // Shouldn't interrupt at all.
 }
 
 TEST_F(TimerControllerTest, TimerInterruptsWhenOverflows) {
     EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
-    controller_->Advance(256);
-    controller_->SetByteAt(TAC_ADDRESS, 0x0);
+    controller_->Advance(256 * 256);
+    ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
+    ASSERT_EQ(controller_->GetByteAt(TAC_ADDRESS), 0x4);
 }
 
 TEST_F(TimerControllerTest, ModuloAfterOverflow) {
@@ -108,18 +109,18 @@ TEST_F(TimerControllerTest, ModuloAfterOverflow) {
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
     uint8_t TMA = 0xED;
     controller_->SetByteAt(TMA_ADDRESS, TMA);
-    controller_->Advance(256);
+    controller_->Advance(256 * 256);
     EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), TMA);
 }
 
 TEST_F(TimerControllerTest, FourThousandHZ) {
-    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(4096);
+    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(4096/256);
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
     controller_->Advance(CYCLES_PER_SECOND);
 }
 
 TEST_F(TimerControllerTest, TwoSixTwoKHZ) {
-    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(262144);
+    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(262144/256);
     controller_->SetByteAt(TAC_ADDRESS, 0x5);
     controller_->Advance(CYCLES_PER_SECOND);
 }
@@ -127,9 +128,9 @@ TEST_F(TimerControllerTest, TwoSixTwoKHZ) {
 TEST_F(TimerControllerTest, SwitchFrequencies) {
     EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
     controller_->SetByteAt(TAC_ADDRESS, 0x5);
-    controller_->Advance(3);
-    EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 64 * 3);
+    controller_->Advance(512);
+    EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x80);
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
-    controller_->Advance(64);
+    controller_->Advance(128 * 256);
     EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
 }
