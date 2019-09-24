@@ -55,6 +55,7 @@ class PixelFIFO {
     void PopFront();
     Pixel PeekFront();
 	void Append(Pixel p);
+    int SpriteIndexForX(int x);
 
  public:
     PixelFIFO(PPU *ppu);

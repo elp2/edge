@@ -14,6 +14,7 @@
 using namespace std;
 
 const uint16_t DMA_ADDRESS = 0xFF46;
+const uint16_t VIDEO_RAM_START_ADDRESS = 0x8000;
 
 const uint16_t OAM_RAM_ADDRESS = 0xFE00;
 const int NUM_OAM_SPRITES = 40;
@@ -120,7 +121,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
 }
 
 AddressOwner ownerForAddress(uint16_t address) {
-    if (address < 0x8000) {
+    if (address < VIDEO_RAM_START_ADDRESS) {
         return AddressOwner_MMU;
     } else if (address < 0xa000) {
         return AddressOwner_PPU;

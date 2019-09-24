@@ -70,6 +70,11 @@ bool PixelFIFO::Advance(Screen *screen) {
 		// Need to keep the fetch running.
 		return false;
 	}
+    int sprite_i = SpriteIndexForX(x_);
+    if (fetch_->cycles_remaining_ > 0 && sprite_i != -1) {
+        // BG fetch happening, but we also need to apply a sprite here.
+        return false;
+    } 
 
     if (!fifo_length_) {
         return false;
@@ -128,7 +133,7 @@ void PixelFIFO::OverlaySpriteFetch(int i) {
 	if (fp.palette_ == BackgroundWindowPalette) {
 		// TODO: Priority.
 		if (sp.two_bit_color_ != 0x00) {
-			if (fp.palette_ != BackgroundWindowPalette) {
+			if (fp.palette_ == BackgroundWindowPalette) {
 				fifo_[pos] = sp;
 			}
 		}
@@ -155,18 +160,27 @@ void PixelFIFO::StartFetch() {
 	if (fifo_length_ <= 8) {
 		StartBackgroundFetch();
 	} else {
-		for (int i = sprite_index_; i < 10; i++) {
-			if (row_sprites_[i].x_ == 0) {
-				return;
-			}
-			if (row_sprites_[i].x_ == x_) {
-				StartSpriteFetch(row_sprites_[i]);
-				// Next time don't consider this sprite again.
-				sprite_index_++;
-				return;
-			}
-		}
+        int sprite_i = SpriteIndexForX(x_);
+        if (sprite_i == -1) {
+            return;
+        }
+        StartSpriteFetch(row_sprites_[sprite_i]);
+        // Next time don't consider this sprite again.
+        sprite_index_++;
+        return;
 	}
+}
+
+int PixelFIFO::SpriteIndexForX(int x) {
+    for (int i = sprite_index_; i < 10; i++) {
+        if (row_sprites_[i].x_ == 0 && row_sprites_[i].y_ == 0) {
+            return -1;
+        }
+        if (row_sprites_[i].x_ == x) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 void PixelFIFO::StartSpriteFetch(Sprite sprite) {
