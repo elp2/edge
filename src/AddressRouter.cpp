@@ -9,21 +9,24 @@
 #include "PPU.hpp"
 #include "Utils.hpp"
 #include "serial_controller.hpp"
+#include "timer_controller.h"
 
 using namespace std;
 
 const uint16_t DMA_ADDRESS = 0xFF46;
+const uint16_t VIDEO_RAM_START_ADDRESS = 0x8000;
 
 const uint16_t OAM_RAM_ADDRESS = 0xFE00;
 const int NUM_OAM_SPRITES = 40;
 const int OAM_SPRITE_BYTES = 4; // Technically only uses the first 28 bits.
 
-AddressRouter::AddressRouter(MMU *mmu, PPU *ppu, SerialController *serial_controller, InterruptController *interrupt_controller, InputController *input_controller) {
+AddressRouter::AddressRouter(MMU *mmu, PPU *ppu, SerialController *serial_controller, InterruptController *interrupt_controller, InputController *input_controller, TimerController *timer_controller) {
     mmu_ = mmu;
     ppu_ = ppu;
     serial_controller_ = serial_controller;
     interrupt_controller_ = interrupt_controller;
 	input_controller_ = input_controller;
+	timer_controller_ = timer_controller;
 }
 
 AddressOwner ownerForIOAddress(uint16_t address) {
@@ -38,16 +41,16 @@ AddressOwner ownerForIOAddress(uint16_t address) {
         return AddressOwner_Serial;
     case 0xFF04:
         // Divider.
-        return AddressOwner_MMU;
+        return AddressOwner_Timer;
     case 0xFF05:
         // Timer Counter TIMA.
-        return AddressOwner_MMU;
+        return AddressOwner_Timer;
     case 0xFF06:
         // TMA Timer Modulo.
-        return AddressOwner_MMU;
+        return AddressOwner_Timer;
     case 0xFF07:
         // TAC Timer Control.
-        return AddressOwner_MMU;
+        return AddressOwner_Timer;
     case 0xFF0F:
         return AddressOwner_Interrupt;
     case 0xFF10:
@@ -118,7 +121,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
 }
 
 AddressOwner ownerForAddress(uint16_t address) {
-    if (address < 0x8000) {
+    if (address < VIDEO_RAM_START_ADDRESS) {
         return AddressOwner_MMU;
     } else if (address < 0xa000) {
         return AddressOwner_PPU;
@@ -160,6 +163,8 @@ uint8_t AddressRouter::GetByteAtAddressFromOwner(AddressOwner owner, uint16_t ad
 		return input_controller_->GetByteAt(address);
 	case AddressOwner_DMA:
 		return dma_base_;
+	case AddressOwner_Timer:
+		return timer_controller_->GetByteAt(address);
     default:
 		assert(false);
 		return 0x00;
@@ -186,6 +191,8 @@ void AddressRouter::SetByteAtAddressInOwner(AddressOwner owner, uint16_t address
 		return input_controller_->SetByteAt(address, byte);
 	case AddressOwner_DMA:
 		return PerformDMA(byte);
+	case AddressOwner_Timer:
+		return timer_controller_->SetByteAt(address, byte);
     default:
 		assert(false);
         break;

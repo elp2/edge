@@ -27,6 +27,7 @@ class TimerController {
     // TAC.
     bool active_ = false;
     int advance_per_cycle_ = 0;
+    int advanced_ = 0;
 
     // DIV.
     uint16_t div_counter_ = 0;

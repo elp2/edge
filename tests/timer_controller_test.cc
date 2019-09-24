@@ -16,7 +16,7 @@ using testing::_;
 class MockInterruptHandler : public InterruptHandler {
  public:
     MockInterruptHandler() {};
-    MOCK_METHOD(void, HandleInterrupt, (Interrupt interrupt), (override));
+    MOCK_METHOD(void, RequestInterrupt, (Interrupt interrupt), (override));
 };
 
 class TimerControllerTest : public ::testing::Test {
@@ -33,7 +33,7 @@ class TimerControllerTest : public ::testing::Test {
 };
 
 TEST_F(TimerControllerTest, GetAndSetValues) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(_)).Times(0);
+    EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);
     uint8_t tima = 0x57;
     uint8_t tma = 0xF0;
     uint8_t tac = 0x06;
@@ -44,7 +44,7 @@ TEST_F(TimerControllerTest, GetAndSetValues) {
 }
 
 TEST_F(TimerControllerTest, SettingDIVResetsIt) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(_)).Times(0);    
+    EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);    
     controller_->Advance(10000);
     ASSERT_NE(controller_->GetByteAt(DIV_ADDRESS), 0x00);
     controller_->SetByteAt(DIV_ADDRESS, 0x10);
@@ -52,7 +52,7 @@ TEST_F(TimerControllerTest, SettingDIVResetsIt) {
 }
 
 TEST_F(TimerControllerTest, DIVAdvancing) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(_)).Times(0);    
+    EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);    
     ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x00);
 
     controller_->Advance(100);
@@ -75,13 +75,13 @@ TEST_F(TimerControllerTest, DIVAdvancing) {
 }
 
 TEST_F(TimerControllerTest, TimerStartsAtZero) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(_)).Times(0);    
+    EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);    
     uint8_t timer = controller_->GetByteAt(TIMA_ADDRESS);
     ASSERT_EQ(0, timer);
 }
 
 TEST_F(TimerControllerTest, TimerDoesntAdvanceWhenInactive) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(_)).Times(0);    
+    EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);    
     uint8_t timer = controller_->GetByteAt(TIMA_ADDRESS);
     controller_->SetByteAt(TAC_ADDRESS, 0x0);
     controller_->Advance(1000);
@@ -89,47 +89,48 @@ TEST_F(TimerControllerTest, TimerDoesntAdvanceWhenInactive) {
 }
 
 TEST_F(TimerControllerTest, TimerDoesntInterruptWithoutOverflow) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(_)).Times(0);    
+    EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);    
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
     controller_->Advance(1);
-    ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x1);
+    ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
     // Shouldn't interrupt at all.
 }
 
 TEST_F(TimerControllerTest, TimerInterruptsWhenOverflows) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_TimerOverflow)).Times(1);
+    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
-    controller_->Advance(256);
-    controller_->SetByteAt(TAC_ADDRESS, 0x0);
+    controller_->Advance(256 * 256);
+    ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
+    ASSERT_EQ(controller_->GetByteAt(TAC_ADDRESS), 0x4);
 }
 
 TEST_F(TimerControllerTest, ModuloAfterOverflow) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_TimerOverflow)).Times(1);
+    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
     uint8_t TMA = 0xED;
     controller_->SetByteAt(TMA_ADDRESS, TMA);
-    controller_->Advance(256);
+    controller_->Advance(256 * 256);
     EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), TMA);
 }
 
 TEST_F(TimerControllerTest, FourThousandHZ) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_TimerOverflow)).Times(4096);
+    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(4096/256);
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
     controller_->Advance(CYCLES_PER_SECOND);
 }
 
 TEST_F(TimerControllerTest, TwoSixTwoKHZ) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_TimerOverflow)).Times(262144);
+    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(262144/256);
     controller_->SetByteAt(TAC_ADDRESS, 0x5);
     controller_->Advance(CYCLES_PER_SECOND);
 }
 
 TEST_F(TimerControllerTest, SwitchFrequencies) {
-    EXPECT_CALL(mock_handler_, HandleInterrupt(Interrupt_TimerOverflow)).Times(1);
+    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
     controller_->SetByteAt(TAC_ADDRESS, 0x5);
-    controller_->Advance(3);
-    EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 64 * 3);
+    controller_->Advance(512);
+    EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x80);
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
-    controller_->Advance(64);
+    controller_->Advance(128 * 256);
     EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
 }

@@ -3,11 +3,11 @@
 #include <cstdint>
 
 enum Interrupt : uint8_t {
-    Interrupt_VBlank = 0x1,
-    Interrupt_LCDC = 0x02,
-    Interrupt_TimerOverflow = 0x04,
-    Interrupt_SerialTransferCompletion = 0x08,
-    Interrupt_Input = 0x10,
+    Interrupt_VBlank = 0b1,
+    Interrupt_LCDC = 0b10,
+    Interrupt_TimerOverflow = 0b100,
+    Interrupt_SerialTransferCompletion = 0b1000,
+    Interrupt_Input = 0b10000,
 };
 
 class InputController;
@@ -22,16 +22,17 @@ class InterruptExecutor {
 
 class InterruptHandler {
  public:
-    virtual void HandleInterrupt(Interrupt interrupt) = 0;
+    virtual void RequestInterrupt(Interrupt interrupt) = 0;
 };
 
-// TODO: Interrupt Priority ordering 1-5.
 class InterruptController : public InterruptHandler {
  public:
     InterruptController();
     ~InterruptController() = default;
 
-    void HandleInterrupt(Interrupt interrupt);
+    void RequestInterrupt(Interrupt interrupt);
+	// Handles IR's in order. Returns the number of cycles to advance.
+	int HandleInterruptRequest();
 
     void set_executor(InterruptExecutor *executor) { executor_ = executor; };
     void set_interrupt_request(uint8_t value) { interrupt_request_ = value; };

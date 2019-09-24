@@ -59,7 +59,7 @@ bool InputController::Advance(int cycles) {
 	}
 
 	if (trigger_interrupt) {
-		interrupt_handler_->HandleInterrupt(Interrupt_Input);
+		interrupt_handler_->RequestInterrupt(Interrupt_Input);
 	}
 
 

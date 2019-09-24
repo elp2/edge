@@ -5,14 +5,19 @@
 
 #include "interrupt_controller.hpp"
 
+using std::cout;
+using std::hex;
+using std::endl;
+
 const int CYCLES_PER_SECOND = 1048576;
-const int STEPS_FOR_4KHZ = 256 / (CYCLES_PER_SECOND / 4096);
-const int STEPS_FOR_262KHZ = 256 / (CYCLES_PER_SECOND / 262144);
-const int STEPS_FOR_65KHZ = 256 / (CYCLES_PER_SECOND / 65536);
-const int STEPS_FOR_16KHZ = 256 / (CYCLES_PER_SECOND / 16384);
+const int STEPS_FOR_4KHZ = CYCLES_PER_SECOND / 4096;
+const int STEPS_FOR_262KHZ = CYCLES_PER_SECOND / 262144;
+const int STEPS_FOR_65KHZ = CYCLES_PER_SECOND / 65536;
+const int STEPS_FOR_16KHZ = CYCLES_PER_SECOND / 16384;
 
 TimerController::TimerController() {
     advance_per_cycle_ = STEPS_FOR_4KHZ;
+    advanced_ = advance_per_cycle_;
 }
 
 void TimerController::SetByteAt(uint16_t address, uint8_t byte) {
@@ -28,7 +33,7 @@ void TimerController::SetByteAt(uint16_t address, uint8_t byte) {
         modulo_ = byte;
         break;
     case 0XFF07: {
-        active_ = byte &0x04;        
+        active_ = byte & 0x04;      
         switch (byte & 0x03) {
             case 0x00:
                 advance_per_cycle_ = STEPS_FOR_4KHZ;
@@ -45,12 +50,16 @@ void TimerController::SetByteAt(uint16_t address, uint8_t byte) {
             default:
                 break;
         }
+        advanced_ = advance_per_cycle_;
         break;
     }
     default:
         assert(false);
         break;
     }
+	// cout << "Timer updated  " << hex << unsigned(address) << " = " << hex << unsigned(byte);
+	// cout << " Active: " << active_ << " TIMA : " << hex << unsigned(tima_);
+	// cout << " div:" << hex << unsigned(div_counter_) << " APC: " << advance_per_cycle_ << endl;
 }
 
 uint8_t TimerController::GetByteAt(uint16_t address) {
@@ -93,14 +102,23 @@ void TimerController::Advance(int cycles) {
     if (!active_) {
         return;
     }
+    int advance_this_cycle = 0;
     // We will scale appropriately on fetch.
-    while (cycles) {
-        uint8_t previous_tima = tima_;
-        tima_ += advance_per_cycle_;
-        if (tima_ < previous_tima) {
-            interrupt_handler_->HandleInterrupt(Interrupt_TimerOverflow);
+    while (cycles > advance_per_cycle_) {
+        advance_this_cycle++;
+        cycles -= advance_per_cycle_;
+    }
+    advanced_ -= cycles;
+    if (advanced_ <= 0) {
+        advanced_ += advance_per_cycle_;
+        advance_this_cycle++;
+    }
+    while (advance_this_cycle) {
+        tima_++;
+        if (tima_ == 0x00) {
+            interrupt_handler_->RequestInterrupt(Interrupt_TimerOverflow);
             tima_ = modulo_;
         }
-        --cycles;
+        --advance_this_cycle;
     }
 }

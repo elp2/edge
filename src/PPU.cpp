@@ -47,6 +47,10 @@ const int OAM_SPRITE_BYTES = 4; // Technically only uses the first 28 bits.
 PPU::PPU() { 
     oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
     video_ram_ = (uint8_t *)calloc(0x2000, sizeof(uint8_t));
+    for (int i = 0; i < 2000; i++) {
+        // Initialize junk data so corruption will reveal errors.
+        video_ram_[i] = i % 255;
+    }
     io_ram_ = (uint8_t*)calloc(0xD, sizeof(uint8_t));
 
     frame_cycles_ = 0;
@@ -187,7 +191,7 @@ uint8_t PPU::ly() {
 void PPU::set_ly(uint8_t value) {
 	SetIORAM(LY_ADDRESS, value);
 	if (value == lyc() && bit_set(lcdc(), 6)) {
-		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 }
 
@@ -248,7 +252,7 @@ uint8_t PPU::lcdc() {
 
 void PPU::set_lcdc(uint8_t value) {
     bool screen_on = bit_set(value, 7);
-    assert(screen_on);
+    //assert(screen_on);
 	screen_->set_on(screen_on);
 	if (!screen_on && state_ != VBlank) {
 		cout << "Turning off screen must happen in vblank." << endl;
@@ -392,7 +396,7 @@ void PPU::BeginHBlank() {
     screen_->NewLine();
     state_ = HBlank;
 	if (bit_set(lcdc(), 3)) {
-		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 }
 
@@ -402,10 +406,10 @@ void PPU::EndHBlank() {
 void PPU::BeginVBlank() {
     state_ = VBlank;
     screen_->VBlankBegan();
-	interrupt_handler_->HandleInterrupt(Interrupt_VBlank);
+	interrupt_handler_->RequestInterrupt(Interrupt_VBlank);
 	if (bit_set(lcdc(), 4)) {
 		// TODO - how do we compare?
-		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 }
 
@@ -428,7 +432,7 @@ bool PPU::DisplayWindow() {
 
 void PPU::OAMSearchY(int row) {
 	if (bit_set(lcdc(), 5)) {
-		interrupt_handler_->HandleInterrupt(Interrupt_LCDC);
+		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 
 	if (!(bit_set(lcdc(), 1))) {
@@ -446,12 +450,16 @@ void PPU::OAMSearchY(int row) {
 	int sprites_found = 0;
     for (int i = 0; i < NUM_OAM_SPRITES; i++) {
         int offset = 4 * i;
+
+		uint8_t sprite_y = oam_ram_[offset + 0];
+		uint8_t sprite_x = oam_ram_[offset + 1];
 		
-		uint8_t sprite_x = oam_ram_[offset + 0];
-		uint8_t sprite_y = oam_ram_[offset + 1];
-		if (sprite_x == 0 && sprite_y == 0) {
+		if ((sprite_x == 0 && sprite_y == 0)) {
 			continue;
 		}
+        // Sprites are arranged with their maximum bottom right location.
+        sprite_x -= 8;
+        sprite_y -= 16;
 		if (SpriteYIntersectsRow(sprite_y, row, SPRITE_HEIGHT)) {
 			row_sprites_[sprites_found].x_ = sprite_x;
 			row_sprites_[sprites_found].y_ = sprite_y;
@@ -509,15 +517,18 @@ uint16_t PPU::SpritePixels(Sprite sprite, int sprite_y) {
 	if (bit_set(sprite.flags_, 6)) {
 		sprite_y = 7 - sprite_y;
 	}
+    assert(sprite_y >= 0);
+    assert(sprite_y < 8);
 
 	uint16_t sprite_tile_address = 0x8000 + sprite.tile_number_ * BYTES_PER_8X8_TILE;
 	sprite_tile_address += (sprite_y % 8) * 2;
-	uint16_t tile_data = buildMsbLsb16(GetByteAt(sprite_tile_address), GetByteAt(sprite_tile_address + 1));
-	return tile_data;
+	uint16_t tile_data = buildMsbLsb16(GetByteAt(sprite_tile_address), GetByteAt(sprite_tile_address + 1));	
+    return tile_data;
 }
 
 uint16_t PPU::WindowTile(int x, int y) {
 	uint16_t window_map_address_base = bit_set(lcdc(), 6) ? 0x9800 : 0x9C00;
+    // TODO: Windows not implemented.
 	assert(false);
 	return GetByteAt(window_map_address_base);
 }

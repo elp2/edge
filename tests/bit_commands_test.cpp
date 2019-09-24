@@ -25,14 +25,14 @@ TEST(BitCommandsTest, RLCA) {
     EXPECT_TRUE(cpu->flags.c);
 }
 
-TEST(BitCommandsTest, RLCA2) {
+TEST(BitCommandsTest, RLCADoesntSetZeroFlag) {
     const uint8_t RLCA = 0x07;    
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{  RLCA });
     cpu->Set8Bit(Register_A, 0x0);
     cpu->Step();
 
     ASSERT_EQ(cpu->Get8Bit(Register_A), 0x00);
-    EXPECT_TRUE(cpu->flags.z);
+    EXPECT_FALSE(cpu->flags.z);
     EXPECT_FALSE(cpu->flags.c);
 }
 
@@ -145,12 +145,21 @@ TEST(BitCommandsTest, RLCLikeRLCA) {
             cpu->Step();
             int rlc_a = cpu->Get8Bit(Register_A);
             bool flags_c = cpu->flags.c;
+			bool flags_z = cpu->flags.z;
 
             cpu->Set8Bit(Register_A, a);
             cpu->flags.c = c;
             cpu->Step();
             ASSERT_EQ(cpu->flags.c, flags_c);
             ASSERT_EQ(cpu->Get8Bit(Register_A), rlc_a);
+			if (cpu->Get8Bit(Register_A) == 0) {
+				// Only CB RLCA sets the Z flag.
+				ASSERT_FALSE(flags_z);
+				ASSERT_TRUE(cpu->flags.z);
+			}
+			else {
+				ASSERT_EQ(flags_z, cpu->flags.z);
+			}
             cpu->JumpRelative(-3);
         }
     }

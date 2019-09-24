@@ -1,6 +1,7 @@
 #include "interrupt_controller.hpp"
 
 #include <cassert>
+#include <iostream>
 #include "SDL.h"
 
 #include "input_controller.h"
@@ -11,45 +12,53 @@ const uint16_t IF_ADDRESS = 0xFF0F;
 const uint16_t IE_ADDRESS = 0xFFFF;
 
 InterruptController::InterruptController() {
-
 }
 
-void InterruptController::HandleInterrupt(Interrupt interrupt) {
-	if (!(interrupt_enabled_flags_ & interrupt)) {
-		return;
-	}
-
+void InterruptController::RequestInterrupt(Interrupt interrupt) {
 	is_halted_ = false;
-
-	if (!interrupts_enabed_) {
-        return;
-    }
 
     interrupt_request_ |= interrupt;
 
-    uint8_t rst_pc = 0x00;
-    switch (interrupt) {
-        case Interrupt_VBlank:
-            rst_pc = 0x40;
-            break;
-        case Interrupt_LCDC:
-            rst_pc = 0x48;
-            break;
-        case Interrupt_TimerOverflow:
-            rst_pc = 0x50;
-            break;
-        case Interrupt_SerialTransferCompletion:
-            rst_pc = 0x58;
-            break;
-        case Interrupt_Input:
-            rst_pc = 0x60;
-            break;        
-        default:
-            assert(false);
-            break;
-    }
-    interrupts_enabed_ = false; // Must be re-enabled during the event loop.
-    executor_->InterruptToPC(rst_pc);
+}
+
+int InterruptController::HandleInterruptRequest() {
+	if (!interrupts_enabed_) {
+		return 0;
+	}
+
+	uint8_t handleable_interrupts = interrupt_request() & interrupt_enabled_flags();
+
+	uint8_t rst_pc = 0x00;
+	if (handleable_interrupts & Interrupt_VBlank) {
+		rst_pc = 0x40;
+		interrupt_request_ &= ~(Interrupt_VBlank);
+	}
+	else if (handleable_interrupts & Interrupt_LCDC) {
+		rst_pc = 0x48;
+		interrupt_request_ &= ~(Interrupt_LCDC);
+	}
+	else if (handleable_interrupts & Interrupt_TimerOverflow) {
+		rst_pc = 0x50;
+		interrupt_request_ &= ~(Interrupt_TimerOverflow);
+	}
+	else if (handleable_interrupts & Interrupt_SerialTransferCompletion) {
+		rst_pc = 0x58;
+		interrupt_request_ &= ~(Interrupt_SerialTransferCompletion);
+	}
+	else if (handleable_interrupts & Interrupt_Input) {
+		rst_pc = 0x60;
+		interrupt_request_ &= ~(Interrupt_Input);
+	}
+
+	if (rst_pc == 0) {
+		return 0;
+	}
+
+	assert(rst_pc != 0x00);
+	std::cout << "Resetting to pc: " << std::hex << unsigned(rst_pc) << std::endl;
+	interrupts_enabed_ = false; // Must be re-enabled during the event loop.
+	executor_->InterruptToPC(rst_pc);
+	return 0;
 }
 
 void InterruptController::Advance(int cycles) {

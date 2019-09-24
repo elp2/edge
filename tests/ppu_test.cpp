@@ -12,9 +12,9 @@ class PPUTest : public ::testing::Test {
 TEST(PPUTest, GetByte) {
     PPU *ppu = new PPU();
 
-    ppu->SetByteAt(0xFF40, 0x05);
+    ppu->SetByteAt(0xFF40, 0x91);
     uint8_t lcdc = ppu->GetByteAt(0xFF40);
-    ASSERT_EQ(lcdc, 0x05);
+    ASSERT_EQ(lcdc, 0x91);
 
     ppu->SetByteAt(0x8000, 0x56);
     ASSERT_EQ(ppu->GetByteAt(0x8000), 0x56);
