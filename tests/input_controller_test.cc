@@ -8,8 +8,8 @@
 using testing::_;
 
 const uint16_t P0_ADDRESS = 0xFF00;
-const uint8_t P0_P14 = 0x10;
-const uint8_t P0_P15 = 0x20;
+const uint8_t P0_P14 = 0x20; // P14 set low, P15 set high!
+const uint8_t P0_P15 = 0x10; // P15 set low, p14 set high!
 const uint8_t P0_RESET = 0x30;
 
 class MockInterruptHandler : public InterruptHandler {

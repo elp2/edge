@@ -6,9 +6,11 @@
 #include "interrupt_controller.hpp"
 #include "SDL.h"
 
+// FF00: X X P15 P14 [Down/Start] [up/select] [left, a] [right, b].  [is P14 low, is p15 high]
+
 const uint16_t P0_ADDRESS = 0xFF00;
-const uint8_t P0_P14 = 0x10;
-const uint8_t P0_P15 = 0x20;
+const uint8_t P0_P14 = 0x20; // P14 low, P15 high.
+const uint8_t P0_P15 = 0x10; // P15 low, P14 high.
 const uint8_t P0_RESET = 0x30;
 
 const int POLL_EVENT_CYCLES = 10000;
