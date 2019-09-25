@@ -180,7 +180,10 @@ uint8_t PPU::scy() {
 }
 
 void PPU::set_scy(uint8_t value) {
-	assert(CanAccessVRAM());
+	if (!CanAccessVRAM() && value != scy_) {
+		cout << "Updating SCY during VRAM: " << hex << unsigned(scy_) << " -> " << hex << unsigned(value) << endl;
+		assert(false);
+	}
 	scy_ = value;
 }
 

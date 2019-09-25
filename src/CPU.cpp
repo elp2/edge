@@ -52,9 +52,6 @@ int CPU::Step() {
 
 int CPU::RunNextCommand() {
     uint16_t command_pc = pc_;
-	if (command_pc == 0x100) {
-		debugPrint_ = true;
-	}
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
 
