@@ -66,7 +66,7 @@ uint8_t TimerController::GetByteAt(uint16_t address) {
     uint8_t ret = 0x00;
     switch (address) {
         case 0xFF04:
-            return (div_counter_ >> 11) & 0xFF;
+            return (div_counter_ >> 6) & 0xFF;
         case 0xFF05:
             return tima_;
         case 0xFF06:

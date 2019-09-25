@@ -56,7 +56,7 @@ TEST_F(InputControllerTest, ReadsKeyDown) {
 	controller_->SetByteAt(P0_ADDRESS, P0_P15);
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_J));
 	controller_->Advance(1001);
-	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x21);
+	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x11);
 }
 
 
@@ -66,7 +66,7 @@ TEST_F(InputControllerTest, Reads2KeyDown) {
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_A));
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_S));
 	controller_->Advance(1001);
-	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x1A);
+	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x2A);
 }
 
 TEST_F(InputControllerTest, KeyUps) {
@@ -75,10 +75,10 @@ TEST_F(InputControllerTest, KeyUps) {
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_A));
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_S));
 	controller_->Advance(1001);
-	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x1A);
+	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x2A);
 	controller_->HandleEvent(Button(false, SDL_SCANCODE_A));
 	controller_->HandleEvent(Button(false, SDL_SCANCODE_S));
-	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x10);
+	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x20);
 }
 
 TEST_F(InputControllerTest, IgnoresUnknonwKeys) {
@@ -86,9 +86,9 @@ TEST_F(InputControllerTest, IgnoresUnknonwKeys) {
 	controller_->SetByteAt(P0_ADDRESS, P0_P14);
 	controller_->HandleEvent(Button(true, SDL_SCANCODE_Z));
 	controller_->Advance(1001);
-	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x10);
-	controller_->SetByteAt(P0_ADDRESS, P0_P15);
 	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x20);
+	controller_->SetByteAt(P0_ADDRESS, P0_P15);
+	EXPECT_EQ(controller_->GetByteAt(P0_ADDRESS), 0x10);
 }
 
 TEST_F(InputControllerTest, InterruptsMultipleTimes) {

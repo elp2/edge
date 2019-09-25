@@ -51,27 +51,29 @@ TEST_F(TimerControllerTest, SettingDIVResetsIt) {
     ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x00);
 }
 
-TEST_F(TimerControllerTest, DIVAdvancing) {
-    EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);    
+TEST_F(TimerControllerTest, DivTimer16khz) {
+    EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
+	controller_->SetByteAt(TAC_ADDRESS, 0b111);
     ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x00);
+	ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x00);
 
-    controller_->Advance(100);
-    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x00);
-
-    controller_->Advance(1947);
-    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x00);
-
-    controller_->Advance(1);
-    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x01);
-
-    controller_->Advance(1);
-    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x01);
-
-    controller_->Advance(2048 - 2);
-    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x01);
-
-    controller_->Advance(1);
-    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x02);
+	int cycles_per_advance = CYCLES_PER_SECOND / 16384;
+	for (int i = 0; i < 256; i++) {
+		ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), controller_->GetByteAt(TIMA_ADDRESS));
+		controller_->Advance(cycles_per_advance);
+	}
+	ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0);
+	ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0);
+}
+TEST_F(TimerControllerTest, DIVLoops) {
+	EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);
+	ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x00);
+	int cycles_per_advance = CYCLES_PER_SECOND / 16384;
+	for (int i = 0; i < 256; i++) {
+		ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), i);
+		controller_->Advance(cycles_per_advance);
+	}
+	ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0);
 }
 
 TEST_F(TimerControllerTest, TimerStartsAtZero) {
