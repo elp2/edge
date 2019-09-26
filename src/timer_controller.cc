@@ -102,23 +102,23 @@ void TimerController::Advance(int cycles) {
     if (!active_) {
         return;
     }
-    int advance_this_cycle = 0;
+    int ticks = 0;
     // We will scale appropriately on fetch.
     while (cycles > advance_per_cycle_) {
-        advance_this_cycle++;
+		ticks++;
         cycles -= advance_per_cycle_;
     }
     advanced_ -= cycles;
     if (advanced_ <= 0) {
         advanced_ += advance_per_cycle_;
-        advance_this_cycle++;
+		ticks++;
     }
-    while (advance_this_cycle) {
+    while (ticks) {
         tima_++;
         if (tima_ == 0x00) {
             interrupt_handler_->RequestInterrupt(Interrupt_TimerOverflow);
             tima_ = modulo_;
         }
-        --advance_this_cycle;
+        --ticks;
     }
 }

@@ -136,3 +136,15 @@ TEST_F(TimerControllerTest, SwitchFrequencies) {
     controller_->Advance(128 * 256);
     EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
 }
+
+TEST_F(TimerControllerTest, FourThousandHZOrganicBig) {
+	EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
+	controller_->SetByteAt(TAC_ADDRESS, 0x4);
+	EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
+	int advance = 256 * (CYCLES_PER_SECOND / 4096) + 30;
+	while (advance > 0) {
+		int step = advance > 20 ? 20 : advance;
+		controller_->Advance(step);
+		advance -= step;
+	}
+}
