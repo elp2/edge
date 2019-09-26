@@ -60,6 +60,7 @@ int CPU::RunNextCommand() {
     int stepped = command->cycles;
     cycles_ += stepped;
 
+	debugPrint_ = debugPrint_ | command_pc == 0x100;
     if (debugPrint_) {
         cout << command->description << " ; PC=" << command_pc << endl;
         Debugger();
@@ -336,8 +337,8 @@ void CPU::Push8Bit(uint8_t byte) {
 }
 
 void CPU::Push16Bit(uint16_t word) {
-    Push8Bit(LOWER8(word));
-    Push8Bit(HIGHER8(word));
+	Push8Bit(HIGHER8(word));
+	Push8Bit(LOWER8(word));
 }
 
 uint8_t CPU::Pop8Bit() {
@@ -349,9 +350,9 @@ uint8_t CPU::Pop8Bit() {
 }
 
 uint16_t CPU::Pop16Bit() {
-    uint8_t msb = Pop8Bit();
     uint8_t lsb = Pop8Bit();
-    return buildMsbLsb16(msb, lsb);
+	uint8_t msb = Pop8Bit();
+	return buildMsbLsb16(msb, lsb);
 }
 
 void CPU::EnableDisassemblerMode() {

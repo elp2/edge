@@ -60,15 +60,105 @@ MathCommand::MathCommand(uint8_t opcode) {
 	}
 
 	if ((col == 0x4 && row <= 0x3) || (col == 0xc && row <= 0x3)) {
+		Destination d;
+		switch (opcode)
+		{
+		case 0x3c:
+			d = Register_A;
+			break;
+		case 0x04:
+			d = Register_B;
+			break;
+		case 0x0c:
+			d = Register_C;
+			break;
+		case 0x14:
+			d = Register_D;
+			break;
+		case 0x1c:
+			d = Register_E;
+			break;
+		case 0x24:
+			d = Register_H;
+			break;
+		case 0x2c:
+			d = Register_L;
+			break;
+		case 0x34:
+			d = Address_HL;
+			break;
+		case 0x03:
+			d = Register_BC;
+			break;
+		case 0x13:
+			d = Register_DE;
+			break;
+		case 0x23:
+			d = Register_HL;
+			break;
+		case 0x33:
+			d = Register_SP;
+			break;
+
+		default:
+			cout << "Unknown inc command: 0x" << hex << unsigned(opcode) << endl;
+			assert(false);
+			break;
+		}
 		stringstream stream;
-		stream << "DEC " << destinationToString(destinationForColumn(col));
+		stream << "INC " << destinationToString(d);
 		description = stream.str();
 		return;
 	}
 
 	if ((col == 0x5 && row <= 0x3) || (col == 0xd && row <= 0x3)) {
+		Destination d;
+		switch (opcode)
+		{
+		case 0x3d:
+			d = Register_A;
+			break;
+		case 0x05:
+			d = Register_B;
+			break;
+		case 0x0d:
+			d = Register_C;
+			break;
+		case 0x15:
+			d = Register_D;
+			break;
+		case 0x1d:
+			d = Register_E;
+			break;
+		case 0x25:
+			d = Register_H;
+			break;
+		case 0x2d:
+			d = Register_L;
+			break;
+		case 0x35:
+			d = Address_HL;
+			break;
+		case 0x0b:
+			d = Register_BC;
+			break;
+		case 0x1b:
+			d = Register_DE;
+			break;
+		case 0x2b:
+			d = Register_HL;
+			break;
+		case 0x3b:
+			d = Register_SP;
+			break;
+
+		default:
+			cout << "Unknown dec command: 0x" << hex << unsigned(opcode) << endl;
+			assert(false);
+			break;
+		}
 		stringstream stream;
-		stream << "INC " << destinationToString(destinationForColumn(col));
+		stream << "DEC " << destinationToString(d);
 		description = stream.str();
 		return;
 	}

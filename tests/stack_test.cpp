@@ -37,3 +37,28 @@ TEST(StackTest, PushDownwards) {
     uint16_t new_sp = cpu->Get16Bit(Register_SP);
     ASSERT_EQ(new_sp + 2, initial_sp);
 }
+
+TEST(StackTest, PushLSBMSB) {
+	CPU* cpu = getTestingCPU();
+	uint16_t initial_sp = cpu->Get16Bit(Register_SP);
+	cpu->Push16Bit(0x1234);
+	cpu->Set16Bit(Register_HL, initial_sp - 2);
+	ASSERT_EQ(cpu->Get8Bit(Address_HL), 0x34);
+	cpu->Set16Bit(Register_HL, initial_sp - 1);
+	ASSERT_EQ(cpu->Get8Bit(Address_HL), 0x12);
+}
+
+TEST(StackTest, PushBC) {
+	const uint8_t PUSH_BC = 0xC5;
+	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ PUSH_BC });
+
+	uint16_t initial_sp = cpu->Get16Bit(Register_SP);
+	uint16_t BC = 0xABCD;
+	cpu->Set16Bit(Register_BC, BC);
+	cpu->Step();
+
+	cpu->Set16Bit(Register_HL, initial_sp - 1);
+	ASSERT_EQ(cpu->Get8Bit(Address_HL), HIGHER8(BC));
+	cpu->Set16Bit(Register_HL, initial_sp - 2);
+	ASSERT_EQ(cpu->Get8Bit(Address_HL), LOWER8(BC));
+}
