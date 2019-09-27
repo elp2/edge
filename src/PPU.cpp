@@ -66,8 +66,7 @@ void PPU::Advance(int machine_cycles) {
         return;
     }
 
-    // Machine cycles is for the 1.05 MHZ CPU, we are working with the 4.19 MHZ GPU.
-	advance_cycles_ = machine_cycles * 4;
+	advance_cycles_ = machine_cycles;
     
     // Naive version - immediately do all the things for that particular cycle once.
     while(advance_cycles_) {

@@ -5,7 +5,7 @@
 
 #include "interrupt_controller.hpp"
 
-const int CYCLES_PER_SECOND = 1048576;
+const int CYCLES_PER_SECOND = 4194304;
 const uint16_t DIV_ADDRESS = 0xFF04;
 const uint16_t TIMA_ADDRESS = 0xFF05;
 const uint16_t TMA_ADDRESS = 0xFF06;
@@ -101,7 +101,7 @@ TEST_F(TimerControllerTest, TimerDoesntInterruptWithoutOverflow) {
 TEST_F(TimerControllerTest, TimerInterruptsWhenOverflows) {
     EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
-    controller_->Advance(256 * 256);
+    controller_->Advance(256 * CYCLES_PER_SECOND / 4096);
     ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
     ASSERT_EQ(controller_->GetByteAt(TAC_ADDRESS), 0x4);
 }
@@ -111,7 +111,7 @@ TEST_F(TimerControllerTest, ModuloAfterOverflow) {
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
     uint8_t TMA = 0xED;
     controller_->SetByteAt(TMA_ADDRESS, TMA);
-    controller_->Advance(256 * 256);
+    controller_->Advance(256 * CYCLES_PER_SECOND / 4096);
     EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), TMA);
 }
 
@@ -130,10 +130,10 @@ TEST_F(TimerControllerTest, TwoSixTwoKHZ) {
 TEST_F(TimerControllerTest, SwitchFrequencies) {
     EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
     controller_->SetByteAt(TAC_ADDRESS, 0x5);
-    controller_->Advance(512);
+    controller_->Advance(128 * CYCLES_PER_SECOND / 262144);
     EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x80);
     controller_->SetByteAt(TAC_ADDRESS, 0x4);
-    controller_->Advance(128 * 256);
+    controller_->Advance(128 * CYCLES_PER_SECOND / 4096);
     EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
 }
 
@@ -142,6 +142,18 @@ TEST_F(TimerControllerTest, FourThousandHZOrganicBig) {
 	controller_->SetByteAt(TAC_ADDRESS, 0x4);
 	EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
 	int advance = 256 * (CYCLES_PER_SECOND / 4096) + 30;
+	while (advance > 0) {
+		int step = advance > 20 ? 20 : advance;
+		controller_->Advance(step);
+		advance -= step;
+	}
+}
+
+TEST_F(TimerControllerTest, TwoSixTwoOneLoop) {
+	EXPECT_CALL(mock_handler_, RequestInterrupt(Interrupt_TimerOverflow)).Times(1);
+	controller_->SetByteAt(TAC_ADDRESS, 0x5);
+	EXPECT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x0);
+	int advance = 256 * (CYCLES_PER_SECOND / 262144) + 2;
 	while (advance > 0) {
 		int step = advance > 20 ? 20 : advance;
 		controller_->Advance(step);

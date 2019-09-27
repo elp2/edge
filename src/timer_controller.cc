@@ -9,7 +9,7 @@ using std::cout;
 using std::hex;
 using std::endl;
 
-const int CYCLES_PER_SECOND = 1048576;
+const int CYCLES_PER_SECOND = 4194304;
 const int STEPS_FOR_4KHZ = CYCLES_PER_SECOND / 4096;
 const int STEPS_FOR_262KHZ = CYCLES_PER_SECOND / 262144;
 const int STEPS_FOR_65KHZ = CYCLES_PER_SECOND / 65536;
@@ -66,7 +66,7 @@ uint8_t TimerController::GetByteAt(uint16_t address) {
     uint8_t ret = 0x00;
     switch (address) {
         case 0xFF04:
-            return (div_counter_ >> 6) & 0xFF;
+            return (div_counter_ >> 8) & 0xFF;
         case 0xFF05:
             return tima_;
         case 0xFF06:

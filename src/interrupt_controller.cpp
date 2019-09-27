@@ -15,6 +15,7 @@ InterruptController::InterruptController() {
 }
 
 void InterruptController::RequestInterrupt(Interrupt interrupt) {
+	std::cout << "Requesting Interrupt: " << std::hex << unsigned(interrupt) << std::endl;
 	is_halted_ = false;
 
     interrupt_request_ |= interrupt;
@@ -90,6 +91,7 @@ void InterruptController::SetByteAt(uint16_t address, uint8_t byte) {
     switch (address) {
 		case IF_ADDRESS:
 			set_interrupt_request(byte);
+			std::cout << "Write IF" << std::hex << unsigned(interrupt_request()) << std::endl;
 			break;
 		case IE_ADDRESS:
 			set_interrupt_enabled_flags(byte);
@@ -103,6 +105,7 @@ void InterruptController::SetByteAt(uint16_t address, uint8_t byte) {
 uint8_t InterruptController::GetByteAt(uint16_t address) {
     switch (address) {
 		case IF_ADDRESS:
+			std::cout << "GET IF" << std::endl;
 			return interrupt_request();
 		case IE_ADDRESS:
 			return interrupt_enabled_flags();
