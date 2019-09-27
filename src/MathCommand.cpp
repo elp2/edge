@@ -483,8 +483,6 @@ uint16_t AddSP(CPU *cpu) {
         delta = -1 * signed_byte;
     }
     uint8_t lower8 = aluAdd8(cpu, add, false, LOWER8(sp), delta);
-    // Even if we subtracted above, we shouldn't mark this as a subtraction.
-    cpu->flags.n = false;
 
     uint16_t sp_after = sp + signed_byte;
     assert(LOWER8(sp_after) == lower8);
@@ -494,6 +492,11 @@ uint16_t AddSP(CPU *cpu) {
 		// TODO - this doesn't seem safe since pushing on would write over ROM?
         // assert(false);
     }
+
+    // Even if we subtracted above, we shouldn't mark this as a subtraction.
+    cpu->flags.n = false;
+    cpu->flags.z = false;
+
     return sp_after;
 }
 
