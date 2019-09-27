@@ -62,7 +62,7 @@ int CPU::RunNextCommand() {
 
 	debugPrint_ = debugPrint_ | command_pc == 0x100;
     if (debugPrint_) {
-        cout << command->description << " ; PC=" << command_pc << endl;
+        cout << command->description << " ; PC=" << command_pc << " -> ";
         Debugger();
     }
 
@@ -428,9 +428,10 @@ void CPU::Debugger() {
     cout << " HL: " << hex << unsigned(Get8Bit(Register_H)) << "," << hex << unsigned(Get8Bit(Register_L));
     cout << " SP: " << hex << unsigned(sp_);
     cout << " PC: " << hex << unsigned(pc_);
-    cout << " Flags:";
-    cout << " Z: " << hex << flags.z;
-    cout << " C: " << hex << flags.c;
-    cout << " H: " << hex << flags.h;
-    cout << " N: " << hex << flags.n << endl << endl;
+    cout << " " << (flags.z ? "Z" : "_");
+    cout << (flags.c ? "C" : "_");
+    cout << (flags.h ? "H" : "_");
+    cout << (flags.n ? "N" : "_");
+    cout << " C: " << cycles_;
+    cout << endl;
 }
