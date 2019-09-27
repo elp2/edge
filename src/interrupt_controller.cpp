@@ -16,10 +16,11 @@ InterruptController::InterruptController() {
 
 void InterruptController::RequestInterrupt(Interrupt interrupt) {
 	std::cout << "Requesting Interrupt: " << std::hex << unsigned(interrupt) << std::endl;
-	is_halted_ = false;
+	if (interrupt_enabled_flags() & interrupt) {
+		is_halted_ = false;
+	}
 
     interrupt_request_ |= interrupt;
-
 }
 
 int InterruptController::HandleInterruptRequest() {

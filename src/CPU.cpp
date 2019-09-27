@@ -44,6 +44,9 @@ int CPU::Step() {
 	}
 
 	if (interrupt_controller_->IsHalted()) {
+        if (debugPrint_) {
+            cout << "HALTED!" << endl;
+        }
 		return 16;
 	} else {
 		return RunNextCommand();
