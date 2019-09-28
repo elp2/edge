@@ -62,3 +62,30 @@ TEST(StackTest, PushBC) {
 	cpu->Set16Bit(Register_HL, initial_sp - 2);
 	ASSERT_EQ(cpu->Get8Bit(Address_HL), LOWER8(BC));
 }
+
+TEST(StackTest, PopBC) {
+	const uint8_t POP_BC = 0xC1;
+	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ POP_BC });
+
+	uint16_t initial_sp = cpu->Get16Bit(Register_SP);
+    uint16_t expected = 0xFEED;
+    cpu->Push16Bit(expected);
+	cpu->Step();
+    ASSERT_EQ(expected, cpu->Get16Bit(Register_BC));
+}
+
+TEST(StackTest, PushPopDE) {
+	const uint8_t PUSH_DE = 0xD5;
+	const uint8_t POP_DE = 0xD1;
+	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ PUSH_DE, POP_DE });
+
+	uint16_t initial_sp = cpu->Get16Bit(Register_SP);
+    uint16_t expected = 0xFEED;
+    cpu->Set16Bit(Register_DE, expected);
+	cpu->Step();
+    cpu->Set16Bit(Register_DE, ~expected);
+    ASSERT_NE(expected, cpu->Get16Bit(Register_DE));
+
+    cpu->Step();
+    ASSERT_EQ(expected, cpu->Get16Bit(Register_DE));
+}
