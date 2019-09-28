@@ -121,6 +121,7 @@ void PPU::VisibleCycle(int remaining_cycles) {
         EndHBlank();
         state_ = OAM_Search;
         OAMSearchY(row);
+        set_ly(row);
     }
 	
 	if (row_cycles < OAM_SEARCH_CYCLES) {
@@ -254,7 +255,7 @@ uint8_t PPU::lcdc() {
 
 void PPU::set_lcdc(uint8_t value) {
     bool screen_on = bit_set(value, 7);
-    //assert(screen_on);
+    cout << "LCDC " << screen_on << " 0x" << hex << unsigned(value) << endl;
 	screen_->set_on(screen_on);
 	if (!screen_on && state_ != VBlank) {
 		cout << "Turning off screen must happen in vblank." << endl;
@@ -513,12 +514,15 @@ uint16_t PPU::BackgroundTile(int x, int y) {
     return tile_data;
 }
 
-uint16_t PPU::SpritePixels(Sprite sprite, int sprite_y) {
+uint16_t PPU::SpritePixels(Sprite sprite, int sy) {
 	uint16_t pixels = 0;
 	
+    int sprite_y;
 	if (bit_set(sprite.flags_, 6)) {
 		sprite_y = 7 - sprite_y;
-	}
+	} else {
+        sprite_y = sy;
+    }
     assert(sprite_y >= 0);
     assert(sprite_y < 8);
 

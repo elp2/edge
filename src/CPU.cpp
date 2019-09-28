@@ -44,9 +44,6 @@ int CPU::Step() {
 	}
 
 	if (interrupt_controller_->IsHalted()) {
-        if (debugPrint_) {
-            cout << "HALTED!" << endl;
-        }
 		return 16;
 	} else {
 		return RunNextCommand();
@@ -63,7 +60,7 @@ int CPU::RunNextCommand() {
     int stepped = command->cycles;
     cycles_ += stepped;
 
-	debugPrint_ = debugPrint_ | command_pc == 0x100;
+	debugPrint_ = debugPrint_ | (command_pc == 0x100);
     if (debugPrint_) {
         cout << command->description << " ; PC=" << command_pc << " -> ";
         Debugger();
