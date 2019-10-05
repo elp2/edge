@@ -7,6 +7,8 @@
 
 
 int main(int argc, char* argv[]) {
+	(void)argc;
+	(void)argv;
 	std::ofstream log("log.txt");
 	std::cout.rdbuf(log.rdbuf());
 

@@ -12,6 +12,7 @@ bin/*
 .DS_Store
 .DS_Store?
 
+.vscode/*
 # Cmake Directories to ignore.
 build/*
 wsl/*

@@ -68,14 +68,11 @@ void Screen::DrawPixel(Pixel pixel) {
     assert(pixel_index < SCREEN_PIXELS);
     pixels_[pixel_index] = color;
     x_++;
-
-    assert(on_);
 }
 
 void Screen::NewLine() {
     y_++;
     x_ = 0;
-    assert(on_);
 }
 
 void Screen::VBlankBegan() {

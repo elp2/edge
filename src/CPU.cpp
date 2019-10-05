@@ -54,10 +54,10 @@ int CPU::RunNextCommand() {
     uint16_t command_pc = pc_;
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
-    // if (command_pc == 0x100) {
-    //     debugPrint_ = true;
-    //     cycles_ = 0;
-    // }
+    if (command_pc == 0x100) {
+        debugPrint_ = true;
+        cycles_ = 0;
+    }
 
     Command *command = CommandForOpcode(opcode);
     command->Run(this);

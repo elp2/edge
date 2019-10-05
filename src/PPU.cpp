@@ -61,11 +61,6 @@ PPU::PPU() {
 }
 
 void PPU::Advance(int machine_cycles) {
-    if (!screen_->on()) {
-        // Nothing for the PPU to output if the screen's not on.
-        return;
-    }
-
 	advance_cycles_ = machine_cycles;
     
     // Naive version - immediately do all the things for that particular cycle once.
@@ -182,7 +177,6 @@ uint8_t PPU::scy() {
 void PPU::set_scy(uint8_t value) {
 	if (!CanAccessVRAM() && value != scy_) {
 		cout << "Updating SCY during VRAM: " << hex << unsigned(scy_) << " -> " << hex << unsigned(value) << endl;
-		assert(false);
 	}
 	scy_ = value;
 }
@@ -190,7 +184,6 @@ void PPU::set_scy(uint8_t value) {
 uint8_t PPU::ly() {
     if (!screen_->on()) {
         cout << "Reading LY while screen off..." << endl;
-        assert(false); // Fails instr_timing when we assert here.
     }
     return GetIORAM(LY_ADDRESS);
 }
