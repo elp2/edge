@@ -408,10 +408,6 @@ TEST(MathCommandTest, SUBDAA) {
 
 					cpu->Step();
 					uint8_t subbed = cpu->Get8Bit(Register_A);
-                    if (subbed == 0xF0) {
-
-                    }
-
 					cpu->Step();
 
                     uint8_t actual = cpu->Get8Bit(Register_A);
@@ -420,7 +416,6 @@ TEST(MathCommandTest, SUBDAA) {
                         assert(false);
                     }
 					ASSERT_EQ(actual, expected8);
-					// TODO : EXPECT_FLAGS(expected8 == 0, false, true, carry);
 					uint8_t relative = -2;
 					cpu->JumpRelative(relative);
 				}

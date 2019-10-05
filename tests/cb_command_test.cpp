@@ -105,4 +105,3 @@ TEST(CBCommandTest, SwapNibbles) {
 		e++;
 	}
 }
-

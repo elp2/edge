@@ -80,7 +80,6 @@ void CBCommand::Swap(uint8_t column, CPU *cpu) {
     uint8_t value = cpu->Get8Bit(d);
     uint8_t swapped = (NIBBLELOW(value) << 4) | NIBBLEHIGH(value);
 
-    assert(true); // TODO Untested
     cpu->Set8Bit(d, swapped);
     cpu->flags.z = (swapped == 0);
     cpu->flags.n = false;

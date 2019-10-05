@@ -314,10 +314,11 @@ uint8_t PPU::GetByteAt(uint16_t address) {
             case LYC_ADDRESS:
                 return lyc();
             case BGP_ADDRESS:
+                return bgp();
             case OBP0_ADDRESS:
+                return obp0();
             case OBP1_ADDRESS:
-                // TODO Palettes.
-                return 0xed;
+                return obp1();
             case WY_ADDRESS:
                 return wy();
             case WX_ADDRESS:

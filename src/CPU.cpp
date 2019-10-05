@@ -38,9 +38,9 @@ int CPU::Step() {
 		haltNextLoop_ = false;
 		interrupt_controller_->HaltUntilInterrupt(); // halt until interrupt.
 	} else if (stopNextLoop_) {
-		cout << "TODO: Stop!";
+		cout << "SUSPICIOUS: Stop not implemented!!" << endl;
 		stopNextLoop_ = false;
-		assert(false); // TODO!
+		// assert(false);
 	}
 
 	if (interrupt_controller_->IsHalted()) {

@@ -307,7 +307,6 @@ void MathCommand::Inc(CPU *cpu) {
         uint16_t orig = cpu->Get16Bit(d);
         uint16_t inc = orig + 1;
         cpu->Set16Bit(d, inc);
-        // TODO: Test overflow.
     } else {
         uint8_t orig = cpu->Get8Bit(d);
         bool c = cpu->flags.c;
@@ -376,7 +375,6 @@ void MathCommand::Dec(CPU *cpu) {
         uint16_t orig = cpu->Get16Bit(d);
         uint16_t dec = orig - 1;
         cpu->Set16Bit(d, dec);
-        // TODO: Test overflow.
     } else {
         uint8_t orig = cpu->Get8Bit(d);
         bool c = cpu->flags.c;
@@ -488,9 +486,8 @@ uint16_t AddSP(CPU *cpu) {
     assert(LOWER8(sp_after) == lower8);
 
     if (sp_after < 0x10) {
-        cout << "SP too low after adding: " << hex << unsigned(sp_after) << endl;
-		// TODO - this doesn't seem safe since pushing on would write over ROM?
-        // assert(false);
+        // This may happen in the instruction tests.
+        cout << "SUSPICIOUS: SP too low after adding: " << hex << unsigned(sp_after) << endl;
     }
 
     // Even if we subtracted above, we shouldn't mark this as a subtraction.

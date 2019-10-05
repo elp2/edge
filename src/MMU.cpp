@@ -140,7 +140,6 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
     // TODO: Probably shouldn't be setting the ROM, how does RAM work?
     ram[address - 0x8000] = byte;
 
-    // TODO: Test.
     // Echo of Internal 8 Bit RAM.
     if (address >= 0xE000 && address < 0xFE00) {
         uint16_t echoAddress = 0xC000 + (address - 0xE000);
