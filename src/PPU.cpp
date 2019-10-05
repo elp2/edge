@@ -182,9 +182,7 @@ void PPU::set_scy(uint8_t value) {
 }
 
 uint8_t PPU::ly() {
-    if (!screen_->on()) {
-        cout << "Reading LY while screen off..." << endl;
-    }
+    // LY changes even when the screen is off so it's OK to read.
     return GetIORAM(LY_ADDRESS);
 }
 
