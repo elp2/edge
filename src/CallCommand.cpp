@@ -11,18 +11,21 @@ class CallCommand : public Command {
     CallCommand(uint8_t opcode, string description, int cycles) {
         this->opcode = opcode;
         this->description = description;
-        this->cycles = cycles;
+        this->no_jump_cycles_ = cycles;
     }
 
     ~CallCommand() {}
 
     void DoCall(CPU *cpu, uint16_t callAddress, bool condition) {
         if (!condition) {
+            cycles = no_jump_cycles_;
             return;
         }
-        if (cycles == 12) {
+        if (no_jump_cycles_ == 12) {
             // Conditional calls take 2x as many cycles if they jump.
             cycles = 24;
+        } else {
+            cycles = no_jump_cycles_;
         }
         //  Where we should return is where we are currently pointing after the call.
         uint16_t returnAddress = cpu->Get16Bit(Register_PC);
@@ -65,6 +68,9 @@ class CallCommand : public Command {
             break;
         }
     }
+
+ private:
+    int no_jump_cycles_ = 0;
 };
 
 void registerCallCommands(AbstractCommandFactory *factory) {
@@ -76,12 +82,12 @@ void registerCallCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new CallCommand(0xDC, "CALL C,nn", 12));
 
     // RST.
-    factory->RegisterCommand(new CallCommand(0xC7, "RST 00H", 32));
-    factory->RegisterCommand(new CallCommand(0xCF, "RST 08H", 32));
-    factory->RegisterCommand(new CallCommand(0xD7, "RST 10H", 32));
-    factory->RegisterCommand(new CallCommand(0xDF, "RST 18H", 32));
-    factory->RegisterCommand(new CallCommand(0xE7, "RST 20H", 32));
-    factory->RegisterCommand(new CallCommand(0xEF, "RST 28H", 32));
-    factory->RegisterCommand(new CallCommand(0xF7, "RST 30H", 32));
-    factory->RegisterCommand(new CallCommand(0xFF, "RST 38H", 32));
+    factory->RegisterCommand(new CallCommand(0xC7, "RST 00H", 16));
+    factory->RegisterCommand(new CallCommand(0xCF, "RST 08H", 16));
+    factory->RegisterCommand(new CallCommand(0xD7, "RST 10H", 16));
+    factory->RegisterCommand(new CallCommand(0xDF, "RST 18H", 16));
+    factory->RegisterCommand(new CallCommand(0xE7, "RST 20H", 16));
+    factory->RegisterCommand(new CallCommand(0xEF, "RST 28H", 16));
+    factory->RegisterCommand(new CallCommand(0xF7, "RST 30H", 16));
+    factory->RegisterCommand(new CallCommand(0xFF, "RST 38H", 16));
 }

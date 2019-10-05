@@ -56,6 +56,9 @@ void System::Advance(int stepped) {
 	}
     ppu_->Advance(stepped);
 	timer_controller_->Advance(stepped);
+	// if (cpu_->Get16Bit(Register_PC) >= 0xC200) {
+	// 	timer_controller_->Debugger();
+	// }
 
 	interrupt_controller_->Advance(stepped);
 	int interrupt_steps = interrupt_controller_->HandleInterruptRequest();

@@ -190,7 +190,7 @@ void PPU::set_scy(uint8_t value) {
 uint8_t PPU::ly() {
     if (!screen_->on()) {
         cout << "Reading LY while screen off..." << endl;
-        assert(false);
+        assert(false); // Fails instr_timing when we assert here.
     }
     return GetIORAM(LY_ADDRESS);
 }

@@ -241,6 +241,7 @@ void AddressRouter::PerformDMA(uint8_t dma_base) {
 	dma_base_ = dma_base;
 
 	uint16_t dma_address = dma_base_;
+    cout << "DMA sprites from " << hex << unsigned(dma_address) << endl;
 	dma_address <<= 8;
 	// This takes 160 cycles, but we're assuming the CPU is doing its loop.
 	for (int i = 0; i < NUM_OAM_SPRITES * OAM_SPRITE_BYTES; i++) {
