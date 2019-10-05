@@ -59,5 +59,5 @@ TEST(CallCommandTest, RST18H) {
     cpu->Step();
 
     ASSERT_EQ(cpu->Get16Bit(Register_PC), 0x18);
-    ASSERT_EQ(cpu->cycles(), cycles + 32);
+    ASSERT_EQ(cpu->cycles(), cycles + 16);
 }

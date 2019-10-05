@@ -16,6 +16,8 @@ class TimerController {
 
     void SetInterruptHandler(InterruptHandler *handler) { interrupt_handler_ = handler; };
 
+   void Debugger();
+
  private:
     InterruptHandler *interrupt_handler_;
     // TIMA.

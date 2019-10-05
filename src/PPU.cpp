@@ -122,6 +122,7 @@ void PPU::VisibleCycle(int remaining_cycles) {
         state_ = OAM_Search;
         OAMSearchY(row);
         set_ly(row);
+		fifo_->NewRow(row, row_sprites_);
     }
 	
 	if (row_cycles < OAM_SEARCH_CYCLES) {
@@ -134,7 +135,6 @@ void PPU::VisibleCycle(int remaining_cycles) {
 
 	if (max_cycles > 0 && row_cycles == OAM_SEARCH_CYCLES) {
 		state_ = Pixel_Transfer;
-		fifo_->NewRow(row, row_sprites_);
 		fifo_->Advance(screen_);
 	}
 
@@ -188,12 +188,16 @@ void PPU::set_scy(uint8_t value) {
 }
 
 uint8_t PPU::ly() {
+    if (!screen_->on()) {
+        cout << "Reading LY while screen off..." << endl;
+        assert(false); // Fails instr_timing when we assert here.
+    }
     return GetIORAM(LY_ADDRESS);
 }
 
 void PPU::set_ly(uint8_t value) {
 	SetIORAM(LY_ADDRESS, value);
-	if (value == lyc() && bit_set(lcdc(), 6)) {
+	if (value == lyc() && bit_set(stat(), 6)) {
 		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 }
@@ -364,6 +368,8 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
                 set_scx(byte);
                 break;		
             case LY_ADDRESS:
+                cout << "Writing LY via memory to: 0x" << hex << unsigned(byte) << endl;
+                assert(false);
                 set_ly(byte);
                 break;
             case LYC_ADDRESS:
@@ -398,7 +404,7 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
 void PPU::BeginHBlank() {
     screen_->NewLine();
     state_ = HBlank;
-	if (bit_set(lcdc(), 3)) {
+	if (bit_set(stat(), 3)) {
 		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 }
@@ -410,8 +416,7 @@ void PPU::BeginVBlank() {
     state_ = VBlank;
     screen_->VBlankBegan();
 	interrupt_handler_->RequestInterrupt(Interrupt_VBlank);
-	if (bit_set(lcdc(), 4)) {
-		// TODO - how do we compare?
+	if (bit_set(stat(), 4)) {
 		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 }
@@ -434,7 +439,7 @@ bool PPU::DisplayWindow() {
 }
 
 void PPU::OAMSearchY(int row) {
-	if (bit_set(lcdc(), 5)) {
+	if (bit_set(stat(), 5)) {
 		interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
 	}
 
@@ -464,6 +469,8 @@ void PPU::OAMSearchY(int row) {
         sprite_x -= 8;
         sprite_y -= 16;
 		if (SpriteYIntersectsRow(sprite_y, row, SPRITE_HEIGHT)) {
+            assert(sprite_y - row < 8);
+
 			row_sprites_[sprites_found].x_ = sprite_x;
 			row_sprites_[sprites_found].y_ = sprite_y;
 			row_sprites_[sprites_found].tile_number_ = oam_ram_[offset + 2];
@@ -514,20 +521,16 @@ uint16_t PPU::BackgroundTile(int x, int y) {
     return tile_data;
 }
 
-uint16_t PPU::SpritePixels(Sprite sprite, int sy) {
-	uint16_t pixels = 0;
-	
-    int sprite_y;
+uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
+    assert(sprite_row >= 0);
+    assert(sprite_row < 8);
+
 	if (bit_set(sprite.flags_, 6)) {
-		sprite_y = 7 - sprite_y;
-	} else {
-        sprite_y = sy;
-    }
-    assert(sprite_y >= 0);
-    assert(sprite_y < 8);
+		sprite_row = 7 - sprite_row;
+	}
 
 	uint16_t sprite_tile_address = 0x8000 + sprite.tile_number_ * BYTES_PER_8X8_TILE;
-	sprite_tile_address += (sprite_y % 8) * 2;
+	sprite_tile_address += (sprite_row % 8) * 2;
 	uint16_t tile_data = buildMsbLsb16(GetByteAt(sprite_tile_address), GetByteAt(sprite_tile_address + 1));	
     return tile_data;
 }

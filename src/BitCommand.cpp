@@ -278,5 +278,5 @@ void registerBitCommands(AbstractCommandFactory *factory) {
     factory->RegisterCommand(new BitCommand(0xb5, "OR L", 4));
     factory->RegisterCommand(new BitCommand(0xb6, "OR (HL)", 8));
     factory->RegisterCommand(new BitCommand(0xb7, "OR A", 4));
-    factory->RegisterCommand(new BitCommand(0xF6, "OR #", 4));
+    factory->RegisterCommand(new BitCommand(0xF6, "OR #", 8));
 }

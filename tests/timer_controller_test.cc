@@ -65,6 +65,7 @@ TEST_F(TimerControllerTest, DivTimer16khz) {
 	ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0);
 	ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0);
 }
+
 TEST_F(TimerControllerTest, DIVLoops) {
 	EXPECT_CALL(mock_handler_, RequestInterrupt(_)).Times(0);
 	ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x00);
@@ -159,4 +160,32 @@ TEST_F(TimerControllerTest, TwoSixTwoOneLoop) {
 		controller_->Advance(step);
 		advance -= step;
 	}
+}
+
+TEST_F(TimerControllerTest, TIMAAdvancesWithDIV) {
+	controller_->SetByteAt(TAC_ADDRESS, 0b111);
+    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 0x00);
+	ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0x00);
+
+    // We need two advances to tick DIV once.
+	int cycles_per_advance = CYCLES_PER_SECOND / (2 * 16384);
+    controller_->Advance(cycles_per_advance);
+    controller_->Advance(cycles_per_advance);
+
+    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), controller_->GetByteAt(TIMA_ADDRESS));
+    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 1);
+
+    // Shouldn't have ticked over yet.
+    controller_->Advance(cycles_per_advance);
+    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), controller_->GetByteAt(TIMA_ADDRESS));
+    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 1);
+
+    // Reset TIMA.
+    controller_->SetByteAt(TIMA_ADDRESS, 0);
+    ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 0);
+
+    controller_->Advance(cycles_per_advance);
+    // Both DIV and TIMA should have ticked over.
+    ASSERT_EQ(controller_->GetByteAt(TIMA_ADDRESS), 1);
+    ASSERT_EQ(controller_->GetByteAt(DIV_ADDRESS), 2);
 }

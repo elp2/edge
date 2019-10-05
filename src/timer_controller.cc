@@ -113,6 +113,10 @@ void TimerController::Advance(int cycles) {
         advanced_ += advance_per_cycle_;
 		ticks++;
     }
+    if (!active_) {
+        return;
+    }
+
     while (ticks) {
         tima_++;
         if (tima_ == 0x00) {
@@ -121,4 +125,9 @@ void TimerController::Advance(int cycles) {
         }
         --ticks;
     }
+}
+
+void TimerController::Debugger() {
+    cout << "DIV: " << hex << unsigned(GetByteAt(0xFF04)) << endl;
+    cout << "TIMA: " << hex << unsigned(tima_) << endl;
 }

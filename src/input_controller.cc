@@ -15,10 +15,11 @@ const uint8_t P0_RESET = 0x30;
 
 const int POLL_EVENT_CYCLES = 10000;
 
-const int TRIGGER_DURATION_4MHZ_CYCLES = 2 * 2 * 2 * 2;
-const int KEY_HOLD_TRIGGER_CYCLES = TRIGGER_DURATION_4MHZ_CYCLES;
+const int KEY_HOLD_TRIGGER_CYCLES = 2 * 2 * 2 * 2;
 
 int KeyIndex(SDL_Scancode scancode) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
 	switch (scancode) {
 		// P14 selected.
 		case SDL_SCANCODE_D: // Right
@@ -39,6 +40,7 @@ int KeyIndex(SDL_Scancode scancode) {
 		case SDL_SCANCODE_M: // Start
 			return 7;
 	}
+#pragma GCC diagnostic push	
 	return -1;
 }
 
@@ -51,8 +53,9 @@ bool InputController::Advance(int cycles) {
 	for (int i = 0; i < 8; i++) {
 		int key_cycles = cycles_held_[i];
 		if (key_cycles > 0) {
-			key_cycles += cycles * 4; // 4 MHZ.
-			if (key_cycles > KEY_HOLD_TRIGGER_CYCLES) {
+			key_cycles += cycles;
+			if (key_cycles > KEY_HOLD_TRIGGER_CYCLES && !triggered_[i]) {
+				std::cout << "KEY DOWN: " << i << std::endl;
 				triggered_[i] = true;
 				trigger_interrupt = true;
 			}
@@ -63,7 +66,6 @@ bool InputController::Advance(int cycles) {
 	if (trigger_interrupt) {
 		interrupt_handler_->RequestInterrupt(Interrupt_Input);
 	}
-
 
 	cycles_since_poll_ += cycles;
 	if (cycles_since_poll_ >= POLL_EVENT_CYCLES) {

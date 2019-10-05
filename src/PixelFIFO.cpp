@@ -171,6 +171,7 @@ void PixelFIFO::StartFetch() {
 	}
 }
 
+// Returns the first sprite at x past sprite_index_, or -1 if there is no such sprite.
 int PixelFIFO::SpriteIndexForX(int x) {
     for (int i = sprite_index_; i < 10; i++) {
         if (row_sprites_[i].x_ == 0 && row_sprites_[i].y_ == 0) {

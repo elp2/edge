@@ -54,15 +54,18 @@ int CPU::RunNextCommand() {
     uint16_t command_pc = pc_;
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
+    // if (command_pc == 0x100) {
+    //     debugPrint_ = true;
+    //     cycles_ = 0;
+    // }
 
     Command *command = CommandForOpcode(opcode);
     command->Run(this);
     int stepped = command->cycles;
     cycles_ += stepped;
 
-	debugPrint_ = debugPrint_ | (command_pc == 0x100);
     if (debugPrint_) {
-        cout << command->description << " ; PC=" << command_pc << " -> ";
+        cout << command->description << " ; PC=" << hex << unsigned(command_pc) << " -> ";
         Debugger();
     }
 
@@ -249,7 +252,7 @@ void CPU::Set8Bit(Destination destination, uint8_t value) {
         address_router_->SetByteAt(0xff00 + Get8Bit(Register_C), value);
         break;
     case Eat_PC_Byte:
-        // TODO: Is this even valid/necessary?
+        // You can't set over the PC value outside of a LD which would use different registers.
         assert(false);
         break;
     default:
@@ -432,6 +435,6 @@ void CPU::Debugger() {
     cout << (flags.c ? "C" : "_");
     cout << (flags.h ? "H" : "_");
     cout << (flags.n ? "N" : "_");
-    cout << " C: " << cycles_;
+    cout << " C: " << dec << cycles_;
     cout << endl;
 }

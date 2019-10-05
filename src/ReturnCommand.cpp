@@ -9,7 +9,7 @@
 ReturnCommand::ReturnCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
     this->description = description;
-    this->cycles = cycles;
+    this->base_cycles_ = cycles;
 }
 
 ReturnCommand::~ReturnCommand() {
@@ -17,8 +17,7 @@ ReturnCommand::~ReturnCommand() {
 }
 
 void ReturnCommand::Run(CPU *cpu) {
-    // TODO - when we take a branch it eats 12 more cycles?
-
+    cycles = base_cycles_;
     switch (this->opcode)
     {  
         case 0xc9:
@@ -26,21 +25,25 @@ void ReturnCommand::Run(CPU *cpu) {
             break;
         case 0xc0:
             if (!cpu->flags.z) {
+                cycles = 20;
                 cpu->JumpAddress(cpu->Pop16Bit());
             }
             break;
         case 0xc8:
             if (cpu->flags.z) {
+                cycles = 20;
                 cpu->JumpAddress(cpu->Pop16Bit());
             }
             break;
         case 0xd0:
             if (!cpu->flags.c) {
+                cycles = 20;
                 cpu->JumpAddress(cpu->Pop16Bit());
             }
             break;
         case 0xd8:
             if (cpu->flags.c) {
+                cycles = 20;
                 cpu->JumpAddress(cpu->Pop16Bit());
             }
             break;
@@ -57,12 +60,12 @@ void ReturnCommand::Run(CPU *cpu) {
 }
 
 void registerReturnCommands(AbstractCommandFactory *factory) {
-    factory->RegisterCommand(new ReturnCommand(0xc9, "RET", 8));
+    factory->RegisterCommand(new ReturnCommand(0xc9, "RET", 16));
 
     factory->RegisterCommand(new ReturnCommand(0xc0, "RET NZ", 8));
     factory->RegisterCommand(new ReturnCommand(0xc8, "RET Z", 8));
     factory->RegisterCommand(new ReturnCommand(0xd0, "RET CZ", 8));
     factory->RegisterCommand(new ReturnCommand(0xd8, "RET C", 8));
 
-    factory->RegisterCommand(new ReturnCommand(0xd9, "RETI", 8));
+    factory->RegisterCommand(new ReturnCommand(0xd9, "RETI", 16));
 }

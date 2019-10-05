@@ -9,7 +9,7 @@
 JumpCommand::JumpCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;
     this->description = description;
-    this->cycles = cycles;
+    this->base_cycles_ = cycles;
 }
 
 JumpCommand::~JumpCommand() {
@@ -21,15 +21,18 @@ void JumpCommand::JumpCondition(CPU *cpu, bool jump, Destination destination) {
     if (jump) {
         cycles = destination == Register_HL ? 4 : 16;
         cpu->JumpAddress(address);
+    } else {
+        cycles = base_cycles_;
     }
 }
 
 void JumpCommand::JumpConditionRelative(CPU *cpu, bool jump, Destination destination) {
     uint8_t relative = cpu->Get8Bit(destination);
-
     if (jump) {
         cycles = 12;
         cpu->JumpRelative(relative);
+    } else {
+        cycles = base_cycles_;
     }
 }
 
