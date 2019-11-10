@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	std::ofstream log("log.txt");
 	std::cout.rdbuf(log.rdbuf());
 
-	System* system = new System("../../t.gb");
+	System* system = new System("../../d.gb");
 
 	// System* system = new System("../../gb-test-roms/instr_timing/instr_timing.gb");
 	// System* system = new System("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"); // All OK, #3 failed.

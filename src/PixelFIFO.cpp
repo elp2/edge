@@ -1,6 +1,7 @@
 #include "PixelFIFO.hpp"
 
 #include <cassert>
+#include <cstddef>
 #include <iostream>
 
 #include "PPU.hpp"
