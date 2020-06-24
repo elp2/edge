@@ -18,7 +18,7 @@ TEST(CallCommandTest, CALLnn) {
     uint32_t cycles = cpu->cycles();
     uint16_t expected_pushed_pc = cpu->Get16Bit(Register_PC) + 3;
     cpu->Step();
-    
+
     ASSERT_EQ(cpu->Get16Bit(Register_PC), 0x1234);
     ASSERT_EQ(cpu->cycles(), cycles + 24);
     ASSERT_EQ(cpu->Pop16Bit(), expected_pushed_pc);
@@ -32,7 +32,7 @@ TEST(CallCommandTest, CALLNZnnJump) {
     cpu->flags.z = false;
     uint32_t cycles = cpu->cycles();
     cpu->Step();
-    
+
     ASSERT_EQ(cpu->Get16Bit(Register_PC), 0x1234);
     ASSERT_EQ(cpu->cycles(), cycles + 24);
     ASSERT_EQ(cpu->Pop16Bit(), expected_pushed_pc);
@@ -46,7 +46,7 @@ TEST(CallCommandTest, CALLNCnnNoJump) {
     uint32_t cycles = cpu->cycles();
     cpu->Step();
 
-    // Advances after the call withtout jumping.    
+    // Advances after the call withtout jumping.
     ASSERT_EQ(cpu->Get16Bit(Register_PC), pc + 3);
     ASSERT_EQ(cpu->cycles(), cycles + 12);
 }
@@ -54,7 +54,6 @@ TEST(CallCommandTest, CALLNCnnNoJump) {
 TEST(CallCommandTest, RST18H) {
     const uint8_t RST18H = 0xDF;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ RST18H, 0x18 });
-    uint16_t pc = cpu->Get16Bit(Register_PC);
     uint32_t cycles = cpu->cycles();
     cpu->Step();
 

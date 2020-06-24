@@ -14,7 +14,6 @@ TEST(MathCommandTest, INC) {
     const uint8_t INC_HL = 0x34;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ INC_A, INC_HL });
     cpu->Set8Bit(Register_A, 0xFF);
-    uint32_t cycles = cpu->cycles();
 
     cpu->Step();
     EXPECT_EQ(cpu->Get8Bit(Register_A), 0);
@@ -24,7 +23,7 @@ TEST(MathCommandTest, INC) {
     // Ensure C is not affected.
     cpu->flags.c = true;
     cpu->Set16Bit(Register_HL, 0x9998);
-    cpu->Set8Bit(Address_HL, 0x50); 
+    cpu->Set8Bit(Address_HL, 0x50);
     cpu->Step();
     EXPECT_EQ(cpu->Get8Bit(Address_HL), 0x51);
     EXPECT_FLAGS(false, false, false, true);
@@ -36,7 +35,6 @@ TEST(MathCommandTest, DEC) {
     const uint8_t DEC_HL = 0x35;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ DEC_L, DEC_HL });
     cpu->Set8Bit(Register_L, 0x01);
-    uint32_t cycles = cpu->cycles();
 
     cpu->Step();
     EXPECT_EQ(cpu->Get8Bit(Register_A), 0);
@@ -46,7 +44,7 @@ TEST(MathCommandTest, DEC) {
     // Ensure C is not affected.
     cpu->flags.c = true;
     cpu->Set16Bit(Register_HL, 0x9998);
-    cpu->Set8Bit(Address_HL, 0x00); 
+    cpu->Set8Bit(Address_HL, 0x00);
     cpu->Step();
     EXPECT_EQ(cpu->Get8Bit(Address_HL), 0xFF);
     EXPECT_FLAGS(false, true, true, true);
@@ -185,7 +183,6 @@ TEST(MathCommandTest, SBC) {
     const uint8_t SBC_N = 0xDE;
     const uint8_t SBC_Address_HL = 0x9E;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ SBC_AH, SBC_N, 0x3A, SBC_Address_HL });
-    uint32_t cycles = cpu->cycles();
 
     cpu->Set8Bit(Register_A, 0x3B);
     cpu->flags.c = true;
@@ -213,9 +210,8 @@ TEST(MathCommandTest, SBC) {
 TEST(MathCommandTest, AddSP1) {
     const uint8_t ADD_SP = 0xE8;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_SP, 0x01 });
-    uint32_t cycles = cpu->cycles();
     cpu->Set16Bit(Register_SP, 0xFF00);
-    
+
     cpu->Step();
     ASSERT_EQ(cpu->cycles(), 16);
     ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFF01);
@@ -225,9 +221,8 @@ TEST(MathCommandTest, AddSP1) {
 TEST(MathCommandTest, AddSP2) {
     const uint8_t ADD_SP = 0xE8;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_SP, 0x02 });
-    uint32_t cycles = cpu->cycles();
     cpu->Set16Bit(Register_SP, 0xFFF8);
-    
+
     cpu->Step();
     ASSERT_EQ(cpu->cycles(), 16);
     ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFFFA);
@@ -239,9 +234,8 @@ TEST(MathCommandTest, AddSPNegative) {
     const int8_t negative8 = -8;
     const uint8_t unsigned_negative8 = negative8;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_SP, unsigned_negative8 });
-    uint32_t cycles = cpu->cycles();
     cpu->Set16Bit(Register_SP, 0xFFF8);
-    
+
     cpu->Step();
     ASSERT_EQ(cpu->cycles(), 16);
     ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFFF0);
@@ -254,7 +248,6 @@ TEST(MathCommandTest, ADD) {
     const uint8_t ADD_AHL = 0x86;
 
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_AB, ADD_AN, 0xFF, ADD_AHL });
-    uint32_t cycles = cpu->cycles();
     cpu->Set8Bit(Register_A, 0x3A);
     cpu->Set8Bit(Register_B, 0xC6);
 
@@ -284,7 +277,6 @@ TEST(MathCommandTest, ADC) {
 	const uint8_t ADC_AHL = 0x8E;
 
 	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADC_AE, ADC_AN, 0x3B, ADC_AHL });
-	uint32_t cycles = cpu->cycles();
 	cpu->Set8Bit(Register_A, 0xE1);
 	cpu->Set8Bit(Register_E, 0x0F);
 	cpu->flags.c = true;
@@ -318,7 +310,6 @@ TEST(MathCommandTest, SUB) {
     const uint8_t SUB_AHL = 0x96;
 
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ SUB_E, SUB_N, 0x0F, SUB_AHL });
-    uint32_t cycles = cpu->cycles();
     cpu->Set8Bit(Register_A, 0x3E);
     cpu->Set8Bit(Register_E, 0x3E);
 
@@ -367,6 +358,7 @@ TEST(MathCommandTest, AddDAA) {
 					cpu->Set8Bit(Register_B, b);
 
 					cpu->Step();
+                    // TODO: Explain why we need to step 2x and get Register A.
 					uint8_t added = cpu->Get8Bit(Register_A);
 
 					cpu->Step();
@@ -386,7 +378,7 @@ TEST(MathCommandTest, SUBDAA) {
 	const uint8_t DAA = 0x27;
 
 	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ SUB_AB, DAA });
-	
+
     // O = ones, T = tens for a and b.
 	for (uint8_t oa = 0; oa < 9; oa++) {
 		for (uint8_t ta = 0; ta < 9; ta++) {

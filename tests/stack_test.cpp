@@ -67,7 +67,6 @@ TEST(StackTest, PopBC) {
 	const uint8_t POP_BC = 0xC1;
 	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ POP_BC });
 
-	uint16_t initial_sp = cpu->Get16Bit(Register_SP);
     uint16_t expected = 0xFEED;
     cpu->Push16Bit(expected);
 	cpu->Step();
@@ -79,7 +78,6 @@ TEST(StackTest, PushPopDE) {
 	const uint8_t POP_DE = 0xD1;
 	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ PUSH_DE, POP_DE });
 
-	uint16_t initial_sp = cpu->Get16Bit(Register_SP);
     uint16_t expected = 0xFEED;
     cpu->Set16Bit(Register_DE, expected);
 	cpu->Step();

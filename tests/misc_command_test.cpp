@@ -14,7 +14,6 @@ TEST(MiscCommandTest, DAA) {
     const uint8_t SUB_AB = 0x90;
     const uint8_t DAA = 0x27;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_AB, DAA, SUB_AB, DAA });
-    uint32_t cycles = cpu->cycles();
 
     cpu->Set8Bit(Register_A, 0x45);
     cpu->Set8Bit(Register_B, 0x38);

@@ -12,7 +12,6 @@ class LoadCommandTest : public ::testing::Test {
 TEST(LoadCommandTest, LDnnSP) {
     const uint8_t LDnnSP = 0x08;
     CPU *cpu = getTestingCPUWithInstructions(vector<uint8_t>{ LDnnSP, 0x00, 0xC1 });
-    uint32_t cycles = cpu->cycles();
     uint16_t expected_sp = 0xFFF8;
     cpu->Set16Bit(Register_SP, expected_sp);
 

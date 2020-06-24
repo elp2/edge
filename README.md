@@ -1,6 +1,15 @@
 # Ed's Gameboy Emulator
 
-Status:
+## Instructions
+* Install cmake and SDL-dev libraries
+  * sudo apt-get install libsdl2-dev cmake
+* mkdir build
+* cd build
+* cmake -DCMAKE_BUILD_TYPE=[Debug|Release] ..
+
+## Status:
+
+✔️ Inconsistent C++ Style
 
 ✔️ Boot Screen Works
 

@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "CommandFactory.hpp"
+#include "Destination.hpp"
 #include "CPU.hpp"
 #include "MMU.hpp"
 #include "Utils.hpp"
@@ -186,7 +187,7 @@ MathCommand::MathCommand(uint8_t opcode) {
 
 	bool carry = false;
 	bool add = false;
-	Destination d;
+	Destination d = Destination_Unknown;
 	if (row == 0x8 || opcode == ADDAd8 || opcode == ADCAd8) {
 		// ADD, ADC.
 		carry = col > 7;
@@ -200,7 +201,7 @@ MathCommand::MathCommand(uint8_t opcode) {
 		add = false;
 		d = (opcode == SUBAd8 || opcode == SBCAd8) ? Eat_PC_Byte : destinationForColumn(col);
 	}
-
+    assert(d != Destination_Unknown);
 
 	stringstream stream;
 	if (add) {

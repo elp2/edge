@@ -64,6 +64,7 @@ int InterruptController::HandleInterruptRequest() {
 }
 
 void InterruptController::Advance(int cycles) {
+	(void)cycles;
     if (disable_interrupts_in_loops_ > 0) {
         if (disable_interrupts_in_loops_ == 1) {
             interrupts_enabed_ = false;

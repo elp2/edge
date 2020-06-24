@@ -53,7 +53,6 @@ TEST(CBCommandTest, TestBitOff) {
 
 TEST(CBCommandTest, SetBit) {
 	CPU* cpu = getTestingCPUWithInstructions(opcodes(0xC6));
-	uint8_t c = 1;
     cpu->Set16Bit(Register_HL, 0x9899);
 
 	// Shouldn't be affected. We'll flip these throughout.
@@ -73,7 +72,6 @@ TEST(CBCommandTest, SetBit) {
 
 TEST(CBCommandTest, ResetBit) {
 	CPU* cpu = getTestingCPUWithInstructions(opcodes(0x81));
-	uint8_t c = 1;
 
 	// Shouldn't be affected. We'll flip these throughout.
 	bool check_flags = true;
