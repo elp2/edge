@@ -8,7 +8,12 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+if (WIN32)
+# TODO - re enable. This outputs a billion warnings and -Wextra results in a CL.exe exit with code 2. 
+# set(CMAKE_CXX_FLAGS "-Wall")
+else()
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+endif()
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
