@@ -1,0 +1,22 @@
+#pragma once
+
+#include <cstdint>
+
+union SDL_Event;
+
+class SoundController {
+ public:
+	SoundController();
+	~SoundController() = default;
+	
+	bool Advance(int cycles);
+
+	void SetByteAt(uint16_t address, uint8_t byte);
+	uint8_t GetByteAt(uint16_t);
+
+ private:
+    uint8_t sound_output_terminals_ = 0;
+    bool global_sound_on_ = 0;
+    uint8_t s01_volume_level_ = 0;
+    uint8_t s02_volume_level_ = 0;
+};

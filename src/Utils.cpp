@@ -136,7 +136,7 @@ MMU *getTestingMMU() {
 CPU *getTestingCPU() {
     MMU *mmu = getTestingMMU();
     PPU *ppu = new PPU();
-	AddressRouter* address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL);
+	AddressRouter* address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
 	CPU* cpu = new CPU(address_router);
 	InterruptController* interrupt_controller = new InterruptController();
 	cpu->SetInterruptController(interrupt_controller);
@@ -147,7 +147,7 @@ CPU *getTestingCPU() {
 CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions) {
     MMU *mmu = getTestingMMU();
     PPU *ppu = new PPU();
-	AddressRouter *address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL);
+	AddressRouter *address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
     CPU *cpu = new CPU(address_router);
 
 	InterruptController* interrupt_controller = new InterruptController();

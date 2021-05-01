@@ -14,6 +14,7 @@
 #include "MMU.hpp"
 #include "PPU.hpp"
 #include "serial_controller.hpp"
+#include "sound_controller.h"
 #include "timer_controller.h"
 #include "Screen.hpp"
 #include "Utils.hpp"
@@ -28,8 +29,9 @@ System::System(string rom_filename) {
 	input_controller_->SetInterruptHandler(interrupt_controller_);
 	timer_controller_ = new TimerController();
 	timer_controller_->SetInterruptHandler(interrupt_controller_);
+	sound_controller_ = new SoundController();
 
-	router_ = new AddressRouter(mmu_, ppu_, serial_controller_, interrupt_controller_, input_controller_, timer_controller_);
+	router_ = new AddressRouter(mmu_, ppu_, serial_controller_, interrupt_controller_, input_controller_, timer_controller_, sound_controller_);
 
 	interrupt_controller_->set_input_controller(input_controller_);
 
@@ -59,6 +61,8 @@ void System::Advance(int stepped) {
 	// if (cpu_->Get16Bit(Register_PC) >= 0xC200) {
 	// 	timer_controller_->Debugger();
 	// }
+
+	sound_controller_->Advance(stepped);
 
 	interrupt_controller_->Advance(stepped);
 	int interrupt_steps = interrupt_controller_->HandleInterruptRequest();

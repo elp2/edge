@@ -48,6 +48,7 @@ add_library (edge_lib
     src/ROM.cpp
     src/Screen.cpp
     src/serial_controller.cpp
+    src/sound_controller.cc
     src/StackCommand.cpp
     src/Sprite.cpp
     src/timer_controller.cc

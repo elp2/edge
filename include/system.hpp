@@ -10,6 +10,7 @@ class InterruptController;
 class MMU;
 class PPU;
 class SerialController;
+class SoundController;
 class TimerController;
 
 using namespace std;
@@ -29,6 +30,7 @@ class System {
 	InputController* input_controller_;
     InterruptController *interrupt_controller_;
     SerialController *serial_controller_;
+    SoundController *sound_controller_;
 	TimerController *timer_controller_;
 
     MMU *GetMMU(string rom_filename);

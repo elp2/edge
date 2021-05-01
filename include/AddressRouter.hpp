@@ -9,6 +9,7 @@ class InterruptController;
 class MMU;
 class PPU;
 class SerialController;
+class SoundController;
 class TimerController;
 
 enum AddressOwner {
@@ -20,12 +21,19 @@ enum AddressOwner {
 	AddressOwner_Input,
 	AddressOwner_DMA,
 	AddressOwner_Timer,
+    AddressOwner_Sound,
 };
 
 // Redirects reads and writes to the MMU, PPU, Sound, and potentially other controllers.
 class AddressRouter {
  public:
-	AddressRouter(MMU* mmu, PPU* ppu, SerialController* serial_controller, InterruptController* interrupt_controller, InputController* input_controller, TimerController* timer_controller);
+	AddressRouter(MMU* mmu,
+		PPU* ppu, 
+		SerialController* serial_controller,
+		InterruptController* interrupt_controller,
+		InputController* input_controller,
+		TimerController* timer_controller,
+		SoundController *sound_controller);
     ~AddressRouter() = default;
 
     uint8_t GetByteAt(uint16_t address);
@@ -38,10 +46,12 @@ class AddressRouter {
  private:
     MMU *mmu_;
     PPU *ppu_;
-    SerialController *serial_controller_;
-    InterruptController *interrupt_controller_;
 	InputController *input_controller_;
+    InterruptController *interrupt_controller_;
+    SerialController *serial_controller_;
+	SoundController* sound_controller_;
 	TimerController* timer_controller_;
+
     bool disassemblerMode_ = false;
 	uint8_t dma_base_ = 0x00;
 

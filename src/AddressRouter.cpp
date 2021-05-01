@@ -9,6 +9,7 @@
 #include "PPU.hpp"
 #include "Utils.hpp"
 #include "serial_controller.hpp"
+#include "sound_controller.h"
 #include "timer_controller.h"
 
 using namespace std;
@@ -20,13 +21,20 @@ const uint16_t OAM_RAM_ADDRESS = 0xFE00;
 const int NUM_OAM_SPRITES = 40;
 const int OAM_SPRITE_BYTES = 4; // Technically only uses the first 28 bits.
 
-AddressRouter::AddressRouter(MMU *mmu, PPU *ppu, SerialController *serial_controller, InterruptController *interrupt_controller, InputController *input_controller, TimerController *timer_controller) {
+AddressRouter::AddressRouter(MMU *mmu,
+        PPU *ppu,
+        SerialController *serial_controller,
+        InterruptController *interrupt_controller,
+        InputController *input_controller,
+        TimerController *timer_controller,
+        SoundController *sound_controller) {
     mmu_ = mmu;
     ppu_ = ppu;
     serial_controller_ = serial_controller;
     interrupt_controller_ = interrupt_controller;
-	input_controller_ = input_controller;
-	timer_controller_ = timer_controller;
+    input_controller_ = input_controller;
+    timer_controller_ = timer_controller;
+    sound_controller_ = sound_controller;
 }
 
 AddressOwner ownerForIOAddress(uint16_t address) {
@@ -77,10 +85,9 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     case 0xFF24:
     case 0xFF25:
     case 0xFF26:
-        //nothng until FF30.
-        // Sound!
-        cout << "Bleep bloop " << hex << unsigned(address) << endl;
-        return AddressOwner_MMU;
+        // Nothng until FF30.
+        // Sound voices.
+        return AddressOwner_Sound;
     case 0xFF30:
     case 0xFF31:
     case 0xFF32:
@@ -96,8 +103,8 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     case 0xFF3C:
     case 0xFF3D:
     case 0xFF3E:
-        cout << "WaveForm! " << hex << unsigned(address) << endl;
-        return AddressOwner_MMU;
+        // Waveform.
+        return AddressOwner_Sound;
     case 0xFF40:
     case 0xFF41:
     case 0xFF42:
@@ -140,10 +147,10 @@ AddressOwner ownerForAddress(uint16_t address) {
 		return AddressOwner_DMA;
 	} else if (address < 0xFF4C || address == 0xFFFF) {
         return ownerForIOAddress(address);
-    } else if (address < 0xff80) {
-        return AddressOwner_MMU; // Empty i/o (2)
-    } else if (address < 0xffff) {
-        return AddressOwner_MMU; //Internal RAM
+    } else if (address < 0xFF80) {
+        return AddressOwner_MMU; // Empty i/o (2).
+    } else if (address < 0xFFFF) {
+        return AddressOwner_MMU; // Internal RAM.
     } else {
         return AddressOwner_MMU; // Interrupt Enable Register.
     }    
@@ -166,6 +173,8 @@ uint8_t AddressRouter::GetByteAtAddressFromOwner(AddressOwner owner, uint16_t ad
 		return dma_base_;
 	case AddressOwner_Timer:
 		return timer_controller_->GetByteAt(address);
+    case AddressOwner_Sound:
+        return sound_controller_->GetByteAt(address);
     default:
 		assert(false);
 		return 0x00;
@@ -194,6 +203,8 @@ void AddressRouter::SetByteAtAddressInOwner(AddressOwner owner, uint16_t address
 		return PerformDMA(byte);
 	case AddressOwner_Timer:
 		return timer_controller_->SetByteAt(address, byte);
+    case AddressOwner_Sound:
+        return sound_controller_->SetByteAt(address, byte);
     default:
 		assert(false);
         break;
