@@ -58,7 +58,7 @@ TEST(CBCommandTest, SetBit) {
 	// Shouldn't be affected. We'll flip these throughout.
 	bool check_flags = true;
 	for (int i = 0; i < 8; i++) {
-		uint8_t c_bit = pow(2, i);
+		uint8_t c_bit = 1 << i;
         c_bit = ~c_bit;
 		cpu->flags.c = cpu->flags.z = cpu->flags.h = cpu->flags.n = check_flags;
 
@@ -76,7 +76,7 @@ TEST(CBCommandTest, ResetBit) {
 	// Shouldn't be affected. We'll flip these throughout.
 	bool check_flags = true;
 	for (int i = 0; i < 8; i++) {
-		uint8_t c_bit = pow(2, i);
+		uint8_t c_bit = 1 << i;
 		cpu->flags.c = cpu->flags.z = cpu->flags.h = cpu->flags.n = check_flags;
 
 		cpu->Set8Bit(Register_C, c_bit);

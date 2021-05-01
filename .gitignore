@@ -16,3 +16,5 @@ bin/*
 # Cmake Directories to ignore.
 build/*
 wsl/*
+out/*
+.vs/*

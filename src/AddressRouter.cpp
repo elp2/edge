@@ -38,7 +38,7 @@ AddressRouter::AddressRouter(MMU *mmu,
 }
 
 AddressOwner ownerForIOAddress(uint16_t address) {
-    cout << "IO @ " << hex << unsigned(address) << endl;
+    // cout << "IO @ " << hex << unsigned(address) << endl;
     switch (address)
     {
     case 0xFF00:
