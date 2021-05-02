@@ -11,25 +11,29 @@ class PulseVoice {
 	
 	bool Advance(int cycles);
 
-    void SetSweepByte(uint8_t byte) { sweep_byte_ = byte; };
-    uint8_t GetSweepByte() { return sweep_byte_; };
+    void SetSweepByte(uint8_t byte);
+    uint8_t GetSweepByte();
 
-    void SetWavePatternDutyByte(uint8_t byte) { wave_pattern_duty_byte_ = byte; };
-    uint8_t GetWavePatternDutyByte() { return wave_pattern_duty_byte_; };
+    void SetWavePatternDutyByte(uint8_t byte);
+    uint8_t GetWavePatternDutyByte();
 
-    void SetEnvelopeByte(uint8_t byte) { envelope_byte_ = byte; };
-    uint8_t GetEnvelopeByte() { return envelope_byte_; };
+    void SetEnvelopeByte(uint8_t byte);
+    uint8_t GetEnvelopeByte();
 
-    void SetFrequencyLowByte(uint8_t byte) { frequency_low_byte_ = byte; };
-    uint8_t GetFrequencyLowByte() { return frequency_low_byte_; };
+    void SetFrequencyLowByte(uint8_t byte);
+    uint8_t GetFrequencyLowByte();
 
-    void SetFrequencyHighByte(uint8_t byte) { frequency_high_byte_ = byte; };
-    uint8_t GetFrequencyHighByte()  { return frequency_high_byte_; };
+    void SetFrequencyHighByte(uint8_t byte);
+    uint8_t GetFrequencyHighByte();
 
  private:
-    uint8_t sweep_byte_ = 0;
-    uint8_t envelope_byte_ = 0;
-    uint8_t wave_pattern_duty_byte_ = 0;
-    uint8_t frequency_low_byte_ = 0;
-    uint8_t frequency_high_byte_ = 0;
+     // Length of the voice in CPU steps (4194304 / sec).
+    int length_steps_ = 0;
+    // Length of the Sweep in CPU steps (4194304 / sec).
+    int sweep_steps_ = 0;
+
+    // 11 bit frequency sourced from the frequency_low and high bytes.
+    uint16_t eleven_bit_frequency_ = 0;
+
+	uint8_t wave_duty_ = 0;
 };

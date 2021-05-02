@@ -122,6 +122,7 @@ add_executable(tests
     tests/misc_command_test.cpp
     tests/mmu_test.cpp
     tests/ppu_test.cpp
+    tests/pulse_voice_test.cc
     tests/sprite_test.cpp
     tests/stack_test.cpp
     tests/timer_controller_test.cc)
