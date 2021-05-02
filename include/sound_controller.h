@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-union SDL_Event;
+class PulseVoice;
 
 class SoundController {
  public:
@@ -19,4 +19,9 @@ class SoundController {
     bool global_sound_on_ = 0;
     uint8_t s01_volume_level_ = 0;
     uint8_t s02_volume_level_ = 0;
+
+	PulseVoice *voice1_;
+	PulseVoice *voice2_;
+	// TODO: WaveVoice *voice3_;
+	// TODO: NoiseVoice *voice4_;
 };

@@ -43,6 +43,7 @@ add_library (edge_lib
     src/MMU.cpp
     src/NopCommand.cpp
     src/PixelFIFO.cpp
+    src/pulse_voice.cc
     src/PPU.cpp
     src/ReturnCommand.cpp
     src/ROM.cpp
