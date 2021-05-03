@@ -156,7 +156,7 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
             // TODO: Channel Control.
             break;
         case 0xFF25:
-			// TODO.
+			return sound_output_terminals_;
             break;
         case 0xFF26:
 			return FF26();

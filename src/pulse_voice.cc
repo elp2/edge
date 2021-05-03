@@ -8,7 +8,7 @@
 #include "Utils.hpp"
 
 const int MAX_SOUND_BUFFER_LENGTH = SAMPLE_RATE / 4;
-const int SAMPLES_PER_SWEEP = SAMPLE_RATE / 64;
+const int SAMPLES_PER_ENVELOPE_SWEEP = SAMPLE_RATE / 64;
 
 PulseVoice::PulseVoice() {
     // The sound can be no longer than 1/4 seconds (when t1 is set to 0).
@@ -76,8 +76,11 @@ float VolumeForEnvelope(int envelope) {
 	if (envelope <= 0) {
 		return 0.0;
 	}
+	if (envelope >= 0xF) {
+		return 1.0;
+	}
 
-	return(float)envelope / 15.0;
+	return (float)envelope / 15.0;
 }
 
 void PulseVoice::GenerateSoundBuffer() {
@@ -112,12 +115,18 @@ void PulseVoice::GenerateSoundBuffer() {
 		}
 		idx++;
 
-		if (++samples_since_envelope == SAMPLES_PER_SWEEP) {
+		if (++samples_since_envelope == SAMPLES_PER_ENVELOPE_SWEEP) {
 			samples_since_envelope = 0;
 			if (envelope_sweeps > 0) {
-				envelope--;
+				if (envelope_up) {
+					envelope++;
+				}
+				else {
+					envelope--;
+				}
 				volume = VolumeForEnvelope(envelope);
 			}
+			samples_since_envelope = 0;
 		}
 		if (++wave_samples == samples_per_wave_duty) {
 			wave_samples = 0;
