@@ -24,4 +24,8 @@ class SoundController {
 	PulseVoice *voice2_;
 	// TODO: WaveVoice *voice3_;
 	// TODO: NoiseVoice *voice4_;
+
+	uint32_t audio_device_ = 0;
+
+	uint8_t FF26();
 };

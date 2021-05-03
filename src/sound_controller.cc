@@ -3,20 +3,58 @@
 #include <cassert>
 #include <iostream>
 
+#include "SDL.h"
+
+#include "constants.h"
 #include "pulse_voice.h"
+#include "Utils.hpp"
 
 SoundController::SoundController() {
     voice1_ = new PulseVoice();
     voice2_ = new PulseVoice(); // We will not set the sweep on this voice.
 	// TODO: Create voices.
+
+    SDL_AudioSpec wanted;
+    wanted.freq = SAMPLE_RATE;
+    wanted.format = AUDIO_F32;
+    wanted.channels = 1; // TODO 2 (eventually)
+    wanted.samples = 4096;
+	wanted.callback = NULL;
+
+    SDL_AudioSpec actual;
+	audio_device_ = SDL_OpenAudioDevice(NULL, 0, &wanted, &actual, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+    // TODO check SAMPLE RATE, what is .samples? assert(wanted == actual);
+
+    SDL_PauseAudioDevice(audio_device_, 0);
 }
 
 bool SoundController::Advance(int cycles) {
-	voice1_->Advance(cycles);
-	voice2_->Advance(cycles);
+	if (voice1_->Advance(cycles)) {
+		// TODO reset.
+	}
+	if (voice2_->Advance(cycles)) {
+		// TODO reset.
+	}
 	// TODO advance.
 	// voice3_->Advance(cycles);
 	// voice4_->Advance(cycles);
+
+	if (!global_sound_on_) {
+		return true;
+	}
+
+    float *sound_buffer;
+    int length;
+    if (voice1_->PlaySound(&sound_buffer, &length)) {
+		bool s01 = bit_set(sound_output_terminals_, 0);
+		bool s02 = bit_set(sound_output_terminals_, 4);
+		if (s01 || s02) {
+			SDL_QueueAudio(audio_device_, sound_buffer, length * sizeof(float));
+		}
+	}
+
+    // TODO: Play other voices.
+
 	return true;
 }
 
@@ -64,7 +102,8 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
             sound_output_terminals_ = byte;
             break;
         case 0xFF26:
-            global_sound_on_ = (bool) 0x1 & byte; // TODO ordering?
+            global_sound_on_ = bit_set(byte, 7);
+			// Other bytes are ignored.
             break;
 
 		// 0xFF27-2F unused.
@@ -120,7 +159,7 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
 			// TODO.
             break;
         case 0xFF26:
-			// TODO.
+			return FF26();
             break;
 		// 0xFF27-2F unused.
         // 0xFF30-3F Wave Pattern - covered above.
@@ -128,4 +167,18 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
         return 0x00;
         break;
     }
+	return 0x00;
+}
+
+uint8_t SoundController::FF26() {
+	uint8_t ff26 = global_sound_on_;
+	ff26 <<= 4;
+	ff26 |= (uint8_t)voice1_->Playing(); // TODO voice4.
+	ff26 <<= 1;
+	ff26 |= (uint8_t)voice1_->Playing(); // TODO voice3.
+	ff26 <<= 1;
+	ff26 |= (uint8_t)voice2_->Playing();
+	ff26 <<= 1;
+	ff26 |= (uint8_t)voice1_->Playing();
+	return ff26;
 }

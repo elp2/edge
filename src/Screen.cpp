@@ -15,7 +15,7 @@ Screen::Screen() {
 }
 
 void Screen::InitSDL() {
-    if (SDL_Init(SDL_INIT_VIDEO)) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         const char * error = SDL_GetError();
         cout << "Error in SDL_Init: " << error << endl;
         assert(false);

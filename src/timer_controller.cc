@@ -3,13 +3,13 @@
 #include <cassert>
 #include <iostream>
 
+#include "constants.h"
 #include "interrupt_controller.hpp"
 
 using std::cout;
 using std::hex;
 using std::endl;
 
-const int CYCLES_PER_SECOND = 4194304;
 const int STEPS_FOR_4KHZ = CYCLES_PER_SECOND / 4096;
 const int STEPS_FOR_262KHZ = CYCLES_PER_SECOND / 262144;
 const int STEPS_FOR_65KHZ = CYCLES_PER_SECOND / 65536;
