@@ -46,7 +46,9 @@ CartridgeType ROM::GetCartridgeType() {
             return CartridgeType_ROM_only;
         case 0x01:
             return CartridgeType_ROM_MBC1;
-        
+		case 0x02:
+			return CartridgeType_ROM_MBC1_RAM;
+
         default:
             return CartridgeType_Unsupported;
     }

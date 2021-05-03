@@ -63,3 +63,43 @@ TEST(MMUTest, OverlayBootROM) {
     mmu->SetByteAt(0xFF50, 0x1);
     ASSERT_EQ(mmu->GetByteAt(0x00), 0x3C);
 }
+
+TEST(MMUTest, RAMBankReadWrite) {
+    MMU *mmu = getTestingMMURAM();
+
+    // Enable RAM Bank.
+    mmu->SetByteAt(0x0000, 0xA);
+    
+    mmu->SetByteAt(0xA000, 0x1);
+    ASSERT_EQ(mmu->GetByteAt(0xA000), 0x1);
+
+    mmu->SetByteAt(0xA000, 0x2);
+    ASSERT_EQ(mmu->GetByteAt(0xA000), 0x2);
+}
+
+TEST(MMUTest, SwitchableRAMBank) {
+    MMU *mmu = getTestingMMURAM();
+
+    // Enable RAM Bank.
+    mmu->SetByteAt(0x0000, 0xA);
+    // Set 32k RAM Mode.
+    mmu->SetByteAt(0x6000, 0x1);
+
+    mmu->SetByteAt(0xA000, 0x1);
+    ASSERT_EQ(mmu->GetByteAt(0xA000), 0x1);
+
+    // Swap to next RAM bank.
+    mmu->SetByteAt(0x4000, 0x1);
+    // Enable RAM Bank.
+    mmu->SetByteAt(0x0000, 0xA);
+
+    mmu->SetByteAt(0xA000, 0x2);
+    ASSERT_EQ(mmu->GetByteAt(0xA000), 0x2);
+
+    // Swap back to original RAM bank.
+    mmu->SetByteAt(0x4000, 0x0);
+    // Enable RAM Bank.
+    mmu->SetByteAt(0x0000, 0xA);
+
+    ASSERT_EQ(mmu->GetByteAt(0xA000), 0x1);
+}

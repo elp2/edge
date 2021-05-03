@@ -92,7 +92,7 @@ int Frequency(uint8_t low_byte, uint8_t high_byte) {
 }
 
 int SweepTimeCycles(uint8_t sweep_byte) {
-	uint8_t sweep_time = (sweep_time & 0b1110000) >> 4;
+	uint8_t sweep_time = (sweep_byte & 0b1110000) >> 4;
 	return sweep_time * SAMPLE_RATE / 8;
 }
 

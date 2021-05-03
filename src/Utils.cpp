@@ -133,6 +133,24 @@ MMU *getTestingMMU() {
     return mmu;
 }
 
+MMU *getTestingMMURAM() {
+#if defined WIN32
+    ROM *bootROM = new ROM();
+    assert(bootROM->LoadFile("../../../boot.gb"));
+    ROM *cartridgeROM = new ROM();
+    assert(cartridgeROM->LoadFile("../../../gb-test-roms/cgb_sound/cgb_sound.gb"));
+#else
+	ROM* bootROM = new ROM();
+	assert(bootROM->LoadFile("../../boot.gb"));
+	ROM* cartridgeROM = new ROM();
+	assert(cartridgeROM->LoadFile("../../gb-test-roms/cgb_sound/cgb_sound.gb"));
+#endif
+
+    MMU *mmu = new MMU();
+    mmu->SetROMs(bootROM, cartridgeROM);
+    return mmu;
+}
+
 CPU *getTestingCPU() {
     MMU *mmu = getTestingMMU();
     PPU *ppu = new PPU();
