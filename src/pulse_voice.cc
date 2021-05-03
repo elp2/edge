@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <math.h>
 
 #include "constants.h"
 #include "Utils.hpp"
@@ -37,7 +38,7 @@ void PulseVoice::SetFrequencyHighByte(uint8_t byte) {
 	if (initial_) {
 		GenerateSoundBuffer();
 	}
-	loop_ = !bit_set(byte, 6);
+	loop_ = false;// !bit_set(byte, 6); // TODO: The logo chime seems to indicate loop, but it clearly shouldn't loop.
 }
 
 bool PulseVoice::Advance(int cycles) {
@@ -83,26 +84,38 @@ float VolumeForEnvelope(int envelope) {
 	return (float)envelope / 15.0;
 }
 
+int Frequency(uint8_t low_byte, uint8_t high_byte) {
+	uint16_t combined_frequency = high_byte & 0b111;
+	combined_frequency <<= 8;
+	combined_frequency |= low_byte;
+	return 131072 / (2048 - combined_frequency);
+}
+
+int SweepTimeCycles(uint8_t sweep_byte) {
+	uint8_t sweep_time = (sweep_time & 0b1110000) >> 4;
+	return sweep_time * SAMPLE_RATE / 8;
+}
+
 void PulseVoice::GenerateSoundBuffer() {
 	uint8_t t1 = 0b11111 & wave_pattern_duty_byte_;
 	length_steps_ = CYCLES_PER_SECOND / (256 * (64 - t1));
 	buffer_length_ = SAMPLE_RATE * (64 - t1) / 256;
 
-	uint16_t combined_frequency = frequency_high_byte_ & 0b111;
-	combined_frequency <<= 8;
-	frequency_low_byte_;
-	int frequency = 131072 / (2048 - combined_frequency);
-
-	int samples_per_wave_duty = SAMPLE_RATE / frequency;
-	int high_eightths = HighEights(wave_pattern_duty_byte_);
+	int sweep_time_cycles = SweepTimeCycles(sweep_byte_);
+	bool sweep_decreases = bit_set(sweep_byte_, 3);
+	uint8_t num_sweeps = sweep_byte_ & 0b111;
+	int samples_since_sweep = 0;
+	int sweep_n = 0;
 
 	int envelope = envelope_byte_ >> 4;
-	int envelope_sweeps = envelope_byte_ & 0b11;
+	int num_envelope_sweeps = envelope_byte_ & 0b111;
 	bool envelope_up = bit_set(envelope_byte_, 3);
 	int samples_since_envelope = 0;
-
 	float volume = VolumeForEnvelope(envelope);
-	int highs_per_wave_duty = high_eightths * samples_per_wave_duty / 8;
+
+	int frequency = Frequency(frequency_low_byte_, frequency_high_byte_);
+	int samples_per_wave_duty = SAMPLE_RATE / frequency;
+	int highs_per_wave_duty = HighEights(wave_pattern_duty_byte_) * samples_per_wave_duty / 8;
 
 	int idx = 0;
 	int wave_samples = 0;
@@ -116,8 +129,8 @@ void PulseVoice::GenerateSoundBuffer() {
 		idx++;
 
 		if (++samples_since_envelope == SAMPLES_PER_ENVELOPE_SWEEP) {
-			samples_since_envelope = 0;
-			if (envelope_sweeps > 0) {
+			if (num_envelope_sweeps > 0) {
+				num_envelope_sweeps--;
 				if (envelope_up) {
 					envelope++;
 				}
@@ -128,6 +141,26 @@ void PulseVoice::GenerateSoundBuffer() {
 			}
 			samples_since_envelope = 0;
 		}
+
+		if (++samples_since_sweep == sweep_time_cycles) {
+			if (num_sweeps > 0) {
+				int delta = frequency / pow(2, sweep_n);
+				if (sweep_decreases) {
+					frequency -= delta;
+					frequency = std::max(10, frequency);
+				} else {
+					frequency += delta;
+				}
+
+				samples_per_wave_duty = SAMPLE_RATE / frequency;
+				highs_per_wave_duty = HighEights(wave_pattern_duty_byte_) * samples_per_wave_duty / 8;
+
+				num_sweeps--;
+				sweep_n++;
+			}
+			samples_since_sweep = 0;
+		}
+
 		if (++wave_samples == samples_per_wave_duty) {
 			wave_samples = 0;
 		}
