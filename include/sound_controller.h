@@ -3,6 +3,7 @@
 #include <cstdint>
 
 class PulseVoice;
+class WaveVoice;
 
 class SoundController {
  public:
@@ -22,7 +23,7 @@ class SoundController {
 
 	PulseVoice *voice1_;
 	PulseVoice *voice2_;
-	// TODO: WaveVoice *voice3_;
+	WaveVoice *voice3_;
 	// TODO: NoiseVoice *voice4_;
 
 	uint32_t audio_device_ = 0;

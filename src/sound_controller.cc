@@ -8,10 +8,12 @@
 #include "constants.h"
 #include "pulse_voice.h"
 #include "Utils.hpp"
+#include "wave_voice.h"
 
 SoundController::SoundController() {
     voice1_ = new PulseVoice();
     voice2_ = new PulseVoice(); // We will not set the sweep on this voice.
+    voice3_ = new WaveVoice();
 	// TODO: Create voices.
 
     SDL_AudioSpec wanted;
@@ -35,9 +37,11 @@ bool SoundController::Advance(int cycles) {
 	if (voice2_->Advance(cycles)) {
 		// TODO reset.
 	}
-	// TODO advance.
-	// voice3_->Advance(cycles);
-	// voice4_->Advance(cycles);
+    if (voice3_->Advance(cycles)) {
+        // TODO reset.
+    }
+
+	// TODO voice4_->Advance(cycles);
 
 	if (!global_sound_on_) {
 		return true;
@@ -45,6 +49,8 @@ bool SoundController::Advance(int cycles) {
 
     float *sound_buffer;
     int length;
+    /* 
+    TODO: Mix these properly.
     if (voice1_->PlaySound(&sound_buffer, &length)) {
 		bool s01 = bit_set(sound_output_terminals_, 0);
 		bool s02 = bit_set(sound_output_terminals_, 4);
@@ -53,7 +59,23 @@ bool SoundController::Advance(int cycles) {
 		}
 	}
 
-    // TODO: Play other voices.
+    if (voice2_->PlaySound(&sound_buffer, &length)) {
+		bool s01 = bit_set(sound_output_terminals_, 1);
+		bool s02 = bit_set(sound_output_terminals_, 5);
+		if (s01 || s02) {
+			SDL_QueueAudio(audio_device_, sound_buffer, length * sizeof(float));
+		}
+	}
+    */
+    if (voice3_->PlaySound(&sound_buffer, &length)) {
+		bool s01 = bit_set(sound_output_terminals_, 2);
+		bool s02 = bit_set(sound_output_terminals_, 6);
+		if (s01 || s02) {
+			SDL_QueueAudio(audio_device_, sound_buffer, length * sizeof(float));
+		}
+	}
+
+    // TODO: Play voice4.
 
 	return true;
 }
@@ -62,7 +84,8 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
     assert(address >= 0xFF10 && address <= 0xFF3F);
 
     if (address >= 0xFF30 && address <= 0xFF3F) {
-        // TODO: Set Wave.
+        voice3_->SetWavePatternAddress(address, byte);
+        return;
     }
 
     switch (address)
@@ -94,7 +117,22 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
             break;
         case 0xFF19:
             voice2_->SetFrequencyHighByte(byte);
-            break;            
+            break;
+        case 0xFF1A:
+            voice3_->SetOnOffByte(byte);
+            break;
+        case 0xFF1B:
+            voice3_->SetSoundLengthByte(byte);
+            break;
+        case 0xFF1C:
+            voice3_->SetOutputLevelByte(byte);
+            break;
+        case 0xFF1D:
+            voice3_->SetFrequencyLowByte(byte);
+            break;
+        case 0xFF1E:
+            voice3_->SetFrequencyHighByte(byte);
+            break;
         case 0xFF24:
             // TODO: Channel Control.
             break;

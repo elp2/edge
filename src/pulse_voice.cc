@@ -84,7 +84,7 @@ float VolumeForEnvelope(int envelope) {
 	return (float)envelope / 15.0;
 }
 
-int Frequency(uint8_t low_byte, uint8_t high_byte) {
+int PulseFrequency(uint8_t low_byte, uint8_t high_byte) {
 	uint16_t combined_frequency = high_byte & 0b111;
 	combined_frequency <<= 8;
 	combined_frequency |= low_byte;
@@ -113,7 +113,7 @@ void PulseVoice::GenerateSoundBuffer() {
 	int samples_since_envelope = 0;
 	float volume = VolumeForEnvelope(envelope);
 
-	int frequency = Frequency(frequency_low_byte_, frequency_high_byte_);
+	int frequency = PulseFrequency(frequency_low_byte_, frequency_high_byte_);
 	int samples_per_wave_duty = SAMPLE_RATE / frequency;
 	int highs_per_wave_duty = HighEights(wave_pattern_duty_byte_) * samples_per_wave_duty / 8;
 

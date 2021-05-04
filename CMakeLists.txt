@@ -54,7 +54,8 @@ add_library (edge_lib
     src/Sprite.cpp
     src/timer_controller.cc
     src/UnimplementedCommand.cpp
-    src/Utils.cpp)
+    src/Utils.cpp
+    src/wave_voice.cc)
 target_include_directories(edge_lib PUBLIC ${SDL2_INCLUDE_DIR})
 target_include_directories(edge_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(edge_lib ${SDL2_LIBRARIES})
