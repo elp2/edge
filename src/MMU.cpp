@@ -161,10 +161,20 @@ void MMU::UpdateROMBank(uint8_t byte) {
     {
     case ROMSize_32k:
         max_bank = 2;
+		break;
     case ROMSize_64k:
         max_bank = 4;
         break;
-    default:
+	case ROMSize_128k:
+		max_bank = 8;
+		break;
+	case ROMSize_256k:
+		max_bank = 16;
+		break;
+	case ROMSize_512k:
+		max_bank = 32;
+		break;
+	default:
         assert(false);
         break;
     }
