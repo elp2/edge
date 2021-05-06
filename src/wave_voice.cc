@@ -72,7 +72,26 @@ int WaveFrequency(uint8_t low_byte, uint8_t high_byte) {
 }
 
 void WaveVoice::GenerateSoundBuffer() {
-    
+	int frequency = WaveFrequency(frequency_low_byte_, frequency_high_byte_);
+    int samples_per_frequency = SAMPLE_RATE / frequency;
+	int samples_per_fragment = samples_per_frequency / 32;
+
+	float sound_length = (256 - sound_length_byte_) / 256.0;
+
+	int i = 0;
+	int fi = 0;
+	while (i < std::min(int(sound_length * SAMPLE_RATE), MAX_SOUND_BUFFER_LENGTH)) {
+		uint8_t val = fi % 2 == 0 ? NIBBLEHIGH(wave_pattern_[fi/2]) : NIBBLELOW(wave_pattern_[fi/2]);
+		
+		float sound = (float)val / (float)(0xf / 2.0) - 1.0;
+		sound = std::max(std::min(1.0f, sound), -1.0f);
+		sound_buffer_[i] = sound;
+
+		i += 1;
+		if (i % samples_per_fragment == 0) {
+			fi = (fi + 1) % 32;
+		}
+	}
 }
 
 void WaveVoice::SetWavePatternAddress(uint16_t address, uint8_t byte) {
