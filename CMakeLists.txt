@@ -29,32 +29,32 @@ include_directories(${SDL2_INCLUDE_DIRS})
 
 add_library (edge_lib
     src/address_router.cc
-    src/BitCommand.cpp
-    src/CallCommand.cpp
-    src/CBCommand.cpp
-    src/CommandFactory.cpp
-    src/CPU.cpp
+    src/bit_command.cc
+    src/call_command.cc
+    src/cb_command.cc
+    src/command_factory.cc
+    src/cpu.cc
     src/input_controller.cc
-    src/interrupt_controller.cpp
-    src/JumpCommand.cpp
-    src/LoadCommand.cpp
-    src/MathCommand.cpp
-    src/MiscCommand.cpp
-    src/MMU.cpp
-    src/NopCommand.cpp
+    src/interrupt_controller.cc
+    src/jump_command.cc
+    src/load_command.cc
+    src/math_command.cc
+    src/misc_command.cc
+    src/mmu.cc
+    src/nop_command.cc
     src/pixel_fifo.cc
     src/pulse_voice.cc
-    src/PPU.cpp
-    src/ReturnCommand.cpp
-    src/ROM.cpp
-    src/Screen.cpp
-    src/serial_controller.cpp
+    src/ppu.cc
+    src/return_command.cc
+    src/rom.cc
+    src/screen.cc
+    src/serial_controller.cc
     src/sound_controller.cc
-    src/StackCommand.cpp
-    src/Sprite.cpp
+    src/stack_command.cc
+    src/sprite.cc
     src/timer_controller.cc
-    src/UnimplementedCommand.cpp
-    src/Utils.cpp
+    src/unimplemented_command.cc
+    src/utils.cc
     src/wave_voice.cc)
 target_include_directories(edge_lib PUBLIC ${SDL2_INCLUDE_DIR})
 target_include_directories(edge_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
@@ -62,8 +62,8 @@ target_link_libraries(edge_lib ${SDL2_LIBRARIES})
 
 
 add_executable(edge WIN32
-    src/system.cpp
-    src/main.cpp)
+    src/system.cc
+    src/main.cc)
 target_link_libraries(edge edge_lib)
 target_link_libraries(edge ${SDL2_LIBRARIES})
 
