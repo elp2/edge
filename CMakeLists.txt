@@ -111,21 +111,21 @@ endif()
 # Tests
 add_executable(tests
     tests/address_router_test.cc
-    tests/bit_commands_test.cpp
-    tests/call_command_test.cpp
-    tests/cb_command_test.cpp
-    tests/cpu_registers_test.cpp
+    tests/bit_commands_test.cc
+    tests/call_command_test.cc
+    tests/cb_command_test.cc
+    tests/cpu_registers_test.cc
     tests/input_controller_test.cc
-    tests/interrupt_controller_test.cpp
-    tests/jump_command_test.cpp
+    tests/interrupt_controller_test.cc
+    tests/jump_command_test.cc
     tests/load_command_test.cc
-    tests/math_command_test.cpp
-    tests/misc_command_test.cpp
-    tests/mmu_test.cpp
-    tests/ppu_test.cpp
+    tests/math_command_test.cc
+    tests/misc_command_test.cc
+    tests/mmu_test.cc
+    tests/ppu_test.cc
     tests/pulse_voice_test.cc
-    tests/sprite_test.cpp
-    tests/stack_test.cpp
+    tests/sprite_test.cc
+    tests/stack_test.cc
     tests/timer_controller_test.cc)
 target_include_directories(tests PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(tests gtest_main)
