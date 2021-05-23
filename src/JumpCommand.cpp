@@ -2,8 +2,8 @@
 
 #include <cassert>
 
-#include "CommandFactory.hpp"
-#include "CPU.hpp"
+#include "command_factory.h"
+#include "cpu.h"
 #include "MMU.hpp"
 
 JumpCommand::JumpCommand(uint8_t opcode, string description, int cycles) {

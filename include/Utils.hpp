@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "Destination.hpp"
+#include "destination.h"
 #include "Pixel.hpp"
 
 // Bit utility functions.

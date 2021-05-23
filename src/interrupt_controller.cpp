@@ -1,4 +1,4 @@
-#include "interrupt_controller.hpp"
+#include "interrupt_controller.h"
 
 #include <cassert>
 #include <iostream>

@@ -1,9 +1,9 @@
-#include "CallCommand.hpp"
+#include "call_command.h"
 
 #include <cassert>
 
-#include "CommandFactory.hpp"
-#include "CPU.hpp"
+#include "command_factory.h"
+#include "cpu.h"
 #include "MMU.hpp"
 
 class CallCommand : public Command {

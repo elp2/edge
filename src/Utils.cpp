@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "CPU.hpp"
+#include "cpu.h"
 #include "MMU.hpp"
 #include "ROM.hpp"
 #include "PPU.hpp"

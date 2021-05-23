@@ -1,10 +1,10 @@
-#include "CommandFactory.hpp"
+#include "command_factory.h"
 
 #include <cassert>
 
-#include "BitCommand.hpp"
-#include "CallCommand.hpp"
-#include "CBCommand.hpp"
+#include "bit_command.h"
+#include "call_command.h"
+#include "cb_command.h"
 #include "JumpCommand.hpp"
 #include "LoadCommand.hpp"
 #include "MathCommand.hpp"

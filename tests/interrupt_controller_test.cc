@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "interrupt_controller.hpp"
+#include "interrupt_controller.h"
 
 const uint16_t IF_ADDRESS = 0xFF0F;
 const uint16_t IE_ADDRESS = 0xFFFF;

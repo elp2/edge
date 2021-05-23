@@ -3,9 +3,9 @@
 #include <cassert>
 #include <sstream>
 
-#include "CommandFactory.hpp"
-#include "Destination.hpp"
-#include "CPU.hpp"
+#include "command_factory.h"
+#include "destination.h"
+#include "cpu.h"
 #include "MMU.hpp"
 #include "Utils.hpp"
 

@@ -4,10 +4,10 @@
 #include <array>
 #include <cstdint>
 #include "address_router.h"
-#include "Command.hpp"
-#include "CommandFactory.hpp"
-#include "Destination.hpp"
-#include "interrupt_controller.hpp"
+#include "command.h"
+#include "command_factory.h"
+#include "destination.h"
+#include "interrupt_controller.h"
 
 using namespace std;
 

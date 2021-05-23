@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Command.hpp"
-#include "Destination.hpp"
+#include "command.h"
+#include "destination.h"
 
 class AbstractCommandFactory;
 

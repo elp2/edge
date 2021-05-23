@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "CPU.hpp"
+#include "cpu.h"
 #include "MMU.hpp"
 #include "ROM.hpp"
 #include "PPU.hpp"

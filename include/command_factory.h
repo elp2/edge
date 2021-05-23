@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-#include "Command.hpp"
+#include "command.h"
 
 using namespace std;
 

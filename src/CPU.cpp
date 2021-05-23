@@ -1,12 +1,12 @@
-#include "CPU.hpp"
+#include "cpu.h"
 
 #include <cassert>
 #include <ios>
 #include <iostream>
 
 #include "address_router.h"
-#include "Command.hpp"
-#include "interrupt_controller.hpp"
+#include "command.h"
+#include "interrupt_controller.h"
 #include "Utils.hpp"
 #include "PPU.hpp"
 

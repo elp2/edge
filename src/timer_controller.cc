@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "constants.h"
-#include "interrupt_controller.hpp"
+#include "interrupt_controller.h"
 
 using std::cout;
 using std::hex;

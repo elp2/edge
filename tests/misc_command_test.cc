@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "CPU.hpp"
+#include "cpu.h"
 #include "Utils.hpp"
 
 class MiscCommandTest : public ::testing::Test {

@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "CPU.hpp"
+#include "cpu.h"
 #include "Utils.hpp"
 
 class CBCommandTest : public ::testing::Test {

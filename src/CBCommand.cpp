@@ -1,11 +1,11 @@
-#include "CBCommand.hpp"
+#include "cb_command.h"
 
 #include <bitset>
 #include <cassert>
 #include <sstream>
 
-#include "BitCommand.hpp"
-#include "CPU.hpp"
+#include "bit_command.h"
+#include "cpu.h"
 #include "MMU.hpp"
 #include "Utils.hpp"
 

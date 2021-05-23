@@ -3,7 +3,7 @@
 #include "gmock/gmock.h"
 #include "SDL.h"
 
-#include "interrupt_controller.hpp"
+#include "interrupt_controller.h"
 
 using testing::_;
 

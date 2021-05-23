@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Command.hpp"
+#include "command.h"
 
 class AbstractCommandFactory;
 

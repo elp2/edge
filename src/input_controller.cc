@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "interrupt_controller.hpp"
+#include "interrupt_controller.h"
 #include "SDL.h"
 
 // FF00: X X P15 P14 [Down/Start] [up/select] [left, a] [right, b].  [is P14 low, is p15 high]

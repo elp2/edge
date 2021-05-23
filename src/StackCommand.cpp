@@ -3,8 +3,8 @@
 #include <cassert>
 #include <sstream>
 
-#include "CommandFactory.hpp"
-#include "CPU.hpp"
+#include "command_factory.h"
+#include "cpu.h"
 #include "MMU.hpp"
 #include "Utils.hpp"
 

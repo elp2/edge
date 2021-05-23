@@ -6,11 +6,11 @@
 #include <iostream>
 
 #include "address_router.h"
-#include "BitCommand.hpp"
-#include "CommandFactory.hpp"
-#include "CPU.hpp"
+#include "bit_command.h"
+#include "command_factory.h"
+#include "cpu.h"
 #include "input_controller.h"
-#include "interrupt_controller.hpp"
+#include "interrupt_controller.h"
 #include "MMU.hpp"
 #include "PPU.hpp"
 #include "serial_controller.hpp"

@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "input_controller.h"
-#include "interrupt_controller.hpp"
+#include "interrupt_controller.h"
 #include "MMU.hpp"
 #include "PPU.hpp"
 #include "Utils.hpp"

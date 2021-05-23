@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include "interrupt_controller.hpp"
+#include "interrupt_controller.h"
 #include "pixel_fifo.h"
 #include "PPU.hpp"
 #include "Screen.hpp"

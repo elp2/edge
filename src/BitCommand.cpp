@@ -1,11 +1,11 @@
-#include "BitCommand.hpp"
+#include "bit_command.h"
 
 #include <cassert>
 #include <sstream>
 #include <string>
 
-#include "CommandFactory.hpp"
-#include "CPU.hpp"
+#include "command_factory.h"
+#include "cpu.h"
 #include "MathCommand.hpp"
 #include "MMU.hpp"
 #include "Utils.hpp"

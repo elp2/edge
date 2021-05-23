@@ -4,7 +4,7 @@
 #include "gmock/gmock.h"
 
 #include "constants.h"
-#include "interrupt_controller.hpp"
+#include "interrupt_controller.h"
 
 const uint16_t DIV_ADDRESS = 0xFF04;
 const uint16_t TIMA_ADDRESS = 0xFF05;
