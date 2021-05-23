@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "AddressRouter.hpp"
+#include "address_router.h"
 #include "MMU.hpp"
 #include "ROM.hpp"
 #include "PPU.hpp"

@@ -28,7 +28,7 @@ find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
 add_library (edge_lib
-    src/AddressRouter.cpp
+    src/address_router.cc
     src/BitCommand.cpp
     src/CallCommand.cpp
     src/CBCommand.cpp
@@ -42,7 +42,7 @@ add_library (edge_lib
     src/MiscCommand.cpp
     src/MMU.cpp
     src/NopCommand.cpp
-    src/PixelFIFO.cpp
+    src/pixel_fifo.cc
     src/pulse_voice.cc
     src/PPU.cpp
     src/ReturnCommand.cpp
@@ -110,7 +110,7 @@ endif()
 
 # Tests
 add_executable(tests
-    tests/address_router_test.cpp
+    tests/address_router_test.cc
     tests/bit_commands_test.cpp
     tests/call_command_test.cpp
     tests/cb_command_test.cpp

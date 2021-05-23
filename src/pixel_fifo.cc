@@ -1,4 +1,4 @@
-#include "PixelFIFO.hpp"
+#include "pixel_fifo.h"
 
 #include <cassert>
 #include <cstddef>

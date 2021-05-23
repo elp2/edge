@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "interrupt_controller.hpp"
-#include "PixelFIFO.hpp"
+#include "pixel_fifo.h"
 #include "PPU.hpp"
 #include "Screen.hpp"
 #include "Sprite.hpp"

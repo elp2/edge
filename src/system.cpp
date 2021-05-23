@@ -5,7 +5,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "AddressRouter.hpp"
+#include "address_router.h"
 #include "BitCommand.hpp"
 #include "CommandFactory.hpp"
 #include "CPU.hpp"
