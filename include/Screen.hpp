@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-#include "Palette.hpp"
-#include "Pixel.hpp"
+#include "palette.h"
+#include "pixel.h"
 
 const int SCREEN_WIDTH = 160;
 const int SCREEN_HEIGHT = 144;

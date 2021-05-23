@@ -8,7 +8,7 @@
 #include "command.h"
 #include "interrupt_controller.h"
 #include "Utils.hpp"
-#include "PPU.hpp"
+#include "ppu.h"
 
 CPU::CPU(AddressRouter* address_router) {
     commandFactory_ = new CommandFactory();

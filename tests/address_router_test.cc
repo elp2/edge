@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 
 #include "address_router.h"
-#include "MMU.hpp"
+#include "mmu.h"
 #include "ROM.hpp"
-#include "PPU.hpp"
+#include "ppu.h"
 #include "Utils.hpp"
 
 class AddressRouterTest : public ::testing::Test {

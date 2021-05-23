@@ -5,9 +5,9 @@
 #include <sstream>
 
 #include "cpu.h"
-#include "MMU.hpp"
+#include "mmu.h"
 #include "ROM.hpp"
-#include "PPU.hpp"
+#include "ppu.h"
 
 using namespace std;
 

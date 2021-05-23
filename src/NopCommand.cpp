@@ -1,8 +1,8 @@
-#include "NopCommand.hpp"
+#include "nop_command.h"
 
 #include "command_factory.h"
 #include "cpu.h"
-#include "MMU.hpp"
+#include "mmu.h"
 
 NopCommand::NopCommand(uint8_t opcode) {
     this->opcode = opcode;

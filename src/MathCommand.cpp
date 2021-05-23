@@ -1,4 +1,4 @@
-#include "MathCommand.hpp"
+#include "math_command.h"
 
 #include <cassert>
 #include <sstream>
@@ -6,7 +6,7 @@
 #include "command_factory.h"
 #include "destination.h"
 #include "cpu.h"
-#include "MMU.hpp"
+#include "mmu.h"
 #include "Utils.hpp"
 
 #define ADDAd8 0xc6

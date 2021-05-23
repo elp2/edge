@@ -6,8 +6,8 @@
 
 #include "command_factory.h"
 #include "cpu.h"
-#include "MathCommand.hpp"
-#include "MMU.hpp"
+#include "math_command.h"
+#include "mmu.h"
 #include "Utils.hpp"
 
 string detailedDescription(string base, Destination to, Destination from, uint8_t a, uint8_t n) {

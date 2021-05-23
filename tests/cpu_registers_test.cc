@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 
 #include "cpu.h"
-#include "MMU.hpp"
+#include "mmu.h"
 #include "ROM.hpp"
-#include "PPU.hpp"
+#include "ppu.h"
 #include "Utils.hpp"
 
 class CPURegistersTest : public ::testing::Test {

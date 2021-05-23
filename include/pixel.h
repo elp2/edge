@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "Palette.hpp"
+#include "palette.h"
 
 struct Pixel
 {

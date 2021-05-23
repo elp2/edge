@@ -1,10 +1,10 @@
-#include "MiscCommand.hpp"
+#include "misc_command.h"
 
 #include <cassert>
 
 #include "command_factory.h"
 #include "cpu.h"
-#include "MMU.hpp"
+#include "mmu.h"
 #include "Utils.hpp"
 
 MiscCommand::MiscCommand(uint8_t opcode, string description, int cycles) {

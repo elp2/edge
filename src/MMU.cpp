@@ -1,4 +1,4 @@
-#include "MMU.hpp"
+#include "mmu.h"
 
 #include <cassert>
 #include <iostream>

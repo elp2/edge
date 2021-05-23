@@ -5,8 +5,8 @@
 
 #include "input_controller.h"
 #include "interrupt_controller.h"
-#include "MMU.hpp"
-#include "PPU.hpp"
+#include "mmu.h"
+#include "ppu.h"
 #include "Utils.hpp"
 #include "serial_controller.hpp"
 #include "sound_controller.h"

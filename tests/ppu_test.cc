@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "PPU.hpp"
+#include "ppu.h"
 #include "Utils.hpp"
 
 class PPUTest : public ::testing::Test {

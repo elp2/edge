@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <list>
 
-#include "Palette.hpp"
-#include "Pixel.hpp"
+#include "palette.h"
+#include "pixel.h"
 #include "Sprite.hpp"
 
 using namespace std;

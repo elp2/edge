@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <iostream>
 
-#include "PPU.hpp"
+#include "ppu.h"
 #include "Screen.hpp"
 #include "Utils.hpp"
 

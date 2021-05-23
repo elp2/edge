@@ -4,7 +4,7 @@
 
 #include "command_factory.h"
 #include "cpu.h"
-#include "MMU.hpp"
+#include "mmu.h"
 
 class CallCommand : public Command {
  public:

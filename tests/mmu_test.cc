@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "MMU.hpp"
+#include "mmu.h"
 #include "Utils.hpp"
 
 class MMUTest : public ::testing::Test {

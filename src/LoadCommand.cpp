@@ -1,11 +1,11 @@
-#include "LoadCommand.hpp"
+#include "load_command.h"
 
 #include <cassert>
 
 #include "command_factory.h"
 #include "cpu.h"
-#include "MathCommand.hpp"
-#include "MMU.hpp"
+#include "math_command.h"
+#include "mmu.h"
 
 LoadCommand::LoadCommand(uint8_t opcode, string description, Destination to, Destination from, int cycles) {
         this->opcode = opcode;

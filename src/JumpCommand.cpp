@@ -1,10 +1,10 @@
-#include "JumpCommand.hpp"
+#include "jump_command.h"
 
 #include <cassert>
 
 #include "command_factory.h"
 #include "cpu.h"
-#include "MMU.hpp"
+#include "mmu.h"
 
 JumpCommand::JumpCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;

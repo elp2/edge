@@ -5,7 +5,7 @@
 
 #include "command_factory.h"
 #include "cpu.h"
-#include "MMU.hpp"
+#include "mmu.h"
 #include "Utils.hpp"
 
 Destination stackDestinationForRow(uint8_t row) {

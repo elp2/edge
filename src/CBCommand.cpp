@@ -6,7 +6,7 @@
 
 #include "bit_command.h"
 #include "cpu.h"
-#include "MMU.hpp"
+#include "mmu.h"
 #include "Utils.hpp"
 
 uint8_t bitForRowColumn(uint8_t startingRow, uint8_t row, uint8_t column) {

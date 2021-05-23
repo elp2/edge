@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "destination.h"
-#include "Pixel.hpp"
+#include "pixel.h"
 
 // Bit utility functions.
 #define HIGHER8(word) ((word >> 8) & 0xff)

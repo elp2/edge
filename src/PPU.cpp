@@ -5,7 +5,7 @@
 
 #include "interrupt_controller.h"
 #include "pixel_fifo.h"
-#include "PPU.hpp"
+#include "ppu.h"
 #include "Screen.hpp"
 #include "Sprite.hpp"
 #include "Utils.hpp"
