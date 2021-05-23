@@ -8,7 +8,7 @@
 #include "cpu.h"
 #include "math_command.h"
 #include "mmu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 string detailedDescription(string base, Destination to, Destination from, uint8_t a, uint8_t n) {
     stringstream stream;

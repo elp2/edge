@@ -7,7 +7,7 @@
 #include "address_router.h"
 #include "command.h"
 #include "interrupt_controller.h"
-#include "Utils.hpp"
+#include "utils.h"
 #include "ppu.h"
 
 CPU::CPU(AddressRouter* address_router) {

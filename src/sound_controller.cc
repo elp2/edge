@@ -7,7 +7,7 @@
 
 #include "constants.h"
 #include "pulse_voice.h"
-#include "Utils.hpp"
+#include "utils.h"
 #include "wave_voice.h"
 
 SoundController::SoundController() {

@@ -7,7 +7,7 @@
 #include "bit_command.h"
 #include "cpu.h"
 #include "mmu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 uint8_t bitForRowColumn(uint8_t startingRow, uint8_t row, uint8_t column) {
     uint8_t times = ((row - startingRow) * 16 + column) / 8;

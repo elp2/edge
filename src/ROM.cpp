@@ -1,4 +1,4 @@
-#include "ROM.hpp"
+#include "rom.h"
 
 #include <cassert>
 #include <fstream>

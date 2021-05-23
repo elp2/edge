@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "Utils.hpp"
+#include "utils.h"
 
 using namespace std;
 

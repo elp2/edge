@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "Sprite.hpp"
+#include "sprite.h"
 
 class SpriteTest : public ::testing::Test {
  protected:

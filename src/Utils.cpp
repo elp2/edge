@@ -1,4 +1,4 @@
-#include "Utils.hpp"
+#include "utils.h"
 
 #include <cassert>
 #include <iostream>
@@ -6,7 +6,7 @@
 
 #include "cpu.h"
 #include "mmu.h"
-#include "ROM.hpp"
+#include "rom.h"
 #include "ppu.h"
 
 using namespace std;

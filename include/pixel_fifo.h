@@ -5,7 +5,7 @@
 
 #include "palette.h"
 #include "pixel.h"
-#include "Sprite.hpp"
+#include "sprite.h"
 
 using namespace std;
 

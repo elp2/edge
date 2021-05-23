@@ -1,4 +1,4 @@
-#include "system.hpp"
+#include "system.h"
 
 #include "SDL.h"
 
@@ -13,11 +13,11 @@
 #include "interrupt_controller.h"
 #include "mmu.h"
 #include "ppu.h"
-#include "serial_controller.hpp"
+#include "serial_controller.h"
 #include "sound_controller.h"
 #include "timer_controller.h"
-#include "Screen.hpp"
-#include "Utils.hpp"
+#include "screen.h"
+#include "utils.h"
 
 System::System(string rom_filename) {
     mmu_ = GetMMU(rom_filename);

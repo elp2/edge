@@ -1,4 +1,4 @@
-#include "StackCommand.hpp"
+#include "stack_command.h"
 
 #include <cassert>
 #include <sstream>
@@ -6,7 +6,7 @@
 #include "command_factory.h"
 #include "cpu.h"
 #include "mmu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 Destination stackDestinationForRow(uint8_t row) {
     switch (row)

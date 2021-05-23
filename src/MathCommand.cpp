@@ -7,7 +7,7 @@
 #include "destination.h"
 #include "cpu.h"
 #include "mmu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 #define ADDAd8 0xc6
 #define SUBAd8 0xd6

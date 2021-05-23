@@ -1,4 +1,4 @@
-#include "serial_controller.hpp"
+#include "serial_controller.h"
 
 #include <cassert>
 #include <iostream>

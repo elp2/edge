@@ -7,8 +7,8 @@
 #include "interrupt_controller.h"
 #include "mmu.h"
 #include "ppu.h"
-#include "Utils.hpp"
-#include "serial_controller.hpp"
+#include "utils.h"
+#include "serial_controller.h"
 #include "sound_controller.h"
 #include "timer_controller.h"
 

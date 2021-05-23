@@ -5,8 +5,8 @@
 #include <iostream>
 
 #include "ppu.h"
-#include "Screen.hpp"
-#include "Utils.hpp"
+#include "screen.h"
+#include "utils.h"
 
 const int FETCH_CYCLES = 3;
 

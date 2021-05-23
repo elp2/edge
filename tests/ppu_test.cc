@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "ppu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 class PPUTest : public ::testing::Test {
  protected:

@@ -2,9 +2,9 @@
 
 #include "cpu.h"
 #include "mmu.h"
-#include "ROM.hpp"
+#include "rom.h"
 #include "ppu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 class CallCommandTest : public ::testing::Test {
  protected:

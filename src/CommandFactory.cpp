@@ -11,8 +11,8 @@
 #include "misc_command.h"
 #include "nop_command.h"
 #include "return_command.h"
-#include "StackCommand.hpp"
-#include "UnimplementedCommand.hpp"
+#include "stack_command.h"
+#include "unimplemented_command.h"
 
 AbstractCommandFactory::AbstractCommandFactory() {
     commands = array<Command *, 256>();

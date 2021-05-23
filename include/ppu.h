@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "Sprite.hpp"
+#include "sprite.h"
 
 class InterruptHandler;
 class PixelFIFO;

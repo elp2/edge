@@ -2,9 +2,9 @@
 
 #include "address_router.h"
 #include "mmu.h"
-#include "ROM.hpp"
+#include "rom.h"
 #include "ppu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 class AddressRouterTest : public ::testing::Test {
  protected:

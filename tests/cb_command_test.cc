@@ -3,7 +3,7 @@
 #include <cmath>
 
 #include "cpu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 class CBCommandTest : public ::testing::Test {
  protected:

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "ROM.hpp"
+#include "rom.h"
 
 using namespace std;
 

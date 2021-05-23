@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "cpu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 class MiscCommandTest : public ::testing::Test {
  protected:

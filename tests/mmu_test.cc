@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "mmu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 class MMUTest : public ::testing::Test {
  protected:

@@ -6,9 +6,9 @@
 #include "interrupt_controller.h"
 #include "pixel_fifo.h"
 #include "ppu.h"
-#include "Screen.hpp"
-#include "Sprite.hpp"
-#include "Utils.hpp"
+#include "screen.h"
+#include "sprite.h"
+#include "utils.h"
 
 using namespace std;
 

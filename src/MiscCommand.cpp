@@ -5,7 +5,7 @@
 #include "command_factory.h"
 #include "cpu.h"
 #include "mmu.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 MiscCommand::MiscCommand(uint8_t opcode, string description, int cycles) {
     this->opcode = opcode;

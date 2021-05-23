@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "constants.h"
-#include "Utils.hpp"
+#include "utils.h"
 
 const int MAX_SOUND_BUFFER_LENGTH = SAMPLE_RATE / 4;
 const int SAMPLES_PER_ENVELOPE_SWEEP = SAMPLE_RATE / 64;
