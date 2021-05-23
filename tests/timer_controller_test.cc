@@ -3,9 +3,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "constants.h"
 #include "interrupt_controller.hpp"
 
-const int CYCLES_PER_SECOND = 4194304;
 const uint16_t DIV_ADDRESS = 0xFF04;
 const uint16_t TIMA_ADDRESS = 0xFF05;
 const uint16_t TMA_ADDRESS = 0xFF06;

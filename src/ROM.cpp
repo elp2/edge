@@ -46,7 +46,10 @@ CartridgeType ROM::GetCartridgeType() {
             return CartridgeType_ROM_only;
         case 0x01:
             return CartridgeType_ROM_MBC1;
-        
+		case 0x02:
+		case 0x03: // With Battery Backup - ignore.
+			return CartridgeType_ROM_MBC1_RAM;
+
         default:
             return CartridgeType_Unsupported;
     }
@@ -60,7 +63,12 @@ ROMSizeType ROM::GetROMSizeType() {
             return ROMSize_32k;
         case 0x01:
             return ROMSize_64k;
-        
+		case 0x02:
+			return ROMSize_128k;
+		case 0x03:
+			return ROMSize_256k;
+		case 0x04:
+			return ROMSize_512k;
         default:
             return ROMSize_Unsupported;
     }

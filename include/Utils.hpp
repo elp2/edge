@@ -37,3 +37,4 @@ CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions);
 
 class MMU;
 MMU *getTestingMMU();
+MMU *getTestingMMURAM();

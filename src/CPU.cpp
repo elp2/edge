@@ -55,7 +55,7 @@ int CPU::RunNextCommand() {
     uint8_t opcode = ReadOpcodeAtPC();
     AdvancePC();
     if (command_pc == 0x100) {
-        debugPrint_ = true;
+        debugPrint_ = false;
         cycles_ = 0;
     }
 

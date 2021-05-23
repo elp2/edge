@@ -47,12 +47,12 @@ public:
 	void SetInterruptHandler(InterruptHandler *handler) { interrupt_handler_ = handler; };
 
 private:
-    uint8_t *oam_ram_;
-    uint8_t *video_ram_;
-    uint8_t *io_ram_;
-    Screen *screen_;
-    PixelFIFO *fifo_;
-	InterruptHandler* interrupt_handler_;
+    uint8_t *oam_ram_ = NULL;
+    uint8_t *video_ram_ = NULL;
+    uint8_t *io_ram_ = NULL;
+    Screen *screen_ = NULL;
+    PixelFIFO *fifo_ = NULL;
+	InterruptHandler *interrupt_handler_ = NULL;
 
     PPUState state_;
 
@@ -63,7 +63,7 @@ private:
 	void AdvanceFrame(int frame_cycles);
     
 
-	Sprite *row_sprites_;
+	Sprite *row_sprites_ = NULL;
 
     void VisibleCycle(int clockCycles);
     void InvisibleCycle(int clockCycles);
@@ -90,7 +90,7 @@ private:
     void set_scx(uint8_t value);
 
 	void set_scy(uint8_t value);
-	uint8_t scy_;
+	uint8_t scy_ = 0;
 
     void set_ly(uint8_t value);
     uint8_t ly();

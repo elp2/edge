@@ -30,6 +30,9 @@ public:
 private:
     bool UseBootROMForAddress(uint16_t address);
     string AddressRegion(uint16_t address);
+    void UpdateROMBank(uint8_t byte);
+    void UpdateRAMBank(uint16_t address, uint8_t byte);
+
     uint8_t *ram;
 
     bool disasemblerMode_ = false;
@@ -37,4 +40,10 @@ private:
     ROM *bootROM;
     ROM *cartridgeROM;
     uint8_t bank_ = 0x1;
+
+    uint8_t *switchable_ram_bank_;
+    uint8_t switchable_ram_bank_active_ = 0x0;
+    uint8_t switchable_ram_bank_count_ = 0x0;
+    // Must be set explicitly before reading or writing RAM banks.
+    bool switchable_ram_bank_enabled_ = false;
 };

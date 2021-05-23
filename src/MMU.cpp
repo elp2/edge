@@ -9,6 +9,8 @@ using namespace std;
 
 MMU::MMU() {
     ram = new uint8_t[0x8000];
+    // Create a bank big enough for the 32KB RAM if necessary.
+    switchable_ram_bank_ = new uint8_t[0x10000];
     bootROM = NULL;
     cartridgeROM = NULL;
     overlayBootROM = true;
@@ -33,21 +35,21 @@ string MMU::AddressRegion(uint16_t address) {
         return "ROM Bank 1 (switchable)";
     } else if (address < 0xa000) {
         return "Video RAM";
-    } else if (address < 0xc000) {
+    } else if (address < 0xC000) {
         return "Switchable RAM";
-    } else if (address < 0xe000) {
+    } else if (address < 0xE000) {
         return "Internal RAM";
-    } else if (address < 0xfe00) {
+    } else if (address < 0xFE00) {
         return "Echo of 8k Internal RAM";
-    } else if (address < 0xfea0) {
+    } else if (address < 0xFEA0) {
         return "OAM";
-    } else if (address < 0xff00) {
+    } else if (address < 0xFF00) {
         return "Empty i/o";
-    } else if (address < 0xff4c) {
+    } else if (address < 0xFF4C) {
         return "i/o ports";
-    } else if (address < 0xff80) {
+    } else if (address < 0xFF80) {
         return "Empty i/o (2)";
-    } else if (address < 0xffff) {
+    } else if (address < 0xFFFF) {
         return "Internal RAM";
     } else {
         return "Interrupt Enable Register";
@@ -77,6 +79,9 @@ uint8_t MMU::GetByteAt(uint16_t address) {
             uint16_t bank_address = address + (bank() - 1) * 0x4000;
             byte = cartridgeROM->GetByteAt(bank_address);
         }
+    } else if (address >= 0xA000 && address < 0xC000) {
+        assert(cartridgeROM->GetCartridgeType() == CartridgeType_ROM_MBC1_RAM);
+        return switchable_ram_bank_[address - 0xA000 + switchable_ram_bank_active_ * 0x2000];
     } else {
         byte = ram[address - 0x8000];
     }
@@ -102,31 +107,23 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
     }
 
     if (address >= 0x2000 && address <= 0x3FFF) {
-        if (byte == 0x00) {
-            byte = 0x01;
-        }
-        bank_ = byte;
-        cout << "Switched to ROM bank: 0x" << hex << unsigned(bank_) << endl;
-        int max_bank;
-        switch (cartridgeROM->GetROMSizeType())
-        {
-        case ROMSize_32k:
-            max_bank = 2;
-        case ROMSize_64k:
-            max_bank = 4;
-            break;
-        default:
-            assert(false);
-            break;
-        }
-        assert(bank_ < max_bank);
+        UpdateROMBank(byte);
         return;
     } else if (address < 0x8000) {
-        cout << "Can't Write to: ";
-        cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
-        cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
+        if (cartridgeROM->GetCartridgeType() == CartridgeType_ROM_MBC1_RAM) {
+            UpdateRAMBank(address, byte);
+        } else {
+            cout << "Can't Write to: ";
+            cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
+            cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
 
-        assert(false);
+            assert(false);
+        }
+        return;
+    } else if (address >= 0xA000 && address < 0xC000) {
+        assert(switchable_ram_bank_enabled_);
+        switchable_ram_bank_[address - 0xA000 + switchable_ram_bank_active_ * 0x2000] = byte;
+        return;
     }
     // cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
     // cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
@@ -150,6 +147,57 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
         uint16_t echoAddress = 0xE000 + (address - 0xC000);
         ram[echoAddress - 0x8000] = byte;
     } 
+}
+
+void MMU::UpdateROMBank(uint8_t byte) {
+    if (byte == 0x00) {
+        // Bank 0 is always mapped low.
+        byte = 0x01;
+    }
+    bank_ = byte;
+    cout << "Switched to ROM bank: 0x" << hex << unsigned(bank_) << endl;
+    int max_bank;
+    switch (cartridgeROM->GetROMSizeType())
+    {
+    case ROMSize_32k:
+        max_bank = 2;
+		break;
+    case ROMSize_64k:
+        max_bank = 4;
+        break;
+	case ROMSize_128k:
+		max_bank = 8;
+		break;
+	case ROMSize_256k:
+		max_bank = 16;
+		break;
+	case ROMSize_512k:
+		max_bank = 32;
+		break;
+	default:
+        assert(false);
+        break;
+    }
+    assert(bank_ < max_bank);
+}
+
+void MMU::UpdateRAMBank(uint16_t address, uint8_t byte) {
+    if (address >= 0x0000 && address <= 0x1FFF) {
+        switchable_ram_bank_enabled_ = byte & 0xA;
+    } else if (address >= 0x4000 && address <= 0x5FFF) {
+        uint8_t bank_num = byte & 0b11;
+        assert(bank_num < switchable_ram_bank_count_);
+        switchable_ram_bank_active_ = bank_num;
+        switchable_ram_bank_enabled_ = false; // TODO - does this need to be per switchable bank?
+    } else if (address >= 0x6000 && address <= 0x7FFFF) {
+        if (byte & 0b1) {
+            switchable_ram_bank_count_ = 4;
+        } else {
+            switchable_ram_bank_count_ = 1;
+        }
+    } else {
+        assert(false);
+    }
 }
 
 void MMU::SetWordAt(uint16_t address, uint16_t word) {

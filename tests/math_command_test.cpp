@@ -242,6 +242,30 @@ TEST(MathCommandTest, AddSPNegative) {
     EXPECT_FLAGS(false, false, false, false);
 }
 
+TEST(MathCommandTest, AddSPUnderflow) {
+	const uint8_t ADD_SP = 0xE8;
+	const int8_t negative1 = -1;
+	const uint8_t unsigned_negative1 = negative1;
+	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_SP, unsigned_negative1 });
+	cpu->Set16Bit(Register_SP, 0x0000);
+
+	cpu->Step();
+	ASSERT_EQ(cpu->cycles(), 16);
+	ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFFFF);
+	EXPECT_FLAGS(false, true, false, true);
+}
+
+TEST(MathCommandTest, AddSPOverFlow) {
+	const uint8_t ADD_SP = 0xE8;
+	const int8_t one = 1;
+	CPU* cpu = getTestingCPUWithInstructions(vector<uint8_t>{ ADD_SP, one });
+	cpu->Set16Bit(Register_SP, 0xFFFF);
+
+	cpu->Step();
+	ASSERT_EQ(cpu->cycles(), 16);
+	ASSERT_EQ(cpu->Get16Bit(Register_SP), 0x0000);
+	EXPECT_FLAGS(false, true, false, true);
+}
 TEST(MathCommandTest, ADD) {
     const uint8_t ADD_AB = 0x80;
     const uint8_t ADD_AN = 0xC6;

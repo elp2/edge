@@ -12,9 +12,9 @@ if (WIN32)
 # TODO - re enable. This outputs a billion warnings and -Wextra results in a CL.exe exit with code 2. 
 # set(CMAKE_CXX_FLAGS "-Wall")
 else()
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 endif()
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
@@ -43,16 +43,19 @@ add_library (edge_lib
     src/MMU.cpp
     src/NopCommand.cpp
     src/PixelFIFO.cpp
+    src/pulse_voice.cc
     src/PPU.cpp
     src/ReturnCommand.cpp
     src/ROM.cpp
     src/Screen.cpp
     src/serial_controller.cpp
+    src/sound_controller.cc
     src/StackCommand.cpp
     src/Sprite.cpp
     src/timer_controller.cc
     src/UnimplementedCommand.cpp
-    src/Utils.cpp)
+    src/Utils.cpp
+    src/wave_voice.cc)
 target_include_directories(edge_lib PUBLIC ${SDL2_INCLUDE_DIR})
 target_include_directories(edge_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(edge_lib ${SDL2_LIBRARIES})
@@ -120,6 +123,7 @@ add_executable(tests
     tests/misc_command_test.cpp
     tests/mmu_test.cpp
     tests/ppu_test.cpp
+    tests/pulse_voice_test.cc
     tests/sprite_test.cpp
     tests/stack_test.cpp
     tests/timer_controller_test.cc)

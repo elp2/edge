@@ -133,10 +133,28 @@ MMU *getTestingMMU() {
     return mmu;
 }
 
+MMU *getTestingMMURAM() {
+#if defined WIN32
+    ROM *bootROM = new ROM();
+    assert(bootROM->LoadFile("../../../boot.gb"));
+    ROM *cartridgeROM = new ROM();
+    assert(cartridgeROM->LoadFile("../../../gb-test-roms/cgb_sound/cgb_sound.gb"));
+#else
+	ROM* bootROM = new ROM();
+	assert(bootROM->LoadFile("../../boot.gb"));
+	ROM* cartridgeROM = new ROM();
+	assert(cartridgeROM->LoadFile("../../gb-test-roms/cgb_sound/cgb_sound.gb"));
+#endif
+
+    MMU *mmu = new MMU();
+    mmu->SetROMs(bootROM, cartridgeROM);
+    return mmu;
+}
+
 CPU *getTestingCPU() {
     MMU *mmu = getTestingMMU();
     PPU *ppu = new PPU();
-	AddressRouter* address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL);
+	AddressRouter* address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
 	CPU* cpu = new CPU(address_router);
 	InterruptController* interrupt_controller = new InterruptController();
 	cpu->SetInterruptController(interrupt_controller);
@@ -147,7 +165,7 @@ CPU *getTestingCPU() {
 CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions) {
     MMU *mmu = getTestingMMU();
     PPU *ppu = new PPU();
-	AddressRouter *address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL);
+	AddressRouter *address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
     CPU *cpu = new CPU(address_router);
 
 	InterruptController* interrupt_controller = new InterruptController();
