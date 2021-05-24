@@ -1,23 +1,24 @@
-#include "gtest/gtest.h"
-
 #include "sprite.h"
+
+#include "gtest/gtest.h"
 
 class SpriteTest : public ::testing::Test {
  protected:
-    SpriteTest() {}
+  SpriteTest() {}
 
-    ~SpriteTest() {}
+  ~SpriteTest() {}
 };
 
 // TODO Re:enable sprite tests.
 
-Sprite *testingSprite(uint8_t x, uint8_t y, uint8_t tile_number, uint8_t flags) {
-    Sprite *sprite = new Sprite();
-    sprite->x_ = x;
-    sprite->y_ = y;
-    sprite->flags_ = flags;
-    sprite->tile_number_ = tile_number;
-    return sprite;
+Sprite *testingSprite(uint8_t x, uint8_t y, uint8_t tile_number,
+                      uint8_t flags) {
+  Sprite *sprite = new Sprite();
+  sprite->x_ = x;
+  sprite->y_ = y;
+  sprite->flags_ = flags;
+  sprite->tile_number_ = tile_number;
+  return sprite;
 }
 /*
 TEST(SpriteTest, Basic) {
@@ -30,9 +31,9 @@ TEST(SpriteTest, Basic) {
 }
 */
 TEST(SpriteTest, TileNumber) {
-    Sprite *sprite = testingSprite(0x12, 0x34, 0xED, 0xA0);
+  Sprite *sprite = testingSprite(0x12, 0x34, 0xED, 0xA0);
 
-    EXPECT_EQ(sprite->tile_number_, 0xED);
+  EXPECT_EQ(sprite->tile_number_, 0xED);
 }
 /*
 TEST(SpriteTest, IntersectsRow) {

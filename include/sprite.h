@@ -5,10 +5,10 @@
 #include "palette.h"
 
 struct Sprite {
-	int x_;
-	int y_;
-	uint8_t tile_number_;
-	uint8_t flags_; // Priority, flips, palette.
+  int x_;
+  int y_;
+  uint8_t tile_number_;
+  uint8_t flags_;  // Priority, flips, palette.
 };
 
 bool SpriteYIntersectsRow(uint8_t sprite_y, int row, int sprite_height);
@@ -32,6 +32,7 @@ public:
     uint8_t tile_number() { return tile_number_; };
     bool x_flip() { return flags_ & 0x40; };
     bool y_flip() { return flags_ & 0x20; };
-    Palette palette() { return flags_ & 0x10 ?  SpritePalette1 : SpritePalette0; };
+    Palette palette() { return flags_ & 0x10 ?  SpritePalette1 : SpritePalette0;
+};
 };
 */

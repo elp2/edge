@@ -6,177 +6,178 @@
 
 #include "cpu.h"
 #include "mmu.h"
-#include "rom.h"
 #include "ppu.h"
+#include "rom.h"
 
 using namespace std;
 
 uint16_t buildMsbLsb16(uint8_t msb, uint8_t lsb) {
-    uint16_t word = msb;
-    word = word << 8;
-    word |= lsb;
-    assert(HIGHER8(word) == msb);
-    assert(LOWER8(word) == lsb);
+  uint16_t word = msb;
+  word = word << 8;
+  word |= lsb;
+  assert(HIGHER8(word) == msb);
+  assert(LOWER8(word) == lsb);
 
-    return word;
+  return word;
 }
 
 Destination destinationForColumn(uint8_t column) {
-    switch (column)
-    {
+  switch (column) {
     case 0x00:
     case 0x08:
-        return Register_B;
+      return Register_B;
     case 0x01:
     case 0x09:
-        return Register_C;
+      return Register_C;
     case 0x02:
     case 0x0a:
-        return Register_D;
+      return Register_D;
     case 0x03:
     case 0x0b:
-        return Register_E;
+      return Register_E;
     case 0x04:
     case 0x0c:
-        return Register_H;
+      return Register_H;
     case 0x05:
     case 0x0d:
-        return Register_L;
+      return Register_L;
     case 0x06:
     case 0x0e:
-        return Address_HL;
+      return Address_HL;
     case 0x07:
     case 0x0f:
-        return Register_A;
-    
+      return Register_A;
+
     default:
-        cout << "Unexpected destination for column: 0x" << hex << column << endl;
-        assert(false);
-        return Destination_Unknown;
-    }
+      cout << "Unexpected destination for column: 0x" << hex << column << endl;
+      assert(false);
+      return Destination_Unknown;
+  }
 }
 
 string destinationToString(Destination d) {
-    switch (d)
-    {
+  switch (d) {
     case Register_A:
-        return "A";
+      return "A";
     case Register_B:
-        return "B";
+      return "B";
     case Register_C:
-        return "C";
+      return "C";
     case Register_D:
-        return "D";
+      return "D";
     case Register_E:
-        return "E";
+      return "E";
     case Register_H:
-        return "H";
+      return "H";
     case Register_L:
-        return "L";
+      return "L";
     case Register_AF:
-        return "AF";
+      return "AF";
     case Register_BC:
-        return "BC";
+      return "BC";
     case Register_DE:
-        return "DE";
+      return "DE";
     case Register_HL:
-        return "HL";
-	case Register_SP:
-		return "SP";
+      return "HL";
+    case Register_SP:
+      return "SP";
     case Address_SP:
-        return "(SP)";
+      return "(SP)";
     case Address_BC:
-        return "(BC)";
+      return "(BC)";
     case Address_DE:
-        return "(DE)";
+      return "(DE)";
     case Address_HL:
-        return "(HL)";
+      return "(HL)";
     case Address_nn:
-        return "(nn)";
+      return "(nn)";
     case Eat_PC_Byte:
-        return "n";
+      return "n";
     case Eat_PC_Word:
-        return "nn";    
+      return "nn";
     default:
-        cout << "Unknown d 0x" << hex << unsigned(d) << endl;
-        assert(false);        
-        break;
-    }
-    return "?";
+      cout << "Unknown d 0x" << hex << unsigned(d) << endl;
+      assert(false);
+      break;
+  }
+  return "?";
 }
 
-bool bit_set(uint8_t byte, int bit) {
-	return (byte >> bit) & 0x1;
-}
+bool bit_set(uint8_t byte, int bit) { return (byte >> bit) & 0x1; }
 
 std::string descriptionforPixel(Pixel p) {
-    stringstream stream;
-    stream << hex << unsigned(p.two_bit_color_) << " P:" << p.palette_;
-    return stream.str();
+  stringstream stream;
+  stream << hex << unsigned(p.two_bit_color_) << " P:" << p.palette_;
+  return stream.str();
 }
 
 MMU *getTestingMMU() {
 #if defined WIN32
-    ROM *bootROM = new ROM();
-    assert(bootROM->LoadFile("../../../boot.gb"));
-    ROM *cartridgeROM = new ROM();
-    assert(cartridgeROM->LoadFile("../../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+  ROM *bootROM = new ROM();
+  assert(bootROM->LoadFile("../../../boot.gb"));
+  ROM *cartridgeROM = new ROM();
+  assert(
+      cartridgeROM->LoadFile("../../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
 #else
-	ROM* bootROM = new ROM();
-	assert(bootROM->LoadFile("../../boot.gb"));
-	ROM* cartridgeROM = new ROM();
-	assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+  ROM *bootROM = new ROM();
+  assert(bootROM->LoadFile("../../boot.gb"));
+  ROM *cartridgeROM = new ROM();
+  assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
 #endif
 
-    MMU *mmu = new MMU();
-    mmu->SetROMs(bootROM, cartridgeROM);
-    return mmu;
+  MMU *mmu = new MMU();
+  mmu->SetROMs(bootROM, cartridgeROM);
+  return mmu;
 }
 
 MMU *getTestingMMURAM() {
 #if defined WIN32
-    ROM *bootROM = new ROM();
-    assert(bootROM->LoadFile("../../../boot.gb"));
-    ROM *cartridgeROM = new ROM();
-    assert(cartridgeROM->LoadFile("../../../gb-test-roms/cgb_sound/cgb_sound.gb"));
+  ROM *bootROM = new ROM();
+  assert(bootROM->LoadFile("../../../boot.gb"));
+  ROM *cartridgeROM = new ROM();
+  assert(
+      cartridgeROM->LoadFile("../../../gb-test-roms/cgb_sound/cgb_sound.gb"));
 #else
-	ROM* bootROM = new ROM();
-	assert(bootROM->LoadFile("../../boot.gb"));
-	ROM* cartridgeROM = new ROM();
-	assert(cartridgeROM->LoadFile("../../gb-test-roms/cgb_sound/cgb_sound.gb"));
+  ROM *bootROM = new ROM();
+  assert(bootROM->LoadFile("../../boot.gb"));
+  ROM *cartridgeROM = new ROM();
+  assert(cartridgeROM->LoadFile("../../gb-test-roms/cgb_sound/cgb_sound.gb"));
 #endif
 
-    MMU *mmu = new MMU();
-    mmu->SetROMs(bootROM, cartridgeROM);
-    return mmu;
+  MMU *mmu = new MMU();
+  mmu->SetROMs(bootROM, cartridgeROM);
+  return mmu;
 }
 
 CPU *getTestingCPU() {
-    MMU *mmu = getTestingMMU();
-    PPU *ppu = new PPU();
-	AddressRouter* address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
-	CPU* cpu = new CPU(address_router);
-	InterruptController* interrupt_controller = new InterruptController();
-	cpu->SetInterruptController(interrupt_controller);
+  MMU *mmu = getTestingMMU();
+  PPU *ppu = new PPU();
+  AddressRouter *address_router =
+      new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
+  CPU *cpu = new CPU(address_router);
+  InterruptController *interrupt_controller = new InterruptController();
+  cpu->SetInterruptController(interrupt_controller);
 
-    return cpu;
+  return cpu;
 }
 
 CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions) {
-    MMU *mmu = getTestingMMU();
-    PPU *ppu = new PPU();
-	AddressRouter *address_router = new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
-    CPU *cpu = new CPU(address_router);
+  MMU *mmu = getTestingMMU();
+  PPU *ppu = new PPU();
+  AddressRouter *address_router =
+      new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
+  CPU *cpu = new CPU(address_router);
 
-	InterruptController* interrupt_controller = new InterruptController();
-	cpu->SetInterruptController(interrupt_controller);
+  InterruptController *interrupt_controller = new InterruptController();
+  cpu->SetInterruptController(interrupt_controller);
 
-    uint16_t ram_start = 0xC000;
-    cpu->JumpAddress(ram_start);
-    cpu->Set16Bit(Register_SP, 0xFFFE);
-    for (std::vector<uint8_t>::iterator i = instructions.begin(); i != instructions.end(); i++) {
-        mmu->SetByteAt(ram_start, *i);
-        ram_start++;
-    }
-    return cpu;
+  uint16_t ram_start = 0xC000;
+  cpu->JumpAddress(ram_start);
+  cpu->Set16Bit(Register_SP, 0xFFFE);
+  for (std::vector<uint8_t>::iterator i = instructions.begin();
+       i != instructions.end(); i++) {
+    mmu->SetByteAt(ram_start, *i);
+    ram_start++;
+  }
+  return cpu;
 }

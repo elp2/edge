@@ -11,14 +11,14 @@
 #define HIGHER8(word) ((word >> 8) & 0xff)
 #define LOWER8(word) (word & 0xff)
 
-#define NIBBLEHIGH(byte) ((byte  >> 4 ) & 0xf)
+#define NIBBLEHIGH(byte) ((byte >> 4) & 0xf)
 #define NIBBLELOW(byte) (byte & 0xf)
 
 #define EXPECT_FLAGS(ze, he, ne, ce) \
-    EXPECT_EQ(cpu->flags.z, ze); \
-    EXPECT_EQ(cpu->flags.h, he); \
-    EXPECT_EQ(cpu->flags.n, ne); \
-    EXPECT_EQ(cpu->flags.c, ce);
+  EXPECT_EQ(cpu->flags.z, ze);       \
+  EXPECT_EQ(cpu->flags.h, he);       \
+  EXPECT_EQ(cpu->flags.n, ne);       \
+  EXPECT_EQ(cpu->flags.c, ce);
 
 bool bit_set(uint8_t byte, int bit);
 

@@ -14,24 +14,24 @@ class MMU;
 
 class AbstractCommandFactory {
  public:
-    AbstractCommandFactory();
-    virtual ~AbstractCommandFactory() = default;
-    Command *CommandForOpcode(uint8_t opcode);
-    void RegisterCommand(Command *command);
+  AbstractCommandFactory();
+  virtual ~AbstractCommandFactory() = default;
+  Command *CommandForOpcode(uint8_t opcode);
+  void RegisterCommand(Command *command);
 
- protected: 
-    array<Command *, 256> commands;
-    string name;
+ protected:
+  array<Command *, 256> commands;
+  string name;
 };
 
 class CommandFactory : public AbstractCommandFactory {
-    public:
-        CommandFactory();
-        ~CommandFactory();
+ public:
+  CommandFactory();
+  ~CommandFactory();
 };
 
 class CBCommandFactory : public AbstractCommandFactory {
-    public:
-        CBCommandFactory();
-        ~CBCommandFactory();
+ public:
+  CBCommandFactory();
+  ~CBCommandFactory();
 };

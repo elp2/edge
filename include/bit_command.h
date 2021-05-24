@@ -8,11 +8,12 @@ class CPU;
 
 class BitCommand : public Command {
  private:
-    void CP(CPU *cpu, Destination d);
+  void CP(CPU *cpu, Destination d);
+
  public:
-    BitCommand(uint8_t opcode, string description, int cycles);
-    ~BitCommand();
-    void Run(CPU *cpu);
+  BitCommand(uint8_t opcode, string description, int cycles);
+  ~BitCommand();
+  void Run(CPU *cpu);
 };
 
 void RL(CPU *cpu, Destination d, bool through_carry, bool cb);

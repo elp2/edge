@@ -17,29 +17,29 @@ using namespace std;
 
 class Screen {
  private:
-    bool on_ = false;
-    bool debugger_ = false;
-    uint32_t *pixels_;
-    uint32_t *palettes_;
-    int x_ = 0;
-    int y_ = 0;
+  bool on_ = false;
+  bool debugger_ = false;
+  uint32_t *pixels_;
+  uint32_t *palettes_;
+  int x_ = 0;
+  int y_ = 0;
 
-    void InitSDL();
-    SDL_Renderer *renderer_;
-    SDL_Texture *texture_;  
-    SDL_Window *window_;
-    unsigned int frame_start_ms_ = 0;
-    int frames_ = 0;
+  void InitSDL();
+  SDL_Renderer *renderer_;
+  SDL_Texture *texture_;
+  SDL_Window *window_;
+  unsigned int frame_start_ms_ = 0;
+  int frames_ = 0;
 
  public:
-    Screen();
-    ~Screen() = default;
+  Screen();
+  ~Screen() = default;
 
-    void DrawPixel(Pixel pixel);
-    void NewLine();
-    void VBlankBegan();
-    void VBlankEnded();
-	void SetPalette(Palette palette, uint8_t value);
-    bool on() { return on_; };
-    void set_on(bool on) { on_ = on; };
+  void DrawPixel(Pixel pixel);
+  void NewLine();
+  void VBlankBegan();
+  void VBlankEnded();
+  void SetPalette(Palette palette, uint8_t value);
+  bool on() { return on_; };
+  void set_on(bool on) { on_ = on; };
 };

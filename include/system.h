@@ -17,23 +17,23 @@ using namespace std;
 
 class System {
  public:
-    System(string rom_filename);
-    ~System() = default;
+  System(string rom_filename);
+  ~System() = default;
 
-    void Main();
+  void Main();
 
  private:
-    MMU *mmu_;
-    CPU *cpu_;
-    PPU *ppu_;
-    AddressRouter *router_;
-	InputController* input_controller_;
-    InterruptController *interrupt_controller_;
-    SerialController *serial_controller_;
-    SoundController *sound_controller_;
-	TimerController *timer_controller_;
+  MMU *mmu_;
+  CPU *cpu_;
+  PPU *ppu_;
+  AddressRouter *router_;
+  InputController *input_controller_;
+  InterruptController *interrupt_controller_;
+  SerialController *serial_controller_;
+  SoundController *sound_controller_;
+  TimerController *timer_controller_;
 
-    MMU *GetMMU(string rom_filename);
-    void Advance(int stepped);
-    void FrameEnded();
+  MMU *GetMMU(string rom_filename);
+  void Advance(int stepped);
+  void FrameEnded();
 };

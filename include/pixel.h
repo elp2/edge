@@ -4,8 +4,7 @@
 
 #include "palette.h"
 
-struct Pixel
-{
-    uint8_t two_bit_color_;
-    Palette palette_;
+struct Pixel {
+  uint8_t two_bit_color_;
+  Palette palette_;
 };

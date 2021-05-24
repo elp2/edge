@@ -5,20 +5,18 @@
 #include "mmu.h"
 
 NopCommand::NopCommand(uint8_t opcode) {
-    this->opcode = opcode;
-    this->description = "NOP";
-    this->cycles = 4;
+  this->opcode = opcode;
+  this->description = "NOP";
+  this->cycles = 4;
 }
 
-NopCommand::~NopCommand() {
-
-}
+NopCommand::~NopCommand() {}
 
 void NopCommand::Run(CPU *cpu) {
-    // Nop.
-    (void)cpu;
+  // Nop.
+  (void)cpu;
 }
 
 void registerNopCommands(AbstractCommandFactory *factory) {
-    factory->RegisterCommand(new NopCommand(0x00));
+  factory->RegisterCommand(new NopCommand(0x00));
 }
