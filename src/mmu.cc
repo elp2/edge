@@ -185,7 +185,7 @@ void MMU::UpdateROMBank(uint8_t byte) {
 }
 
 void MMU::UpdateRAMBank(uint16_t address, uint8_t byte) {
-  if (address >= 0x0000 && address <= 0x1FFF) {
+  if (address <= 0x1FFF) {
     switchable_ram_bank_enabled_ = byte & 0xA;
   } else if (address >= 0x4000 && address <= 0x5FFF) {
     uint8_t bank_num = byte & 0b11;
@@ -193,7 +193,7 @@ void MMU::UpdateRAMBank(uint16_t address, uint8_t byte) {
     switchable_ram_bank_active_ = bank_num;
     switchable_ram_bank_enabled_ =
         false;  // TODO - does this need to be per switchable bank?
-  } else if (address >= 0x6000 && address <= 0x7FFFF) {
+  } else if (address >= 0x6000 && address <= 0x7FFF) {
     if (byte & 0b1) {
       switchable_ram_bank_count_ = 4;
     } else {
