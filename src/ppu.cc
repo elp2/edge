@@ -502,6 +502,8 @@ uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
 }
 
 uint16_t PPU::WindowTile(int x, int y) {
+  (void)x;
+  (void)y;
   uint16_t window_map_address_base = bit_set(lcdc(), 6) ? 0x9800 : 0x9C00;
   // TODO: Windows not implemented.
   assert(false);
