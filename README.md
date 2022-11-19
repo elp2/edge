@@ -1,11 +1,15 @@
 # Ed's Gameboy Emulator
 
 ## Instructions
+* MacOS:
+* 
 * Install cmake and SDL-dev libraries
-  * sudo apt-get install libsdl2-dev cmake
+  * Ubuntu: sudo apt-get install libsdl2-dev cmake
+  * MacOS: brew install sdl cmake
 * mkdir build
 * cd build
 * cmake -DCMAKE_BUILD_TYPE=[Debug|Release] ..
+* Build from IDE: 
 
 ## Status:
 
