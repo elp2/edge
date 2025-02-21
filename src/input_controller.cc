@@ -116,8 +116,7 @@ void InputController::SetInterruptHandler(InterruptHandler* handler) {
 
 void InputController::SetByteAt(uint16_t address, uint8_t byte) {
   assert(address == P0_ADDRESS);
-  p0_select_ = byte;
-  std::cout << "P0_SELECT: " << std::bitset<8>(p0_select_) << std::endl;
+  p0_select_ = byte & 0xf0;
 }
 
 uint8_t InputController::GetByteAt(uint16_t address) {
@@ -132,6 +131,5 @@ uint8_t InputController::GetByteAt(uint16_t address) {
     selected_nibble = button_nibble_;
   }
   uint8_t memory = p0_select_ | selected_nibble;
-  std::cout << "Input: " << std::bitset<8>(memory) << std::endl;
   return memory;
 }
