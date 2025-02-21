@@ -1,12 +1,15 @@
 #include "system.h"
 
 #include <cassert>
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 #include "SDL.h"
 #include "address_router.h"
 #include "bit_command.h"
 #include "command_factory.h"
+#include "constants.h"
 #include "cpu.h"
 #include "input_controller.h"
 #include "interrupt_controller.h"
@@ -40,6 +43,9 @@ System::System(string rom_filename) {
 
   cpu_ = new CPU(router_);
   cpu_->SetInterruptController(interrupt_controller_);
+
+  frame_cycles_ = 0;
+  last_frame_start_time_ = std::chrono::high_resolution_clock::now();
 }
 
 MMU *System::GetMMU(string rom_filename) {
@@ -72,6 +78,20 @@ void System::Advance(int stepped) {
   // interrupt controller. Advancing the IC is how we turn the flags on/off.
   // Have a separate "CPU Stepped" version?
   assert(interrupt_steps == 0);
+
+  frame_cycles_ += stepped;
+  if (frame_cycles_ >= CYCLES_PER_FRAME) {
+    frame_cycles_ = 0;
+    static const std::chrono::duration<double> FRAME_TIME(1.0 / 60.0);
+
+    auto current_time = std::chrono::high_resolution_clock::now();
+    auto elapsed = current_time - last_frame_start_time_;
+
+    if (elapsed < FRAME_TIME) {
+      std::this_thread::sleep_for(FRAME_TIME - elapsed);
+    }
+    last_frame_start_time_ = std::chrono::high_resolution_clock::now();
+  }
 }
 
 void System::Main() {

@@ -32,6 +32,8 @@ class System {
   SerialController *serial_controller_;
   SoundController *sound_controller_;
   TimerController *timer_controller_;
+  int frame_cycles_;
+  std::chrono::high_resolution_clock::time_point last_frame_start_time_;
 
   MMU *GetMMU(string rom_filename);
   void Advance(int stepped);
