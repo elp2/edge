@@ -461,32 +461,15 @@ uint16_t AddSP(CPU *cpu) {
   int8_t signed_byte = unsigned_byte;
   uint16_t sp = cpu->Get16Bit(Register_SP);
 
-  uint8_t delta;
-  bool add;
-
-  if (signed_byte > 0) {
-    add = true;
-    delta = unsigned_byte;
-  } else {
-    add = false;
-    delta = -1 * signed_byte;
-  }
-  uint8_t lower8 = aluAdd8(cpu, add, false, LOWER8(sp), delta);
-
-  uint16_t sp_after = sp + signed_byte;
-  assert(LOWER8(sp_after) == lower8);
-
-  if (sp_after < 0x10) {
-    // This may happen in the instruction tests.
-    cout << "SUSPICIOUS: SP too low after adding: " << hex << unsigned(sp_after)
-         << endl;
-  }
-
-  // Even if we subtracted above, we shouldn't mark this as a subtraction.
+  // Calculate flags based on unsigned addition of lower byte.
+  uint8_t sp_low = LOWER8(sp);  
+  cpu->flags.h = ((sp_low & 0xF) + (unsigned_byte & 0xF)) > 0xF;
+  cpu->flags.c = ((uint16_t)sp_low + unsigned_byte) > 0xFF;
+  
   cpu->flags.n = false;
   cpu->flags.z = false;
 
-  return sp_after;
+  return sp + signed_byte;
 }
 
 void MathCommand::Run(CPU *cpu) {
