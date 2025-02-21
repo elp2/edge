@@ -44,7 +44,7 @@ System::System(string rom_filename) {
 
 MMU *System::GetMMU(string rom_filename) {
   ROM *boot_rom = new ROM();
-  assert(boot_rom->LoadFile("../../boot.gb"));
+  assert(boot_rom->LoadFile("../roms/boot.gb"));
   ROM *cartridge_rom = new ROM();
   assert(cartridge_rom->LoadFile(rom_filename));
 
