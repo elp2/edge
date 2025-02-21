@@ -60,9 +60,7 @@ MMU *System::GetMMU(string rom_filename) {
 }
 
 void System::Advance(int stepped) {
-  if (input_controller_->Advance(stepped)) {
-    input_controller_->PollAndApplyEvents();
-  }
+  input_controller_->PollAndApplyEvents();
   ppu_->Advance(stepped);
   timer_controller_->Advance(stepped);
   // if (cpu_->Get16Bit(Register_PC) >= 0xC200) {

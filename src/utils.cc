@@ -114,13 +114,13 @@ std::string descriptionforPixel(Pixel p) {
 MMU *getTestingMMU() {
 #if defined WIN32
   ROM *bootROM = new ROM();
-  assert(bootROM->LoadFile("../../../boot.gb"));
+  assert(bootROM->LoadFile("../../roms/boot.gb"));
   ROM *cartridgeROM = new ROM();
   assert(
       cartridgeROM->LoadFile("../../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
 #else
   ROM *bootROM = new ROM();
-  assert(bootROM->LoadFile("../../boot.gb"));
+  assert(bootROM->LoadFile("../roms/boot.gb"));
   ROM *cartridgeROM = new ROM();
   assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
 #endif
@@ -133,13 +133,13 @@ MMU *getTestingMMU() {
 MMU *getTestingMMURAM() {
 #if defined WIN32
   ROM *bootROM = new ROM();
-  assert(bootROM->LoadFile("../../../boot.gb"));
+  assert(bootROM->LoadFile("../../roms/boot.gb"));
   ROM *cartridgeROM = new ROM();
   assert(
       cartridgeROM->LoadFile("../../../gb-test-roms/cgb_sound/cgb_sound.gb"));
 #else
   ROM *bootROM = new ROM();
-  assert(bootROM->LoadFile("../../boot.gb"));
+  assert(bootROM->LoadFile("../roms/boot.gb"));
   ROM *cartridgeROM = new ROM();
   assert(cartridgeROM->LoadFile("../../gb-test-roms/cgb_sound/cgb_sound.gb"));
 #endif
