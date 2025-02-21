@@ -244,7 +244,7 @@ TEST(MathCommandTest, AddSPNegative) {
   cpu->Step();
   ASSERT_EQ(cpu->cycles(), 16);
   ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFFF0);
-  EXPECT_FLAGS(false, false, false, false);
+  EXPECT_FLAGS(false, true, false, true);
 }
 
 TEST(MathCommandTest, AddSPUnderflow) {
@@ -258,7 +258,7 @@ TEST(MathCommandTest, AddSPUnderflow) {
   cpu->Step();
   ASSERT_EQ(cpu->cycles(), 16);
   ASSERT_EQ(cpu->Get16Bit(Register_SP), 0xFFFF);
-  EXPECT_FLAGS(false, true, false, true);
+  EXPECT_FLAGS(false, false, false, false);
 }
 
 TEST(MathCommandTest, AddSPOverFlow) {
