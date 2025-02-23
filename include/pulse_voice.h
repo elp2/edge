@@ -17,21 +17,21 @@ class PulseVoice {
   bool PlaySound(float **sound_buffer, int *length);
 
   void SetSweepByte(uint8_t byte) { sweep_byte_ = byte; };
-  uint8_t GetSweepByte() { return sweep_byte_; };
+  uint8_t GetSweepByte() { return 0x80 | sweep_byte_; };
 
   void SetWavePatternDutyByte(uint8_t byte) { wave_pattern_duty_byte_ = byte; };
   uint8_t GetWavePatternDutyByte() {
-    return 0b11000000 & wave_pattern_duty_byte_;
+    return 0x3F | wave_pattern_duty_byte_; // Only top two bits can be read.'
   };
 
   void SetEnvelopeByte(uint8_t byte) { envelope_byte_ = byte; };
   uint8_t GetEnvelopeByte() { return envelope_byte_; };
 
   void SetFrequencyLowByte(uint8_t byte) { frequency_low_byte_ = byte; };
-  uint8_t GetFrequencyLowByte() { return frequency_low_byte_; };
+  uint8_t GetFrequencyLowByte() { return 0xFF; /* Write only. */ };
 
   void SetFrequencyHighByte(uint8_t byte);
-  uint8_t GetFrequencyHighByte() { return frequency_high_byte_ & 0b01000000; };
+  uint8_t GetFrequencyHighByte() { return 0xBF | frequency_high_byte_; };
 
   bool Playing() { return playback_steps_remaining_ > 0; };
 

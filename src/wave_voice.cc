@@ -11,6 +11,8 @@
 
 const int MAX_SOUND_BUFFER_LENGTH = SAMPLE_RATE;
 
+const uint16_t WaveVoice::BASE_WAVE_PATTERN_ADDRESS = 0xFF30;
+
 WaveVoice::WaveVoice() {
   // The sound can be no longer than 1/4 seconds (when t1 is set to 0).
   sound_buffer_ = new float[MAX_SOUND_BUFFER_LENGTH];
@@ -97,8 +99,11 @@ void WaveVoice::GenerateSoundBuffer() {
 }
 
 void WaveVoice::SetWavePatternAddress(uint16_t address, uint8_t byte) {
-  const uint16_t BASE_WAVE_PATTERN_ADDRESS = 0xFF30;
   assert(address >= BASE_WAVE_PATTERN_ADDRESS && address <= 0xFF3F);
-
   wave_pattern_[address - BASE_WAVE_PATTERN_ADDRESS] = byte;
+}
+
+uint8_t WaveVoice::GetWavePatternByte(uint16_t address) {
+  assert(address >= BASE_WAVE_PATTERN_ADDRESS && address <= 0xFF3F);
+  return wave_pattern_[address - BASE_WAVE_PATTERN_ADDRESS];
 }

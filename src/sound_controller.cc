@@ -25,7 +25,7 @@ SoundController::SoundController() {
   SDL_AudioSpec actual;
   audio_device_ = SDL_OpenAudioDevice(NULL, 0, &wanted, &actual,
                                       SDL_AUDIO_ALLOW_FORMAT_CHANGE);
-  // TODO check SAMPLE RATE, what is .samples? assert(wanted == actual);
+  assert(wanted.samples == actual.samples);
 
   SDL_PauseAudioDevice(audio_device_, 0);
 }
@@ -49,26 +49,24 @@ bool SoundController::Advance(int cycles) {
 
   float *sound_buffer;
   int length;
-  /*
-  TODO: Mix these properly.
+  
+
   if (voice1_->PlaySound(&sound_buffer, &length)) {
-              bool s01 = bit_set(sound_output_terminals_, 0);
-              bool s02 = bit_set(sound_output_terminals_, 4);
-              if (s01 || s02) {
-                      SDL_QueueAudio(audio_device_, sound_buffer, length *
-  sizeof(float));
-              }
-      }
+    bool s01 = bit_set(sound_output_terminals_, 0);
+    bool s02 = bit_set(sound_output_terminals_, 4);
+    if (s01 || s02) {
+      SDL_QueueAudio(audio_device_, sound_buffer, length * sizeof(float));
+    }
+  }
 
   if (voice2_->PlaySound(&sound_buffer, &length)) {
-              bool s01 = bit_set(sound_output_terminals_, 1);
-              bool s02 = bit_set(sound_output_terminals_, 5);
-              if (s01 || s02) {
-                      SDL_QueueAudio(audio_device_, sound_buffer, length *
-  sizeof(float));
-              }
-      }
-  */
+    bool s01 = bit_set(sound_output_terminals_, 1);
+    bool s02 = bit_set(sound_output_terminals_, 5);
+    if (s01 || s02) {
+      SDL_QueueAudio(audio_device_, sound_buffer, length * sizeof(float));
+    }
+  }
+
   if (voice3_->PlaySound(&sound_buffer, &length)) {
     bool s01 = bit_set(sound_output_terminals_, 2);
     bool s02 = bit_set(sound_output_terminals_, 6);
@@ -157,8 +155,7 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
   assert(address >= 0xFF10 && address <= 0xFF3F);
 
   if (address >= 0xFF30 && address <= 0xFF3F) {
-    // TODO: Get Wave.
-    return 0x00;
+    return voice3_->GetWavePatternByte(address);
   }
 
   switch (address) {
@@ -177,7 +174,10 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
     case 0xFF14:
       return voice1_->GetFrequencyHighByte();
       break;
-    // No 0xFF15.
+    case 0xFF15:
+      // No 0xFF15. Return all high.
+      return 0xFF;
+      break;
     case 0xFF16:
       return voice2_->GetWavePatternDutyByte();
       break;
@@ -190,9 +190,43 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
     case 0xFF19:
       return voice2_->GetFrequencyHighByte();
       break;
-    case 0xFF24:
-      // TODO: Channel Control.
+    case 0xFF1A:
+      return voice3_->GetOnOffByte();
       break;
+    case 0xFF1B:
+      return voice3_->GetSoundLengthByte();
+      break;
+    case 0xFF1C:
+      return voice3_->GetOutputLevelByte();
+      break;
+    case 0xFF1D:
+      return voice3_->GetFrequencyLowByte();
+      break;
+    case 0xFF1E:
+      return voice3_->GetFrequencyHighByte();
+      break;
+    case 0xFF1F:
+      // Unused.
+      return 0;
+      break;
+    case 0xFF20:
+      // tODO.
+      return 0;
+      break;
+    case 0xFF21:
+      // tODO.
+      return 0;
+      break;
+    case 0xFF22:
+      // tODO.
+      return 0;
+      break;
+    case 0xFF23:
+      // tODO.
+      return 0;
+      break;
+    case 0xFF24:
+      assert(false);
     case 0xFF25:
       return sound_output_terminals_;
       break;
@@ -202,9 +236,10 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
       // 0xFF27-2F unused.
       // 0xFF30-3F Wave Pattern - covered above.
     default:
-      return 0x00;
       break;
   }
+  std::cout << "No value for GetByteAt: " << std::hex << " at " << address << std::endl;
+  assert(false);
   return 0x00;
 }
 
@@ -218,5 +253,5 @@ uint8_t SoundController::FF26() {
   ff26 |= (uint8_t)voice2_->Playing();
   ff26 <<= 1;
   ff26 |= (uint8_t)voice1_->Playing();
-  return ff26;
+  return 0x70 |ff26;
 }

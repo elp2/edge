@@ -17,13 +17,13 @@ class WaveVoice {
   bool PlaySound(float **sound_buffer, int *length);
 
   void SetOnOffByte(uint8_t byte);
-  uint8_t GetOnOffByte() { return on_off_byte_; };
+  uint8_t GetOnOffByte() { return 0x7F | on_off_byte_; };
 
   void SetSoundLengthByte(uint8_t byte) { sound_length_byte_ = byte; };
   uint8_t GetSoundLengthByte() { return sound_length_byte_; };
 
   void SetOutputLevelByte(uint8_t byte) { output_level_byte_ = byte; };
-  uint8_t GetOutputLevelByte() { return output_level_byte_; };
+  uint8_t GetOutputLevelByte() { return 0x9F | output_level_byte_; };
 
   void SetFrequencyLowByte(uint8_t byte) { frequency_low_byte_ = byte; };
   uint8_t GetFrequencyLowByte() { return frequency_low_byte_; };
@@ -35,7 +35,10 @@ class WaveVoice {
 
   bool Playing() { return playback_steps_remaining_ > 0; };
 
+  static const uint16_t BASE_WAVE_PATTERN_ADDRESS;
+
   void SetWavePatternAddress(uint16_t address, uint8_t byte);
+  uint8_t GetWavePatternByte(uint16_t address);
 
  private:
   // Length of the voice in CPU steps (CYCLES_PER_SECOND).
