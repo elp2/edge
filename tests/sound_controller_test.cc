@@ -26,17 +26,6 @@ TEST_F(SoundControllerTest, WaveMemorySetGet) {
 }
 
 TEST_F(SoundControllerTest, MemoryRWDefaults) {
-    // Masks for readable bits (mirrors assembly)
-    // ff13, ff15, ff18 are broken.
-    // 12. FF13 (NR 13)
-    //  Name - NR 13
-    //  Contents - Sound Mode 1 register, Frequency lo (W)
-    // ff15 - empty, nothing.
-    // ff18 - 16. FF18 (NR 23)
-    // Name - NR 23
-    // Contents - Sound Mode 2 register, frequency
-    //lo data (W)
-
     const uint8_t masks[] = {
         0x80, 0x3F, 0x00, 0xFF, 0xBF, // NR10-NR14
         0xFF, 0x3F, 0x00, 0xFF, 0xBF, // NR20-NR24
@@ -51,33 +40,38 @@ TEST_F(SoundControllerTest, MemoryRWDefaults) {
     uint16_t address = 0xFF10;
     const uint8_t* mask_ptr = masks;
 
-    // TODO: Test all addresses.
-    // while (address < 0xFF3F) {
-    // while (address < 0xFF1F) {
-    while (address < 0xFF1A) {
-        // Skip NR52
-        if (address == 0xFF25) {
+    while (true) {
+        test_value++;
+        if (test_value == 0) {
+            break;
+        }
+
+        // while (address < 0xFF3F) {
+        while (address < 0xFF20) {
+            // Skip NR52
+            if (address == 0xFF25) {
+                address++;
+                mask_ptr++;
+                continue;
+            }
+
+            // Expected readback value
+            uint8_t expected = *mask_ptr | test_value;
+
+            controller_->SetByteAt(address, test_value);
+            uint8_t actual = controller_->GetByteAt(address);
+            if (actual != expected) {
+                std::cout << "Expected " << std::hex << (int)expected << " but got " << (int)actual << " on " << std::hex << (int)address << std::endl;
+            }
+            EXPECT_EQ(actual, expected);
+
+            // Mute channels and disable Wave.
+            controller_->SetByteAt(0xFF25, 0x00);
+            controller_->SetByteAt(0xFF1A, 0x00);
+
             address++;
             mask_ptr++;
-            continue;
         }
-
-        // Expected readback value
-        uint8_t expected = *mask_ptr | test_value;
-
-        controller_->SetByteAt(address, test_value);
-        uint8_t actual = controller_->GetByteAt(address);
-        if (actual != expected) {
-            std::cout << "Expected " << std::hex << (int)expected << " but got " << (int)actual << " on " << std::hex << (int)address << std::endl;
-        }
-        EXPECT_EQ(actual, expected);
-
-        // Mute channels and disable Wave.
-        controller_->SetByteAt(0xFF25, 0x00);
-        controller_->SetByteAt(0xFF1A, 0x00);
-
-        address++;
-        mask_ptr++;
     }
 }
 

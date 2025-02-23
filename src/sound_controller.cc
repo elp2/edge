@@ -104,7 +104,9 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
     case 0xFF14:
       voice1_->SetFrequencyHighByte(byte);
       break;
-    // No 0xFF15.
+    case 0xFF15:
+      // No 0xFF15.
+      break;
     case 0xFF16:
       voice2_->SetWavePatternDutyByte(byte);
       break;
@@ -132,6 +134,9 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
     case 0xFF1E:
       voice3_->SetFrequencyHighByte(byte);
       break;
+    case 0xFF1F:
+      // No 0xFF1F.
+      break;
     case 0xFF24:
       // TODO: Channel Control.
       break;
@@ -147,6 +152,8 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
       // 0xFF30-3F Wave Pattern - covered above.
 
     default:
+      std::cout << "NO!!! SetByteAt: " << std::hex << (int)address << " to " << (int)byte << std::endl;
+      assert(false);
       break;
   }
 }
@@ -207,7 +214,7 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
       break;
     case 0xFF1F:
       // Unused.
-      return 0;
+      return 0xFF;
       break;
     case 0xFF20:
       // tODO.

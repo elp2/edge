@@ -20,18 +20,18 @@ class WaveVoice {
   uint8_t GetOnOffByte() { return 0x7F | on_off_byte_; };
 
   void SetSoundLengthByte(uint8_t byte) { sound_length_byte_ = byte; };
-  uint8_t GetSoundLengthByte() { return sound_length_byte_; };
+  uint8_t GetSoundLengthByte() { return 0xFF; /* Write only. */ };
 
   void SetOutputLevelByte(uint8_t byte) { output_level_byte_ = byte; };
   uint8_t GetOutputLevelByte() { return 0x9F | output_level_byte_; };
 
   void SetFrequencyLowByte(uint8_t byte) { frequency_low_byte_ = byte; };
-  uint8_t GetFrequencyLowByte() { return frequency_low_byte_; };
+  uint8_t GetFrequencyLowByte() { return 0xFF; /* Write only. */ };
 
   // Will also potentially make this voice ready for playback if "initial" is
   // set.
   void SetFrequencyHighByte(uint8_t byte);
-  uint8_t GetFrequencyHighByte() { return frequency_high_byte_ & 0b01000000; };
+  uint8_t GetFrequencyHighByte() { return 0xBF | frequency_high_byte_; };
 
   bool Playing() { return playback_steps_remaining_ > 0; };
 
