@@ -31,13 +31,13 @@ MathCommand::MathCommand(uint8_t opcode) {
       case 0x03:
         description = "INC BC";
         break;
-      case 0x23:
+      case 0x13:
         description = "INC DE";
         break;
-      case 0x33:
+      case 0x23:
         description = "INC HL";
         break;
-      case 0x43:
+      case 0x33:
         description = "INC SP";
         break;
       case 0x0B:

@@ -64,6 +64,9 @@ int CPU::RunNextCommand() {
   cycles_ += stepped;
 
   if (debugPrint_) {
+    if (command->description.size() == 0) {
+      cout << "Missing description for: 0x" << hex << int(opcode) << endl;
+    }
     cout << command->description << " ; PC=" << hex << unsigned(command_pc)
          << " -> ";
     Debugger();

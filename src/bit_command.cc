@@ -34,8 +34,6 @@ void BitCommand::CP(CPU *cpu, Destination d) {
   uint8_t a = cpu->Get8Bit(Register_A);
   uint8_t n = cpu->Get8Bit(d);
 
-  description = "CP A,?";
-
   aluAdd8(cpu, false, false, a, n);
 }
 
