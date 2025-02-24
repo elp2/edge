@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+class NoiseVoice;
 class PulseVoice;
 class WaveVoice;
 
@@ -20,11 +21,12 @@ class SoundController {
   bool global_sound_on_ = 0;
   uint8_t s01_volume_level_ = 0;
   uint8_t s02_volume_level_ = 0;
+  uint8_t channel_control_ = 0;
 
   PulseVoice *voice1_;
   PulseVoice *voice2_;
   WaveVoice *voice3_;
-  // TODO: NoiseVoice *voice4_;
+  NoiseVoice *voice4_;
 
   uint32_t audio_device_ = 0;
 

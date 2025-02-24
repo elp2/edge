@@ -5,6 +5,7 @@
 
 #include "SDL.h"
 #include "constants.h"
+#include "noise_voice.h"
 #include "pulse_voice.h"
 #include "utils.h"
 #include "wave_voice.h"
@@ -13,12 +14,12 @@ SoundController::SoundController() {
   voice1_ = new PulseVoice();
   voice2_ = new PulseVoice();  // We will not set the sweep on this voice.
   voice3_ = new WaveVoice();
-  // TODO: Create voices.
+  voice4_ = new NoiseVoice();
 
   SDL_AudioSpec wanted;
   wanted.freq = SAMPLE_RATE;
   wanted.format = AUDIO_F32;
-  wanted.channels = 1;  // TODO 2 (eventually)
+  wanted.channels = 1;  // TODO: 2 for Left / Right.
   wanted.samples = 4096;
   wanted.callback = NULL;
 
@@ -137,8 +138,20 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
     case 0xFF1F:
       // No 0xFF1F.
       break;
+    case 0xFF20:
+      voice4_->SetFF20(byte);
+      break;
+    case 0xFF21:
+      voice4_->SetFF21(byte);
+      break;
+    case 0xFF22:
+      voice4_->SetFF22(byte);
+      break;
+    case 0xFF23:
+      voice4_->SetFF23(byte);
+      break;
     case 0xFF24:
-      // TODO: Channel Control.
+      channel_control_ = byte;
       break;
     case 0xFF25:
       sound_output_terminals_ = byte;
@@ -147,9 +160,19 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
       global_sound_on_ = bit_set(byte, 7);
       // Other bytes are ignored.
       break;
-
+    case 0xFF27:
+    case 0xFF28:
+    case 0xFF29:
+    case 0xFF2A:
+    case 0xFF2B:
+    case 0xFF2C:
+    case 0xFF2D:
+    case 0xFF2E:
+    case 0xFF2F:
       // 0xFF27-2F unused.
-      // 0xFF30-3F Wave Pattern - covered above.
+      break;
+
+    // 0xFF30-3F Wave Pattern - covered above.
 
     default:
       std::cout << "NO!!! SetByteAt: " << std::hex << (int)address << " to " << (int)byte << std::endl;
@@ -217,31 +240,39 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
       return 0xFF;
       break;
     case 0xFF20:
-      // tODO.
-      return 0;
+      return voice4_->GetFF20();
       break;
     case 0xFF21:
-      // tODO.
-      return 0;
+      return voice4_->GetFF21();
       break;
     case 0xFF22:
-      // tODO.
-      return 0;
+      return voice4_->GetFF22();
       break;
     case 0xFF23:
-      // tODO.
-      return 0;
+      return voice4_->GetFF23();
       break;
     case 0xFF24:
-      assert(false);
+      return channel_control_;
+      break;
     case 0xFF25:
       return sound_output_terminals_;
       break;
     case 0xFF26:
       return FF26();
       break;
+    case 0xFF27:
+    case 0xFF28:
+    case 0xFF29:
+    case 0xFF2A:
+    case 0xFF2B:
+    case 0xFF2C:
+    case 0xFF2D:
+    case 0xFF2E:
+    case 0xFF2F:
       // 0xFF27-2F unused.
-      // 0xFF30-3F Wave Pattern - covered above.
+      return 0xFF;
+      break;
+    // 0xFF30-3F Wave Pattern - covered above.
     default:
       break;
   }
@@ -253,12 +284,12 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
 uint8_t SoundController::FF26() {
   uint8_t ff26 = global_sound_on_;
   ff26 <<= 4;
-  ff26 |= (uint8_t)voice1_->Playing();  // TODO voice4.
+  ff26 |= 0; // TODO voice4.
   ff26 <<= 1;
-  ff26 |= (uint8_t)voice1_->Playing();  // TODO voice3.
+  ff26 |= (uint8_t)voice3_->Playing();
   ff26 <<= 1;
   ff26 |= (uint8_t)voice2_->Playing();
   ff26 <<= 1;
   ff26 |= (uint8_t)voice1_->Playing();
-  return 0x70 |ff26;
+  return 0x70 | ff26;
 }

@@ -44,6 +44,7 @@ add_library (edge_lib
     src/math_command.cc
     src/misc_command.cc
     src/mmu.cc
+    src/noise_voice.cc
     src/nop_command.cc
     src/pixel_fifo.cc
     src/pulse_voice.cc

@@ -54,7 +54,7 @@ int CPU::RunNextCommand() {
   uint8_t opcode = ReadOpcodeAtPC();
   AdvancePC();
   if (command_pc == 0x100) {
-    debugPrint_ = false;
+    // Count cycles from 0x100 after boot rom.
     cycles_ = 0;
   }
 
@@ -67,6 +67,7 @@ int CPU::RunNextCommand() {
     if (command->description.size() == 0) {
       cout << "Missing description for: 0x" << hex << int(opcode) << endl;
     }
+    cout << hex << (int)opcode << " ";
     cout << command->description << " ; PC=" << hex << unsigned(command_pc)
          << " -> ";
     Debugger();

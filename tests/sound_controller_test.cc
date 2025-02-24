@@ -19,9 +19,17 @@ class SoundControllerTest : public ::testing::Test {
 };
 
 TEST_F(SoundControllerTest, WaveMemorySetGet) {
-    for (uint16_t address = 0xFF30; address <= 0xFF3F; address++) {
-        controller_->SetByteAt(address, (uint8_t)address);
-        EXPECT_EQ(controller_->GetByteAt(address), (uint8_t)address);
+    uint8_t test_value = 0;
+    while (true) {
+        test_value++;
+        for (uint16_t address = 0xFF30; address <= 0xFF3F; address++) {
+            controller_->SetByteAt(address, (uint8_t)address);
+            EXPECT_EQ(controller_->GetByteAt(address), (uint8_t)address);
+            test_value++;
+        }
+        if (test_value == 0) {
+            break;
+        }
     }
 }
 
@@ -32,34 +40,32 @@ TEST_F(SoundControllerTest, MemoryRWDefaults) {
         0x7F, 0xFF, 0x9F, 0xFF, 0xBF, // NR30-NR34
         0xFF, 0xFF, 0x00, 0x00, 0xBF, // NR40-NR44
         0x00, 0x00, 0x70,             // NR50-NR52
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, // Unuseds.
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Wave RAM ($FF30-$FF3F)
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
-    // TODO: Test 0-255.
     uint8_t test_value = 0;
-    uint16_t address = 0xFF10;
-    const uint8_t* mask_ptr = masks;
 
     while (true) {
-        test_value++;
-        if (test_value == 0) {
-            break;
-        }
+        const uint8_t* mask_ptr = masks;
+        uint16_t address = 0xFF10;
 
-        // while (address < 0xFF3F) {
-        while (address < 0xFF20) {
-            // Skip NR52
-            if (address == 0xFF25) {
+        // std::cout << "Testing " << std::hex << (int)test_value << std::endl;
+
+        while (address < 0xFF30 + 0x10) {
+            // std::cout << "Address " << std::hex << (int)address << " maskptr " << std::hex << (int)*mask_ptr << std::endl;
+
+            // Skip NR52.
+            if (address == 0xFF26) {
                 address++;
                 mask_ptr++;
                 continue;
             }
 
-            // Expected readback value
-            uint8_t expected = *mask_ptr | test_value;
-
             controller_->SetByteAt(address, test_value);
+
             uint8_t actual = controller_->GetByteAt(address);
+            uint8_t expected = *mask_ptr | test_value;
             if (actual != expected) {
                 std::cout << "Expected " << std::hex << (int)expected << " but got " << (int)actual << " on " << std::hex << (int)address << std::endl;
             }
@@ -72,14 +78,9 @@ TEST_F(SoundControllerTest, MemoryRWDefaults) {
             address++;
             mask_ptr++;
         }
+        test_value++;
+        if (test_value == 0) {
+            break;
+        }
     }
 }
-
-// TEST_F(SoundControllerTest, SetAllAndGetAll) {
-//     for (uint16_t address = 0xFF10; address <= 0xFF3F; address++) {
-//         controller_->SetByteAt(address,(uint8_t)address);
-//     }
-//     for (uint16_t address = 0xFF10; address <= 0xFF3F; address++) {
-//         EXPECT_EQ(controller_->GetByteAt(address), (uint8_t)address);
-//     }
-// }

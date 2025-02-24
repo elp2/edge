@@ -65,7 +65,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     case 0xFF12:
     case 0xFF13:
     case 0xFF14:
-      // FF15?
+    case 0xFF15:
     case 0xFF16:
     case 0xFF17:
     case 0xFF18:
@@ -75,7 +75,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     case 0xFF1C:
     case 0xFF1D:
     case 0xFF1E:
-      // FF1F?
+    case 0xFF1F:
     case 0xFF20:
     case 0xFF21:
     case 0xFF22:
@@ -84,6 +84,16 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     case 0xFF25:
     case 0xFF26:
       // Nothng until FF30.
+
+    case 0xFF27:
+    case 0xFF28:
+    case 0xFF29:
+    case 0xFF2A:
+    case 0xFF2B:
+    case 0xFF2C:
+    case 0xFF2D:
+    case 0xFF2E:
+    case 0xFF2F:
       // Sound voices.
       return AddressOwner_Sound;
     case 0xFF30:
@@ -101,6 +111,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     case 0xFF3C:
     case 0xFF3D:
     case 0xFF3E:
+    case 0xFF3F:
       // Waveform.
       return AddressOwner_Sound;
     case 0xFF40:
@@ -116,12 +127,12 @@ AddressOwner ownerForIOAddress(uint16_t address) {
     case 0xFF4A:
     case 0xFF4B:
       return AddressOwner_PPU;
-      // ???
     case 0xFFFF:
       // Interrupt Enable.
       return AddressOwner_Interrupt;
     default:
       cout << "Unknown i/o address: 0x" << hex << unsigned(address) << endl;
+      assert(false);
       return AddressOwner_MMU;
   }
 }

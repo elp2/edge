@@ -60,6 +60,8 @@ PPU::PPU() {
   row_sprites_ = (Sprite *)calloc(10, sizeof(Sprite));
   screen_ = new Screen();
   fifo_ = new PixelFIFO(this);
+
+  // TODO: SetIORAM(LCDC_ADDRESS, 0x91);
 }
 
 void PPU::Advance(int machine_cycles) {
