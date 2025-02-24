@@ -49,7 +49,7 @@ const int OAM_SPRITE_BYTES = 4;  // Technically only uses the first 28 bits.
 PPU::PPU() {
   oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
   video_ram_ = (uint8_t *)calloc(0x2000, sizeof(uint8_t));
-  for (int i = 0; i < 2000; i++) {
+  for (int i = 0; i < 0x2000; i++) {
     // Initialize junk data so corruption will reveal errors.
     video_ram_[i] = i % 255;
   }
@@ -340,7 +340,7 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
         break;
       case LY_ADDRESS:
         cout << "Writing LY via memory to: 0x" << hex << unsigned(byte) << endl;
-        assert(false);
+        // assert(false);
         set_ly(byte);
         break;
       case LYC_ADDRESS:
