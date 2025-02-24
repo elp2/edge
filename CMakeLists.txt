@@ -137,3 +137,66 @@ target_link_libraries(tests gtest_main)
 target_link_libraries(tests gmock)
 target_link_libraries(tests edge_lib)
 add_test(NAME basic_tests COMMAND tests)
+
+# Build test ROMS.
+# Find RGBDS tools. 
+find_program(RGBASM rgbasm)
+find_program(RGBLINK rgblink)
+find_program(RGBFIX rgbfix)
+
+# Check if tools are found
+if(NOT RGBASM OR NOT RGBLINK)
+    message(FATAL_ERROR "RGBDS tools (rgbasm, rgblink) are required. Install them from https://github.com/gbdev/rgbds .")
+endif()
+
+# Source directory for .asm files
+set(ASM_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests/roms)
+
+# List of ROMs to build (without path, just base names)
+set(ROMS
+    pulse1
+    pulse2
+    wave
+    noise
+)
+
+# Custom command to assemble .asm to .o in build directory
+foreach(ROM ${ROMS})
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o
+        COMMAND ${RGBASM} -o ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o -I ${ASM_SOURCE_DIR} ${ASM_SOURCE_DIR}/${ROM}.asm
+        DEPENDS ${ASM_SOURCE_DIR}/${ROM}.asm ${ASM_SOURCE_DIR}/hardware.inc
+        COMMENT "Assembling ${ROM}.asm to ${ROM}.o"
+    )
+endforeach()
+
+# Custom command to link and fix .o to .gb in build directory
+foreach(ROM ${ROMS})
+    if(RGBFIX)
+        add_custom_command(
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb
+            COMMAND ${RGBLINK} -o ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o && ${RGBFIX} -v ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o
+            COMMENT "Linking and fixing ${ROM}.o to ${ROM}.gb"
+        )
+    else()
+        add_custom_command(
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb
+            COMMAND ${RGBLINK} -o ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o
+            COMMENT "Linking ${ROM}.o to ${ROM}.gb (no rgbfix available)"
+        )
+    endif()
+endforeach()
+
+# Define targets for each ROM
+foreach(ROM ${ROMS})
+    add_custom_target(${ROM} ALL
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb
+    )
+endforeach()
+
+# Default target to build all ROMs
+add_custom_target(all_roms ALL
+    DEPENDS ${ROMS}
+)

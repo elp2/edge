@@ -7,6 +7,7 @@ bin/*
 *.exe
 *.ilk
 *.gb
+*.o
 
 # OS.
 .DS_Store

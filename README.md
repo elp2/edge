@@ -1,9 +1,9 @@
 # Ed's Gameboy Emulator
 
 ## Instructions
-* Install cmake and SDL-dev libraries
-  * Ubuntu: sudo apt-get install libsdl2-dev cmake
-  * MacOS: brew install sdl cmake
+* Install cmake, [rgbds](https://github.com/gbdev/rgbds), and SDL-dev libraries
+  * Ubuntu: sudo apt-get install libsdl2-dev cmake rgbds
+  * MacOS: brew install sdl cmake rgbds
 * mkdir build
 * cd build
 * cmake -DCMAKE_BUILD_TYPE=[Debug|Release] ..
@@ -21,6 +21,6 @@
 
 ✔️ Dr. Mario demo works
 
-Dr. Mario Playable
+✔️ Dr. Mario Playable
 
-Sound Works
+❌ Sound Works
