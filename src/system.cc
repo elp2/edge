@@ -22,7 +22,8 @@
 #include "utils.h"
 
 System::System(string rom_filename) {
-  mmu_ = GetMMU(rom_filename);
+  bool skip_boot_rom = true;
+  mmu_ = GetMMU(rom_filename, skip_boot_rom);
   ppu_ = new PPU();
 
   serial_controller_ = new SerialController();
@@ -46,11 +47,19 @@ System::System(string rom_filename) {
 
   frame_cycles_ = 0;
   last_frame_start_time_ = std::chrono::high_resolution_clock::now();
+
+  if (skip_boot_rom) {
+    cpu_->SkipBootROM();
+    ppu_->SkipBootROM();
+  }
 }
 
-MMU *System::GetMMU(string rom_filename) {
-  ROM *boot_rom = new ROM();
-  assert(boot_rom->LoadFile("../roms/boot.gb"));
+MMU *System::GetMMU(string rom_filename, bool skip_boot_rom) {
+  ROM *boot_rom = nullptr;
+  if (!skip_boot_rom) {
+    boot_rom = new ROM();
+    assert(boot_rom->LoadFile("../roms/boot.gb"));
+  }
   ROM *cartridge_rom = new ROM();
   assert(cartridge_rom->LoadFile(rom_filename));
 

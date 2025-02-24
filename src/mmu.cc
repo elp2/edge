@@ -17,8 +17,12 @@ MMU::MMU() {
 }
 
 void MMU::SetROMs(ROM *bootROM, ROM *cartridgeROM) {
-  overlayBootROM = true;
-  this->bootROM = bootROM;
+  if (bootROM) {
+    overlayBootROM = true;
+    this->bootROM = bootROM;
+  } else {
+    overlayBootROM = false;
+  }
   this->cartridgeROM = cartridgeROM;
 
   assert(this->cartridgeROM->GetCartridgeType() != CartridgeType_Unsupported);

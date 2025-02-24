@@ -47,6 +47,8 @@ class PPU {
     interrupt_handler_ = handler;
   };
 
+  void SkipBootROM();
+
  private:
   uint8_t *oam_ram_ = NULL;
   uint8_t *video_ram_ = NULL;

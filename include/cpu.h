@@ -89,6 +89,8 @@ class CPU : public InterruptExecutor {
   void DisableInterrupts();
   void EnableInterrupts();
 
+  void SkipBootROM();
+
   void SetDebugPrint(bool debugPrint) { debugPrint_ = debugPrint; };
 
   void SetInterruptController(InterruptController *interrupt_controller);

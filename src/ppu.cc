@@ -60,8 +60,19 @@ PPU::PPU() {
   row_sprites_ = (Sprite *)calloc(10, sizeof(Sprite));
   screen_ = new Screen();
   fifo_ = new PixelFIFO(this);
+}
 
-  // TODO: SetIORAM(LCDC_ADDRESS, 0x91);
+void PPU::SkipBootROM() {
+  SetIORAM(0xFF40, 0x91);
+  SetIORAM(0xFF41, 0x85);
+  SetIORAM(0xFF42, 0x00);
+  SetIORAM(0xFF43, 0x00);
+  SetIORAM(0xFF44, 0x00);
+  SetIORAM(0xFF45, 0x00);
+  SetIORAM(0xFF46, 0xFF);
+  SetIORAM(0xFF47, 0xFC);
+  SetIORAM(0xFF4A, 0x00);
+  SetIORAM(0xFF4B, 0x00);
 }
 
 void PPU::Advance(int machine_cycles) {

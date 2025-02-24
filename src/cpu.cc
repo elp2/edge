@@ -443,3 +443,51 @@ void CPU::Debugger() {
   cout << " C: " << dec << cycles_;
   cout << endl;
 }
+
+void CPU::SkipBootROM() {
+  // Initialize all states as if the boot ROM successfully ran.
+  Set16Bit(Register_PC, 0x0100);
+  Set16Bit(Register_SP, 0xFFFE);
+  Set16Bit(Register_AF, 0x01B0);
+  Set16Bit(Register_BC, 0x0013);
+  Set16Bit(Register_DE, 0x00D8);
+  Set16Bit(Register_HL, 0x014D);
+
+  flags.z = true;
+  flags.h = false;
+  flags.n = false;
+  flags.c = false; 
+
+  address_router_->SetByteAt(0xFF00, 0xCF);
+  address_router_->SetByteAt(0xFF01, 0x00);
+  address_router_->SetByteAt(0xFF02, 0x7E);
+  address_router_->SetByteAt(0xFF04, 0xAB);
+  address_router_->SetByteAt(0xFF05, 0x00);
+  address_router_->SetByteAt(0xFF06, 0x00);
+  address_router_->SetByteAt(0xFF07, 0xF8);
+  address_router_->SetByteAt(0xFF0F, 0xE1);
+  address_router_->SetByteAt(0xFF10, 0x80);
+  address_router_->SetByteAt(0xFF11, 0xBF);
+  address_router_->SetByteAt(0xFF12, 0xF3);
+  address_router_->SetByteAt(0xFF13, 0xFF);
+  address_router_->SetByteAt(0xFF14, 0xBF);
+  address_router_->SetByteAt(0xFF16, 0x3F);
+  address_router_->SetByteAt(0xFF17, 0x00);
+  address_router_->SetByteAt(0xFF18, 0xFF);
+  address_router_->SetByteAt(0xFF19, 0xBF);
+  address_router_->SetByteAt(0xFF1A, 0x7F);
+  address_router_->SetByteAt(0xFF1B, 0xFF);
+  address_router_->SetByteAt(0xFF1C, 0x9F);
+  address_router_->SetByteAt(0xFF1D, 0xFF);
+  address_router_->SetByteAt(0xFF1E, 0xBF);
+  address_router_->SetByteAt(0xFF20, 0xFF);
+  address_router_->SetByteAt(0xFF21, 0x00);
+  address_router_->SetByteAt(0xFF22, 0x00);
+  address_router_->SetByteAt(0xFF23, 0xBF);
+  address_router_->SetByteAt(0xFF24, 0x77);
+  address_router_->SetByteAt(0xFF25, 0xF3);
+  address_router_->SetByteAt(0xFF26, 0xF1);
+  address_router_->SetByteAt(0xFFFF, 0x00);
+
+  std::cout << "Skipped boot ROM." << std::endl;
+}

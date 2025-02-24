@@ -35,7 +35,7 @@ class System {
   int frame_cycles_;
   std::chrono::high_resolution_clock::time_point last_frame_start_time_;
 
-  MMU *GetMMU(string rom_filename);
+  MMU *GetMMU(string rom_filename, bool skip_boot_rom);
   void Advance(int stepped);
   void FrameEnded();
 };
