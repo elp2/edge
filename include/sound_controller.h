@@ -30,5 +30,6 @@ class SoundController {
 
   uint32_t audio_device_ = 0;
 
-  uint8_t FF26();
+  void SetFF26(uint8_t byte);
+  uint8_t GetFF26();
 };

@@ -16,6 +16,8 @@ SoundController::SoundController() {
   voice3_ = new WaveVoice();
   voice4_ = new NoiseVoice();
 
+  global_sound_on_ = true;
+
   SDL_AudioSpec wanted;
   wanted.freq = SAMPLE_RATE;
   wanted.format = AUDIO_F32;
@@ -89,6 +91,13 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
     return;
   }
 
+  if (!global_sound_on_) {
+    if (address < 0xFF26) {
+      // Can not set registers when APU is off.
+      return;
+    }
+  }
+
   switch (address) {
     case 0xFF10:
       voice1_->SetSweepByte(byte);
@@ -157,8 +166,7 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
       sound_output_terminals_ = byte;
       break;
     case 0xFF26:
-      global_sound_on_ = bit_set(byte, 7);
-      // Other bytes are ignored.
+      SetFF26(byte);
       break;
     case 0xFF27:
     case 0xFF28:
@@ -175,7 +183,7 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
     // 0xFF30-3F Wave Pattern - covered above.
 
     default:
-      std::cout << "NO!!! SetByteAt: " << std::hex << (int)address << " to " << (int)byte << std::endl;
+      std::cout << "Unknown SetByteAt: " << std::hex << (int)address << " to " << (int)byte << std::endl;
       assert(false);
       break;
   }
@@ -258,7 +266,7 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
       return sound_output_terminals_;
       break;
     case 0xFF26:
-      return FF26();
+      return GetFF26();
       break;
     case 0xFF27:
     case 0xFF28:
@@ -281,7 +289,24 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
   return 0x00;
 }
 
-uint8_t SoundController::FF26() {
+void SoundController::SetFF26(uint8_t byte) {
+  bool new_global_sound_on = bit_set(byte, 7);
+  // Other bytes are ignored.
+
+  if (!new_global_sound_on) {
+    // TODO Reset registers, but not wave RAM or NR52.
+
+    uint16_t address = 0xFF10;
+    while (address < 0xFF26) {
+      SetByteAt(address, 0x00);
+      address++;
+    }    
+  }
+
+  global_sound_on_ = new_global_sound_on;
+}
+
+uint8_t SoundController::GetFF26() {
   uint8_t ff26 = global_sound_on_;
   ff26 <<= 4;
   ff26 |= 0; // TODO voice4.
