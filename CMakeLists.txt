@@ -126,6 +126,7 @@ add_executable(tests
     tests/math_command_test.cc
     tests/misc_command_test.cc
     tests/mmu_test.cc
+    tests/noise_voice_test.cc
     tests/ppu_test.cc
     tests/pulse_voice_test.cc
     tests/sound_controller_test.cc

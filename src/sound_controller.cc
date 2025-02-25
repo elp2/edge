@@ -268,7 +268,7 @@ void SoundController::SetFF26(uint8_t byte) {
 uint8_t SoundController::GetFF26() {
   uint8_t ff26 = global_sound_on_;
   ff26 <<= 4;
-  ff26 |= 0; // TODO voice4.
+  ff26 |= (uint8_t)voice4_->Playing();
   ff26 <<= 1;
   ff26 |= (uint8_t)voice3_->Playing();
   ff26 <<= 1;
