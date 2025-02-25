@@ -34,51 +34,10 @@ SoundController::SoundController() {
 }
 
 bool SoundController::Advance(int cycles) {
-  if (voice1_->Advance(cycles)) {
-    // TODO reset.
-  }
-  if (voice2_->Advance(cycles)) {
-    // TODO reset.
-  }
-  if (voice3_->Advance(cycles)) {
-    // TODO reset.
-  }
-
-  // TODO voice4_->Advance(cycles);
-
+  // TODO this will become the SDL Callback.
   if (!global_sound_on_) {
     return true;
   }
-
-  float *sound_buffer;
-  int length;
-  
-
-  if (voice1_->PlaySound(&sound_buffer, &length)) {
-    bool s01 = bit_set(sound_output_terminals_, 0);
-    bool s02 = bit_set(sound_output_terminals_, 4);
-    if (s01 || s02) {
-      SDL_QueueAudio(audio_device_, sound_buffer, length * sizeof(float));
-    }
-  }
-
-  if (voice2_->PlaySound(&sound_buffer, &length)) {
-    bool s01 = bit_set(sound_output_terminals_, 1);
-    bool s02 = bit_set(sound_output_terminals_, 5);
-    if (s01 || s02) {
-      SDL_QueueAudio(audio_device_, sound_buffer, length * sizeof(float));
-    }
-  }
-
-  if (voice3_->PlaySound(&sound_buffer, &length)) {
-    bool s01 = bit_set(sound_output_terminals_, 2);
-    bool s02 = bit_set(sound_output_terminals_, 6);
-    if (s01 || s02) {
-      SDL_QueueAudio(audio_device_, sound_buffer, length * sizeof(float));
-    }
-  }
-
-  // TODO: Play voice4.
 
   return true;
 }
@@ -100,34 +59,34 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
 
   switch (address) {
     case 0xFF10:
-      voice1_->SetSweepByte(byte);
+      voice1_->SetNRX0(byte);
       break;
     case 0xFF11:
-      voice1_->SetWavePatternDutyByte(byte);
+      voice1_->SetNRX1(byte);
       break;
     case 0xFF12:
-      voice1_->SetEnvelopeByte(byte);
+      voice1_->SetNRX2(byte);
       break;
     case 0xFF13:
-      voice1_->SetFrequencyLowByte(byte);
+      voice1_->SetNRX3(byte);
       break;
     case 0xFF14:
-      voice1_->SetFrequencyHighByte(byte);
+      voice1_->SetNRX4(byte);
       break;
     case 0xFF15:
       // No 0xFF15.
       break;
     case 0xFF16:
-      voice2_->SetWavePatternDutyByte(byte);
+      voice2_->SetNRX1(byte);
       break;
     case 0xFF17:
-      voice2_->SetEnvelopeByte(byte);
+      voice2_->SetNRX2(byte);
       break;
     case 0xFF18:
-      voice2_->SetFrequencyLowByte(byte);
+      voice2_->SetNRX3(byte);
       break;
     case 0xFF19:
-      voice2_->SetFrequencyHighByte(byte);
+      voice2_->SetNRX4(byte);
       break;
     case 0xFF1A:
       voice3_->SetOnOffByte(byte);
@@ -198,35 +157,35 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
 
   switch (address) {
     case 0xFF10:
-      return voice1_->GetSweepByte();
+      return voice1_->GetNRX0();
       break;
     case 0xFF11:
-      return voice1_->GetWavePatternDutyByte();
+      return voice1_->GetNRX1();
       break;
     case 0xFF12:
-      return voice1_->GetEnvelopeByte();
+      return voice1_->GetNRX2();
       break;
     case 0xFF13:
-      return voice1_->GetFrequencyLowByte();
+      return voice1_->GetNRX3();
       break;
     case 0xFF14:
-      return voice1_->GetFrequencyHighByte();
+      return voice1_->GetNRX4();
       break;
     case 0xFF15:
-      // No 0xFF15. Return all high.
+      // No Sweep NRX0 for Voice 2.
       return 0xFF;
       break;
     case 0xFF16:
-      return voice2_->GetWavePatternDutyByte();
+      return voice2_->GetNRX1();
       break;
     case 0xFF17:
-      return voice2_->GetEnvelopeByte();
+      return voice2_->GetNRX2();
       break;
     case 0xFF18:
-      return voice2_->GetFrequencyLowByte();
+      return voice2_->GetNRX3();
       break;
     case 0xFF19:
-      return voice2_->GetFrequencyHighByte();
+      return voice2_->GetNRX4();
       break;
     case 0xFF1A:
       return voice3_->GetOnOffByte();

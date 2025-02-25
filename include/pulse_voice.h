@@ -12,51 +12,31 @@ class PulseVoice {
   // Returns true if the sound has finished playing.
   bool Advance(int cycles);
 
-  // Returns true if there is a sound buffer to play at this moment.
-  // Caller should NOT modify the sound buffer.
-  bool PlaySound(float **sound_buffer, int *length);
+  // Adds this voice's samples to the buffer.
+  void AddSamplesToBuffer(int16_t* buffer, int samples);
 
-  void SetSweepByte(uint8_t byte) { sweep_byte_ = byte; };
-  uint8_t GetSweepByte() { return 0x80 | sweep_byte_; };
+  // Pulse voice 2 will never have this set by the controller.
+  void SetNRX0(uint8_t byte) { nrx0_ = byte; };
+  uint8_t GetNRX0() { return 0x80 | nrx0_; };
 
-  void SetWavePatternDutyByte(uint8_t byte) { wave_pattern_duty_byte_ = byte; };
-  uint8_t GetWavePatternDutyByte() {
-    return 0x3F | wave_pattern_duty_byte_; // Only top two bits can be read.'
-  };
+  void SetNRX1(uint8_t byte) { nrx1_ = byte; };
+  uint8_t GetNRX1() { return 0x3F | nrx1_; };
 
-  void SetEnvelopeByte(uint8_t byte) { envelope_byte_ = byte; };
-  uint8_t GetEnvelopeByte() { return envelope_byte_; };
+  void SetNRX2(uint8_t byte) { nrx2_ = byte; };
+  uint8_t GetNRX2() { return nrx2_; };
 
-  void SetFrequencyLowByte(uint8_t byte) { frequency_low_byte_ = byte; };
-  uint8_t GetFrequencyLowByte() { return 0xFF; /* Write only. */ };
+  void SetNRX3(uint8_t byte) { nrx3_ = byte; };
+  uint8_t GetNRX3() { return 0xFF | nrx3_; };
 
-  void SetFrequencyHighByte(uint8_t byte);
-  uint8_t GetFrequencyHighByte() { return 0xBF | frequency_high_byte_; };
+  void SetNRX4(uint8_t byte) { nrx4_ = byte; };
+  uint8_t GetNRX4() { return 0xBF | nrx4_; };
 
-  bool Playing() { return playback_steps_remaining_ > 0; };
+  bool Playing() { return false; }
 
  private:
-  // Length of the voice in CPU steps (CYCLES_PER_SECOND).
-  int length_steps_ = 0;
-  // Length of the Sweep in CPU steps (CYCLES_PER_SECOND).
-  int sweep_steps_ = 0;
-
-  float *sound_buffer_;
-  // Length of the internal buffer which we should play. May be less than real
-  // size if we're playing a shorter sound.
-  int buffer_length_ = 0;
-
-  bool initial_ = false;
-  bool loop_ = false;
-  int playback_steps_remaining_ = 0;
-
-  // Frequency bytes which are combined when we generate the sound.
-  uint8_t frequency_low_byte_ = 0;
-  uint8_t frequency_high_byte_ = 0;
-
-  uint8_t envelope_byte_ = 0;
-  uint8_t sweep_byte_ = 0;
-  uint8_t wave_pattern_duty_byte_ = 0;
-
-  void GenerateSoundBuffer();
+  uint8_t nrx0_ = 0;
+  uint8_t nrx1_ = 0;
+  uint8_t nrx2_ = 0;
+  uint8_t nrx3_ = 0;
+  uint8_t nrx4_ = 0;
 };
