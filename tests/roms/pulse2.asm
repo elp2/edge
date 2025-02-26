@@ -11,13 +11,13 @@ section "Main", rom0
 Start:
     ld a, $80       ; Power on APU
     ld [rNR52], a
-    ld a, $80       ; Duty 50%, max volume
+    ld a, $80       ; Duty 50%
     ld [rNR21], a
     ld a, $F0       ; Envelope: max volume, no fade
     ld [rNR22], a
-    ld a, $D0       ; Frequency low (~440 Hz)
+    ld a, $40       ; Frequency Low 8 bits
     ld [rNR23], a
-    ld a, $87       ; Frequency high, trigger
+    ld a, $C7       ; Trigger | Length Enable ; Frequency High
     ld [rNR24], a
 Loop:
     jr Loop

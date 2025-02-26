@@ -24,8 +24,8 @@ void audioCallback(void* userdata, Uint8* stream, int len) {
 }
 
 SoundController::SoundController() {
-  voice1_ = new PulseVoice();
-  voice2_ = new PulseVoice();  // We will not set the sweep on this voice.
+  voice1_ = new PulseVoice(1);
+  voice2_ = new PulseVoice(2);  // We will not set the sweep on this voice.
   voice3_ = new WaveVoice();
   voice4_ = new NoiseVoice();
 
@@ -53,8 +53,8 @@ SoundController::SoundController() {
 }
 
 void SoundController::MixSamplesToBuffer(int16_t* buffer, int samples) {
-  // voice1_->AddSamplesToBuffer(buffer, samples);
-  // voice2_->AddSamplesToBuffer(buffer, samples);
+  voice1_->AddSamplesToBuffer(buffer, samples);
+  voice2_->AddSamplesToBuffer(buffer, samples);
   // voice3_->AddSamplesToBuffer(buffer, samples);
   voice4_->AddSamplesToBuffer(buffer, samples);
 }

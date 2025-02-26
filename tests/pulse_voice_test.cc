@@ -11,6 +11,6 @@ class PulseVoiceTest : public ::testing::Test {
 };
 
 TEST(PulseVoiceTest, WaveDuty) {
-  PulseVoice *pv = new PulseVoice();
+  PulseVoice *pv = new PulseVoice(1);
   ASSERT_EQ(true, true); // TODO: Add tests.
 }
