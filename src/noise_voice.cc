@@ -58,7 +58,6 @@ void NoiseVoice::PrintDebug() {
     std::cout << "LFSR: " << lfsr_ << std::endl;
     std::cout << "Frequency: " << FrequencyHz() << std::endl;
     std::cout << "Volume: " << (int)volume_ << std::endl;
-    std::cout << "Envelope direction: " << (int)envelope_direction_ << std::endl;
     std::cout << "Sweep pace: " << (int)SweepPace() << std::endl;
     std::cout << "Sweep up: " << SweepUp() << std::endl;
 }
