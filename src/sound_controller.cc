@@ -10,6 +10,19 @@
 #include "utils.h"
 #include "wave_voice.h"
 
+
+void audioCallback(void* userdata, Uint8* stream, int len) {
+  int samples = len / sizeof(int16_t);
+
+  int16_t* buffer = reinterpret_cast<int16_t*>(stream);
+  // The buffer is reused, clear it since we'll add each voice.
+  for (int i = 0; i < samples; i++) {
+    buffer[i] = 0;
+  }
+
+  static_cast<SoundController*>(userdata)->MixSamplesToBuffer(buffer, samples);
+}
+
 SoundController::SoundController() {
   voice1_ = new PulseVoice();
   voice2_ = new PulseVoice();  // We will not set the sweep on this voice.
@@ -18,19 +31,32 @@ SoundController::SoundController() {
 
   global_sound_on_ = true;
 
-  SDL_AudioSpec wanted;
-  wanted.freq = SAMPLE_RATE;
-  wanted.format = AUDIO_F32;
-  wanted.channels = 1;  // TODO: 2 for Left / Right.
-  wanted.samples = 4096;
-  wanted.callback = NULL;
+  SDL_AudioSpec spec, obtained;
+  SDL_zero(spec);
+  spec.freq = SAMPLE_RATE;
+  spec.format = AUDIO_S16SYS;
+  spec.channels = 1;
+  spec.samples = 512;
+  spec.callback = audioCallback;
+  spec.userdata = this;
 
-  SDL_AudioSpec actual;
-  audio_device_ = SDL_OpenAudioDevice(NULL, 0, &wanted, &actual,
-                                      SDL_AUDIO_ALLOW_FORMAT_CHANGE);
-  assert(wanted.samples == actual.samples);
+  // Open audio device
+  if (SDL_OpenAudio(&spec, &obtained) < 0) {
+      std::cerr << "Failed to open audio: " << SDL_GetError() << std::endl;
+      return;
+  }
 
-  SDL_PauseAudioDevice(audio_device_, 0);
+  std::cout << "Audio initialized with buffer size: " << obtained.samples << " samples" << std::endl;
+
+  // Start audio playback (unpauses the callback)
+  SDL_PauseAudio(0);
+}
+
+void SoundController::MixSamplesToBuffer(int16_t* buffer, int samples) {
+  // voice1_->AddSamplesToBuffer(buffer, samples);
+  // voice2_->AddSamplesToBuffer(buffer, samples);
+  // voice3_->AddSamplesToBuffer(buffer, samples);
+  voice4_->AddSamplesToBuffer(buffer, samples);
 }
 
 bool SoundController::Advance(int cycles) {

@@ -37,6 +37,11 @@ class NoiseVoice {
   uint8_t ClockDivider() { return (ff22_ & 0b111); }
   uint8_t ClockShift() { return (ff22_ & 0xF0) >> 4; }
 
+  bool SweepUp() { return (ff21_ & 0b1000) >> 3; }
+  uint8_t SweepPace() { return ff21_ & 0b111; }
+
+  uint8_t envelope_direction_ = 0;
+
   float FrequencyHz();
 
   bool enabled_ = false;
@@ -51,4 +56,5 @@ class NoiseVoice {
   int next_timer_cycle_ = 0;
   int next_lfsr_cycle_ = 0;
   int cycles_per_lfsr_ = 0;
+  int next_envelope_cycle_ = 0;
 };

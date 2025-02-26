@@ -10,7 +10,6 @@
 #include "utils.h"
 
 NoiseVoice::NoiseVoice() {
-    // TODO: Implementation.
 }
 
 void NoiseVoice::SetFF20(uint8_t value) { 
@@ -30,6 +29,7 @@ void NoiseVoice::SetFF23(uint8_t value) {
 
     if (bit_set(ff23_, 7)) {
         // Trigger.
+        cycles_ = 0; // TODO: Should the clock reset each time?
         enabled_ = true;
         length_ = ff20_ & 0x3F;
         lfsr_ = 0x00;
@@ -40,13 +40,15 @@ void NoiseVoice::SetFF23(uint8_t value) {
 
         cycles_per_lfsr_ = CYCLES_PER_SECOND / FrequencyHz();
         next_lfsr_cycle_ = cycles_per_lfsr_;
+
+        next_envelope_cycle_ = CYCLES_PER_ENVELOPE_TICK * SweepPace();
     } else {
-        std::cout << "TODO Noise voice disabled." << std::endl;
+        enabled_ = false;
     }
 
     length_enable_ = bit_set(ff23_, 6);
 
-    PrintDebug();
+    // PrintDebug();
 }
 
 void NoiseVoice::PrintDebug() {
@@ -56,6 +58,9 @@ void NoiseVoice::PrintDebug() {
     std::cout << "LFSR: " << lfsr_ << std::endl;
     std::cout << "Frequency: " << FrequencyHz() << std::endl;
     std::cout << "Volume: " << (int)volume_ << std::endl;
+    std::cout << "Envelope direction: " << (int)envelope_direction_ << std::endl;
+    std::cout << "Sweep pace: " << (int)SweepPace() << std::endl;
+    std::cout << "Sweep up: " << SweepUp() << std::endl;
 }
 
 bool NoiseVoice::TickLFSR() {
@@ -71,16 +76,24 @@ bool NoiseVoice::TickLFSR() {
 }
 
 void NoiseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
+    if (!enabled_) {
+        return;
+    }
+
     bool current_lfsr = 0x1 & lfsr_;
     for (int i = 0; i < samples; i++) {
         if (cycles_ >= next_timer_cycle_) {
             if (length_enable_) {
                 length_ += 1;
-                if (length_ == 64) {
+                if (length_ >= 64) {
                     enabled_ = false;
                 }
             }
             next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
+        }
+
+        if (!enabled_) {
+            return;
         }
 
         if (cycles_ >= next_lfsr_cycle_) {
@@ -88,8 +101,24 @@ void NoiseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
             next_lfsr_cycle_ += cycles_per_lfsr_;
         }
 
-        buffer[i] += current_lfsr ? volume_ : -volume_;
-        std::cout << "Current LFSR: " << cycles_ << " " << buffer[i] << std::endl;
+        if (SweepPace() > 0 && cycles_ >= next_envelope_cycle_) {
+            if (SweepUp()) {
+                volume_ += 1;
+            } else {
+                volume_ -= 1;
+            }
+            if (volume_ > 15) {
+                volume_ = 15;
+            } else if (volume_ < 0) {
+                // Volume 0 is still considered enabled.
+                volume_ = 0;
+            }
+            next_envelope_cycle_ += CYCLES_PER_ENVELOPE_TICK * SweepPace();
+        }
+
+        int sample_volume = VOICE_MAX_VOLUME * volume_ / 15;
+        buffer[i] += current_lfsr ? sample_volume : -sample_volume;
+
         cycles_ += CYCLES_PER_SAMPLE;
     }
 }

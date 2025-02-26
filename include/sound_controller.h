@@ -16,6 +16,8 @@ class SoundController {
   void SetByteAt(uint16_t address, uint8_t byte);
   uint8_t GetByteAt(uint16_t);
 
+  void MixSamplesToBuffer(int16_t* buffer, int samples);
+
  private:
   uint8_t sound_output_terminals_ = 0;
   bool global_sound_on_ = 0;
