@@ -9,10 +9,6 @@ class WaveVoice {
   WaveVoice();
   ~WaveVoice();
 
-  // Returns true if the sound has finished playing.
-  bool Advance(int cycles);
-
-  // Returns true if there is a sound buffer to play at this moment.
   // Caller should NOT modify the sound buffer.
   bool PlaySound(float **sound_buffer, int *length);
 

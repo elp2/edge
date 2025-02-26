@@ -52,19 +52,6 @@ void WaveVoice::SetFrequencyHighByte(uint8_t byte) {
   }
 }
 
-bool WaveVoice::Advance(int cycles) {
-  playback_steps_remaining_ -= cycles;
-  if (playback_steps_remaining_ > 0) {
-    return false;
-  }
-  if (loop_) {
-    initial_ = true;
-  } else {
-    return true;
-  }
-  return false;
-}
-
 int WaveFrequency(uint8_t low_byte, uint8_t high_byte) {
   uint16_t combined_frequency = high_byte & 0b111;
   combined_frequency <<= 8;

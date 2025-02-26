@@ -9,9 +9,6 @@ class NoiseVoice {
   NoiseVoice();
   ~NoiseVoice();
 
-  // Returns true if the sound has finished playing.
-  bool Advance(int cycles);
-
   void SetFF20(uint8_t value);
   void SetFF21(uint8_t value);
   void SetFF22(uint8_t value);

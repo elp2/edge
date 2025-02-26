@@ -9,9 +9,6 @@ class PulseVoice {
   PulseVoice();
   ~PulseVoice();
 
-  // Returns true if the sound has finished playing.
-  bool Advance(int cycles);
-
   // Adds this voice's samples to the buffer.
   void AddSamplesToBuffer(int16_t* buffer, int samples);
 
@@ -34,6 +31,9 @@ class PulseVoice {
   bool Playing() { return false; }
 
  private:
+  void PrintDebug();
+
+
   uint8_t nrx0_ = 0;
   uint8_t nrx1_ = 0;
   uint8_t nrx2_ = 0;

@@ -60,11 +60,6 @@ void SoundController::MixSamplesToBuffer(int16_t* buffer, int samples) {
 }
 
 bool SoundController::Advance(int cycles) {
-  // TODO this will become the SDL Callback.
-  if (!global_sound_on_) {
-    return true;
-  }
-
   return true;
 }
 
