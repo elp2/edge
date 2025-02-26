@@ -39,14 +39,14 @@ void WaveVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
     if (!enabled_) {
       return;
     }
-    
-    buffer[i] += (SampleNibble() * VOICE_MAX_VOLUME) / 15;
+
+    buffer[i] += CenteredSample() * VOICE_MAX_VOLUME;
 
     cycles_ += CYCLES_PER_SAMPLE;
   }
 }
 
-uint8_t WaveVoice::SampleNibble() {
+float WaveVoice::CenteredSample() {
   assert(sample_index_ >= 0 && sample_index_ < 32);
   uint8_t byte = wave_pattern_[sample_index_ / 2]; // First sample packed high bits.
   uint8_t nibble;
@@ -57,20 +57,25 @@ uint8_t WaveVoice::SampleNibble() {
   }
 
   if (!DACEnabled()) {
-    return 0;
+    return 0.0f;
   }
+  float centered = float(nibble) - 7.5f;
 
+  float ret;
   switch (output_level_) {
     case 0b00:
-      return 0; // Mute.
+      return 0.0f; // Mute.
     case 0b01:
-      return nibble; // 100%
+      centered /= 7.5f; // 100%
+      break;
     case 0b10:
-      return nibble >> 1; // 50%
+      centered /= 15.0f; // 50%
+      break;
     case 0b11:
-      return nibble >> 2; // 25%
+      centered /= 30.0f; // 25%
+      break;
   }
-  assert(false);
+  return std::min(1.0f, std::max(centered, -1.0f));
 }
 
 bool WaveVoice::DACEnabled() {
@@ -113,14 +118,6 @@ void WaveVoice::PrintDebug() {
   std::cout << "output_level_: " << output_level_ << std::endl;
 }
 
-int WaveFrequency(uint8_t low_byte, uint8_t high_byte) {
-  uint16_t combined_frequency = high_byte & 0b111;
-  combined_frequency <<= 8;
-  combined_frequency |= low_byte;
-  return 65336 /
-         (2048 - combined_frequency);  // Pulse voice constant is 131072.
-}
-
 void WaveVoice::SetWavePatternAddress(uint16_t address, uint8_t byte) {
   assert(address >= BASE_WAVE_PATTERN_ADDRESS && address <= 0xFF3F);
   wave_pattern_[address - BASE_WAVE_PATTERN_ADDRESS] = byte;
@@ -140,5 +137,5 @@ uint16_t WaveVoice::PeriodValue() {
 }
 
 float WaveVoice::FrequencyHz() {
-  return 65536 / (2048 - PeriodValue());
+  return 2097152 / (2048 - PeriodValue());
 }

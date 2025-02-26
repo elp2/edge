@@ -59,5 +59,6 @@ class WaveVoice {
   float FrequencyHz();
   void PrintDebug();
 
-  uint8_t SampleNibble();
+  // Returns the current sample value centered from -1 to 1.
+  float CenteredSample();
 };
