@@ -17,59 +17,71 @@ PulseVoice::PulseVoice(int voice_number) {
 PulseVoice::~PulseVoice() {}
 
 void PulseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
+  if (!enabled_) {
+    return;
+  }
+
+  for (int i = 0; i < samples; i++) {
+    if (cycles_ >= next_timer_cycle_) {
+      if (length_enable_) {
+          length_ += 1;
+      }
+      if (length_ >= 64) {
+          enabled_ = false;
+      }
+      next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
+    }
+    
     if (!enabled_) {
-        return;
+      return;
     }
 
-    for (int i = 0; i < samples; i++) {
-        if (cycles_ >= next_timer_cycle_) {
-            if (length_enable_) {
-                length_ += 1;
-            }
-            if (length_ >= 64) {
-                enabled_ = false;
-            }
-            next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
-        }
-        
-        if (!enabled_) {
-            return;
-        }
-
-        if (SweepPace() > 0 && cycles_ >= next_envelope_cycle_) {
-            if (SweepUp()) {
-                volume_ += 1;
-            } else {
-                volume_ -= 1;
-            }
-            if (volume_ > 15) {
-                volume_ = 15;
-            } else if (volume_ < 0) {
-                // Volume 0 is still considered enabled.
-                volume_ = 0;
-            }
-            next_envelope_cycle_ += CYCLES_PER_ENVELOPE_TICK * SweepPace();
-        }
-
-        if (cycles_ >= next_duty_cycle_cycle_) {
-            duty_high_ = !duty_high_;
-            next_duty_cycle_cycle_ += duty_high_ ? HighDutyCycles() : LowDutyCycles();
-        }
-
-        int sample_volume = VOICE_MAX_VOLUME * volume_ / 15;
-        buffer[i] += duty_high_ ? sample_volume : -sample_volume;
-
-        cycles_ += CYCLES_PER_SAMPLE;
+    if (VolumeSweepPace() > 0 && cycles_ >= next_envelope_cycle_) {
+      volume_ += VolumeSweepUp() ? 1 : -1;
+      volume_ = std::max(0, std::min((int)volume_, 15));
+      next_envelope_cycle_ += CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
     }
+
+    if (cycles_ >= next_duty_cycle_cycle_) {
+      duty_high_ = !duty_high_;
+      next_duty_cycle_cycle_ += duty_high_ ? HighDutyCycles() : LowDutyCycles();
+    }
+
+    if (PeriodSweepPace() > 0 && cycles_ >= next_period_sweep_cycle_) {
+      DoPeriodSweep();
+      next_period_sweep_cycle_ += CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
+    }
+
+    int sample_volume = VOICE_MAX_VOLUME * volume_ / 15;
+    buffer[i] += duty_high_ ? sample_volume : -sample_volume;
+
+    cycles_ += CYCLES_PER_SAMPLE;
+  }
+}
+
+void PulseVoice::DoPeriodSweep() {
+  float delta = PeriodValue() / (1 << PeriodSweepStep());
+
+  uint16_t new_period = PeriodValue() + (PeriodSweepDown() ? -delta : delta);
+  if (new_period > 0x7FF) {
+      enabled_ = false;
+  } else {    
+    nrx3_ = new_period & 0xFF;
+    nrx4_ &= 0xF0;
+    nrx4_ |= (new_period >> 8);
+    std::cout << "DidPeriodSweep: " << std::hex << new_period << std::endl;
+    PrintDebug();
+  }
 }
 
 void PulseVoice::PrintDebug() {
+  return;
   std::cout << "Pulse voice " << voice_number_ << " enabled: " << enabled_ << std::endl;
   std::cout << "Length: " << (int)length_ << std::endl;
   std::cout << "Length enable: " << (int)length_enable_ << std::endl;
   std::cout << "Volume: " << (int)volume_ << std::endl;
-  std::cout << "Sweep pace: " << (int)SweepPace() << std::endl;
-  std::cout << "Sweep up: " << SweepUp() << std::endl;
+  std::cout << "Volume Sweep pace: " << (int)VolumeSweepPace() << std::endl;
+  std::cout << "Volume Sweep up: " << (int)VolumeSweepUp() << std::endl;
   std::cout << "Period: " << std::hex << PeriodValue() << std::endl;
   std::cout << "Frequency: " << FrequencyHz() << std::endl;
   std::cout << "Cycles per duty cycle: " << cycles_per_duty_cycle_ << std::endl;
@@ -83,8 +95,9 @@ void PulseVoice::SetNRX4(uint8_t byte) {
     cycles_ = 0;
     length_ = nrx0_ & 0x3F;
     next_timer_cycle_ = CYCLES_PER_SOUND_TIMER_TICK;
-    next_envelope_cycle_ = CYCLES_PER_ENVELOPE_TICK * SweepPace();
+    next_envelope_cycle_ = CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
     cycles_per_duty_cycle_ = CYCLES_PER_SECOND / FrequencyHz();
+    next_period_sweep_cycle_ = CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
 
     volume_ = (nrx2_ & 0xF0) >> 4;
 

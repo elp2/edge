@@ -33,8 +33,13 @@ class PulseVoice {
  private:
   void PrintDebug();
 
-  bool SweepUp() { return (nrx2_ & 0b1000) >> 3; }
-  uint8_t SweepPace() { return nrx2_ & 0b111; }
+  bool VolumeSweepUp() { return (nrx2_ & 0b1000) >> 3; }
+  uint8_t VolumeSweepPace() { return nrx2_ & 0b111; }
+
+  bool PeriodSweepDown() { return (nrx0_ & 0b1000) >> 3; }
+  uint8_t PeriodSweepStep() { return nrx0_ & 0x07;  }
+  uint8_t PeriodSweepPace() { return (nrx0_ & 0x70) >> 4;}
+  void DoPeriodSweep();
 
   // Cycles spent in the low duty cycle.
   int LowDutyCycles();
@@ -56,7 +61,7 @@ class PulseVoice {
   int next_duty_cycle_cycle_ = 0;
   int next_timer_cycle_ = 0;
   int next_envelope_cycle_ = 0;
-
+  int next_period_sweep_cycle_ = 0;
   bool enabled_ = false;
   uint8_t length_ = 0;
   uint8_t length_enable_ = false;
