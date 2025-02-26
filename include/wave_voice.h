@@ -44,4 +44,20 @@ class WaveVoice {
   uint8_t nr34_ = 0;
 
   uint8_t wave_pattern_[16];
+
+  int cycles_ = 0;
+  int next_timer_cycle_ = 0;
+  int cycles_per_sample_ = 0;
+  int next_sample_cycle_ = 0;
+  int sample_index_ = 0;
+
+  int length_ = 0; // Must be able to count up to 256.
+  uint8_t length_enable_ = false;
+  uint8_t output_level_ = 0;
+  
+  uint16_t PeriodValue();
+  float FrequencyHz();
+  void PrintDebug();
+
+  uint8_t SampleNibble();
 };

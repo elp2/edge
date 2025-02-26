@@ -24,10 +24,10 @@ void PulseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
   for (int i = 0; i < samples; i++) {
     if (cycles_ >= next_timer_cycle_) {
       if (length_enable_) {
-          length_ += 1;
+        length_ += 1;
       }
       if (length_ >= 64) {
-          enabled_ = false;
+        enabled_ = false;
       }
       next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
     }
@@ -52,7 +52,7 @@ void PulseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
       next_period_sweep_cycle_ += CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
     }
 
-    int sample_volume = VOICE_MAX_VOLUME * volume_ / 15;
+    int sample_volume = (VOICE_MAX_VOLUME * volume_) / 15;
     buffer[i] += duty_high_ ? sample_volume : -sample_volume;
 
     cycles_ += CYCLES_PER_SAMPLE;
