@@ -55,7 +55,7 @@ SoundController::SoundController() {
 void SoundController::MixSamplesToBuffer(int16_t* buffer, int samples) {
   voice1_->AddSamplesToBuffer(buffer, samples);
   voice2_->AddSamplesToBuffer(buffer, samples);
-  // voice3_->AddSamplesToBuffer(buffer, samples);
+  voice3_->AddSamplesToBuffer(buffer, samples);
   voice4_->AddSamplesToBuffer(buffer, samples);
 }
 
@@ -110,19 +110,19 @@ void SoundController::SetByteAt(uint16_t address, uint8_t byte) {
       voice2_->SetNRX4(byte);
       break;
     case 0xFF1A:
-      voice3_->SetOnOffByte(byte);
+      voice3_->SetNR30(byte);
       break;
     case 0xFF1B:
-      voice3_->SetSoundLengthByte(byte);
+      voice3_->SetNR31(byte);
       break;
     case 0xFF1C:
-      voice3_->SetOutputLevelByte(byte);
+      voice3_->SetNR32(byte);
       break;
     case 0xFF1D:
-      voice3_->SetFrequencyLowByte(byte);
+      voice3_->SetNR33(byte);
       break;
     case 0xFF1E:
-      voice3_->SetFrequencyHighByte(byte);
+      voice3_->SetNR34(byte);
       break;
     case 0xFF1F:
       // No 0xFF1F.
@@ -209,19 +209,19 @@ uint8_t SoundController::GetByteAt(uint16_t address) {
       return voice2_->GetNRX4();
       break;
     case 0xFF1A:
-      return voice3_->GetOnOffByte();
+      return voice3_->GetNR30();
       break;
     case 0xFF1B:
-      return voice3_->GetSoundLengthByte();
+      return voice3_->GetNR31();
       break;
     case 0xFF1C:
-      return voice3_->GetOutputLevelByte();
+      return voice3_->GetNR32();
       break;
     case 0xFF1D:
-      return voice3_->GetFrequencyLowByte();
+      return voice3_->GetNR33();
       break;
     case 0xFF1E:
-      return voice3_->GetFrequencyHighByte();
+      return voice3_->GetNR34();
       break;
     case 0xFF1F:
       // Unused.

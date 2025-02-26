@@ -9,27 +9,24 @@ class WaveVoice {
   WaveVoice();
   ~WaveVoice();
 
-  // Caller should NOT modify the sound buffer.
-  bool PlaySound(float **sound_buffer, int *length);
+  void AddSamplesToBuffer(int16_t* buffer, int samples);
 
-  void SetOnOffByte(uint8_t byte);
-  uint8_t GetOnOffByte() { return 0x7F | on_off_byte_; };
+  void SetNR30(uint8_t byte) { nr30_ = byte; };
+  uint8_t GetNR30() { return 0x7F | nr30_; };
 
-  void SetSoundLengthByte(uint8_t byte) { sound_length_byte_ = byte; };
-  uint8_t GetSoundLengthByte() { return 0xFF; /* Write only. */ };
+  void SetNR31(uint8_t byte) { nr31_ = byte; };
+  uint8_t GetNR31() { return 0xFF | nr31_; };
 
-  void SetOutputLevelByte(uint8_t byte) { output_level_byte_ = byte; };
-  uint8_t GetOutputLevelByte() { return 0x9F | output_level_byte_; };
+  void SetNR32(uint8_t byte) { nr32_ = byte; };
+  uint8_t GetNR32() { return 0x9F | nr32_; };
 
-  void SetFrequencyLowByte(uint8_t byte) { frequency_low_byte_ = byte; };
-  uint8_t GetFrequencyLowByte() { return 0xFF; /* Write only. */ };
+  void SetNR33(uint8_t byte) { nr33_ = byte; };
+  uint8_t GetNR33() { return 0xFF | nr33_; };
 
-  // Will also potentially make this voice ready for playback if "initial" is
-  // set.
-  void SetFrequencyHighByte(uint8_t byte);
-  uint8_t GetFrequencyHighByte() { return 0xBF | frequency_high_byte_; };
+  void SetNR34(uint8_t byte);
+  uint8_t GetNR34() { return 0xBF | nr34_; };
 
-  bool Playing() { return playback_steps_remaining_ > 0; };
+  bool Playing() { return enabled_; };
 
   static const uint16_t BASE_WAVE_PATTERN_ADDRESS;
 
@@ -37,28 +34,14 @@ class WaveVoice {
   uint8_t GetWavePatternByte(uint16_t address);
 
  private:
-  // Length of the voice in CPU steps (CYCLES_PER_SECOND).
-  int length_steps_ = 0;
+  bool DACEnabled();
+  bool enabled_ = false;
 
-  // Pre-calculated sounds based on current state at play start.
-  float *sound_buffer_;
-  // Length of the internal buffer which we should play. May be less than real
-  // size if we're playing a shorter sound.
-  int buffer_length_ = 0;
-
-  bool initial_ = false;
-  bool loop_ = false;
-  int playback_steps_remaining_ = 0;
-
-  uint8_t on_off_byte_ = 0;
-  uint8_t output_level_byte_ = 0;
-  uint8_t sound_length_byte_ = 0;
-
-  // Frequency bytes which are combined when we generate the sound.
-  uint8_t frequency_low_byte_ = 0;
-  uint8_t frequency_high_byte_ = 0;
+  uint8_t nr30_ = 0;
+  uint8_t nr31_ = 0;
+  uint8_t nr32_ = 0;
+  uint8_t nr33_ = 0;
+  uint8_t nr34_ = 0;
 
   uint8_t wave_pattern_[16];
-
-  void GenerateSoundBuffer();
 };
