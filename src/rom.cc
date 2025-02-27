@@ -48,6 +48,7 @@ CartridgeType ROM::GetCartridgeType() {
       return CartridgeType_ROM_MBC1_RAM;
 
     default:
+      std::cout << "Unsupported cartridge type: " << std::hex << (int)ctbyte << std::endl;
       return CartridgeType_Unsupported;
   }
 }
