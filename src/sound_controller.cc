@@ -53,10 +53,21 @@ SoundController::SoundController() {
 }
 
 void SoundController::MixSamplesToBuffer(int16_t* buffer, int samples) {
-  voice1_->AddSamplesToBuffer(buffer, samples);
-  voice2_->AddSamplesToBuffer(buffer, samples);
-  voice3_->AddSamplesToBuffer(buffer, samples);
-  voice4_->AddSamplesToBuffer(buffer, samples);
+  if (!global_sound_on_) {
+    return;
+  }
+  if (ChannelLeftEnabled(0) || ChannelRightEnabled(0)) {
+    voice1_->AddSamplesToBuffer(buffer, samples);
+  }
+  if (ChannelLeftEnabled(1) || ChannelRightEnabled(1)) {
+    voice2_->AddSamplesToBuffer(buffer, samples);
+  }
+  if (ChannelLeftEnabled(2) || ChannelRightEnabled(2)) {
+    voice3_->AddSamplesToBuffer(buffer, samples);
+  }
+  if (ChannelLeftEnabled(3) || ChannelRightEnabled(3)) {
+    voice4_->AddSamplesToBuffer(buffer, samples);
+  }
 }
 
 bool SoundController::Advance(int cycles) {
@@ -297,4 +308,12 @@ uint8_t SoundController::GetFF26() {
   ff26 <<= 1;
   ff26 |= (uint8_t)voice1_->Playing();
   return 0x70 | ff26;
+}
+
+bool SoundController::ChannelLeftEnabled(int channel) {
+  return bit_set(channel_control_, channel);
+}
+
+bool SoundController::ChannelRightEnabled(int channel) {
+  return bit_set(channel_control_, channel + 4);
 }

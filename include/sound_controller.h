@@ -32,6 +32,9 @@ class SoundController {
 
   uint32_t audio_device_ = 0;
 
+  bool ChannelLeftEnabled(int channel);
+  bool ChannelRightEnabled(int channel);
+
   void SetFF26(uint8_t byte);
   uint8_t GetFF26();
 };
