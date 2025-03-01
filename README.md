@@ -1,5 +1,30 @@
 # Ed's Gameboy Emulator
 
+## Status:
+
+✔️ Boot Screen Works
+
+✔️ Pulse, Wave, and Noise Voices play in all games
+
+✔️ PPU features excluding tall sprites
+
+### Games
+✔️ Dr. Mario
+
+✔️ Tetris
+
+🌓 Zelda
+
+🌓 Ducktales
+
+❌ Pokemón Red
+
+### Tests
+
+✔️ All Blarg CPU tests pass
+
+🌓 Many DMG_SOUND tests pass
+
 ## Instructions
 * Install cmake, [rgbds](https://github.com/gbdev/rgbds), and SDL-dev libraries
   * Ubuntu: sudo apt-get install libsdl2-dev cmake rgbds
@@ -11,16 +36,3 @@
   * Open this folder in VSCode
   * MacOS: Choose Clang
   * Click the run button.
-## Status:
-
-✔️ Inconsistent C++ Style
-
-✔️ Boot Screen Works
-
-✔️ All Blarg CPU tests pass
-
-✔️ Dr. Mario demo works
-
-✔️ Dr. Mario Playable
-
-❌ Sound Works
