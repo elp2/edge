@@ -427,7 +427,7 @@ void PPU::OAMSearchY(int row) {
   bool tall_sprites = bit_set(lcdc(), 2);
   if (tall_sprites) {
     // TODO: Support tall sprites here and fetching.
-    assert(false);
+    std::cout << "Tall sprites not supported" << std::endl;
   }
 
   int sprites_found = 0;
@@ -499,8 +499,10 @@ uint16_t PPU::BackgroundTile(int x, int y) {
 }
 
 uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
-  assert(sprite_row >= 0);
-  assert(sprite_row < 8);
+  if (sprite_row < 0 || sprite_row > 7) {
+    std::cout << "Sprite row out of range: " << sprite_row << std::endl;
+    return 0xEDED;
+  }
 
   if (bit_set(sprite.flags_, 6)) {
     sprite_row = 7 - sprite_row;
