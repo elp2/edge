@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "constants.h"
+
 union SDL_Event;
 
 class PulseVoice {
@@ -41,10 +43,7 @@ class PulseVoice {
   uint8_t PeriodSweepPace() { return (nrx0_ & 0x70) >> 4;}
   void DoPeriodSweep();
 
-  // Cycles spent in the low duty cycle.
-  int LowDutyCycles();
-  // Cycles spent in the low duty cycle.
-  int HighDutyCycles();
+  int CyclesPerDutyCycle() { return CYCLES_PER_SECOND / FrequencyHz() / 16; }
 
   uint8_t DutyCycle() { return (nrx1_ & 0xC0) >> 6; }
 
@@ -57,7 +56,6 @@ class PulseVoice {
   uint8_t nrx4_ = 0;
 
   int cycles_ = 0;
-  int cycles_per_duty_cycle_ = 0;
   int next_duty_cycle_cycle_ = 0;
   int next_timer_cycle_ = 0;
   int next_envelope_cycle_ = 0;
@@ -67,6 +65,8 @@ class PulseVoice {
   uint8_t length_enable_ = false;
   uint8_t volume_ = 0;
 
-  bool duty_high_ = false;
   int voice_number_ = 0;
+
+  uint8_t waveform_position_ = 0;
+  static const uint8_t waveform_[4][16];
 };

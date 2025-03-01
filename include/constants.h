@@ -1,4 +1,4 @@
-
+#pragma once
 // CPU Cycles per second (4 MHZ clock).
 const int CYCLES_PER_SECOND = 4194304;
 

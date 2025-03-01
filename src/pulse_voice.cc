@@ -9,6 +9,12 @@
 #include "constants.h"
 #include "utils.h"
 
+const uint8_t PulseVoice::waveform_[4][16] = {
+  {1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0},  // 12.5% (2/16)
+  {0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0},  // 25% (4/16)
+  {0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0},  // 50% (8/16)
+  {1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1}   // 75% (12/16)
+};
 
 PulseVoice::PulseVoice(int voice_number) {
   voice_number_ = voice_number;
@@ -43,8 +49,8 @@ void PulseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
     }
 
     if (cycles_ >= next_duty_cycle_cycle_) {
-      duty_high_ = !duty_high_;
-      next_duty_cycle_cycle_ += duty_high_ ? HighDutyCycles() : LowDutyCycles();
+      waveform_position_ = (waveform_position_ + 1) & 15;
+      next_duty_cycle_cycle_ += CyclesPerDutyCycle();
     }
 
     if (PeriodSweepPace() > 0 && cycles_ >= next_period_sweep_cycle_) {
@@ -53,25 +59,32 @@ void PulseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
     }
 
     int sample_volume = (VOICE_MAX_VOLUME * volume_) / 15;
-    buffer[i] += duty_high_ ? sample_volume : -sample_volume;
+    buffer[i] += waveform_[DutyCycle()][waveform_position_] ? sample_volume : -sample_volume;
 
     cycles_ += CYCLES_PER_SAMPLE;
   }
 }
 
 void PulseVoice::DoPeriodSweep() {
-  float delta = PeriodValue() / (1 << PeriodSweepStep());
-
-  uint16_t new_period = PeriodValue() + (PeriodSweepDown() ? -delta : delta);
-  if (new_period > 0x7FF) {
+  uint16_t current_period = PeriodValue();
+  uint16_t shift_amount = PeriodSweepStep();
+  
+  uint16_t delta = current_period >> shift_amount;
+  
+  uint16_t new_period;
+  if (PeriodSweepDown()) {
+    new_period = current_period - delta;
+  } else {
+    new_period = current_period + delta;
+    if (new_period > 0x7FF) {
       enabled_ = false;
-  } else {    
-    nrx3_ = new_period & 0xFF;
-    nrx4_ &= 0xF0;
-    nrx4_ |= (new_period >> 8);
-    std::cout << "DidPeriodSweep: " << std::hex << new_period << std::endl;
-    PrintDebug();
+      return;
+    }
   }
+  
+  nrx3_ = new_period & 0xFF;
+  nrx4_ &= 0xF8;
+  nrx4_ |= (new_period >> 8) & 0x07;
 }
 
 void PulseVoice::PrintDebug() {
@@ -84,7 +97,7 @@ void PulseVoice::PrintDebug() {
   std::cout << "Volume Sweep up: " << (int)VolumeSweepUp() << std::endl;
   std::cout << "Period: " << std::hex << PeriodValue() << std::endl;
   std::cout << "Frequency: " << FrequencyHz() << std::endl;
-  std::cout << "Cycles per duty cycle: " << cycles_per_duty_cycle_ << std::endl;
+  std::cout << "Cycles per duty cycle: " << CyclesPerDutyCycle() << std::endl;
 }
 
 void PulseVoice::SetNRX4(uint8_t byte) { 
@@ -96,37 +109,18 @@ void PulseVoice::SetNRX4(uint8_t byte) {
     length_ = nrx0_ & 0x3F;
     next_timer_cycle_ = CYCLES_PER_SOUND_TIMER_TICK;
     next_envelope_cycle_ = CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
-    cycles_per_duty_cycle_ = CYCLES_PER_SECOND / FrequencyHz();
     next_period_sweep_cycle_ = CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
 
     volume_ = (nrx2_ & 0xF0) >> 4;
 
-    duty_high_ = false;
-    next_duty_cycle_cycle_ = LowDutyCycles();
-
+    waveform_position_ = 0;
+    next_duty_cycle_cycle_ = CyclesPerDutyCycle();
     PrintDebug();
   } else {
     enabled_ = false;
   }
    
   length_enable_ = bit_set(nrx4_, 6);
-}
-
-int PulseVoice::LowDutyCycles() {
-  if (DutyCycle() == 0x00) {
-    return cycles_per_duty_cycle_ / 8;
-  } else if (DutyCycle() == 0x01) {
-    return cycles_per_duty_cycle_ / 4;
-  } else if (DutyCycle() == 0x02) {
-    return cycles_per_duty_cycle_ / 2;
-  } else if (DutyCycle() == 0x03) {
-    return 3 * cycles_per_duty_cycle_ / 4;
-  }
-  assert(false);
-}
-
-int PulseVoice::HighDutyCycles() {
-  return cycles_per_duty_cycle_ - LowDutyCycles();
 }
 
 uint16_t PulseVoice::PeriodValue() {
@@ -140,3 +134,4 @@ uint16_t PulseVoice::PeriodValue() {
 float PulseVoice::FrequencyHz() {
   return 131072 / (2048 - PeriodValue());
 }
+
