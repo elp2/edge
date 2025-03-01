@@ -3,16 +3,17 @@
 #include <cassert>
 #include <iostream>
 
+#include "constants.h"
 #include "utils.h"
 
 using namespace std;
 
 MMU::MMU() {
-  ram = new uint8_t[0x8000];
-  // Create a bank big enough for the 32KB RAM if necessary.
-  switchable_ram_bank_ = new uint8_t[0x10000];
+  ram_ = new uint8_t[0x8000];
   boot_rom_ = NULL;
   cartridge_ = NULL;
+  overlay_boot_rom_ = false;
+  high_memory_ = new uint8_t[HIGH_RAM_END - HIGH_RAM_START + 1];
 }
 
 void MMU::SetBootROM(uint8_t *bytes) {
@@ -24,7 +25,7 @@ void MMU::SetCartridge(Cartridge *cartridge) {
   cartridge_ = cartridge;
   assert(cartridge_->GetCartridgeType() != CartridgeType_Unsupported);
   assert(cartridge_->GetROMSizeType() != ROMSize_Unsupported);
-  bank_ = 1;
+  rom_bank_ = 1;
 }
 
 string MMU::AddressRegion(uint16_t address) {
@@ -63,36 +64,50 @@ bool MMU::UseBootROMForAddress(uint16_t address) {
 
 uint8_t MMU::GetByteAt(uint16_t address) {
   if (disasembler_mode_) {
-    return 0xed;
+    return 0xED;
   }
 
-  uint8_t byte;
-  if (UseBootROMForAddress(address)) {
-    byte = boot_rom_[address];
-  } else if (address < 0x8000) {
-    if (overlay_boot_rom_ && address > 0x14E) {
+  if (overlay_boot_rom_ && address < 0x8000) {
+    if (UseBootROMForAddress(address)) {
+      return boot_rom_[address];
+    } else if (address > 0x14E) {
       cout << "ROM access above logo while overlaid at 0x" << hex
            << unsigned(address) << endl;
       assert(false);
-    }
-    if (address < 0x4000) {
-      byte = cartridge_->GetByteAt(address);
     } else {
-      uint16_t bank_address = address + (bank() - 1) * 0x4000;
-      byte = cartridge_->GetByteAt(bank_address);
+      assert(false);
     }
-  } else if (address >= 0xA000 && address < 0xC000) {
-    assert(cartridge_->GetCartridgeType() == CartridgeType_ROM_MBC1_RAM);
-    return switchable_ram_bank_[address - 0xA000 +
-                                switchable_ram_bank_active_ * 0x2000];
-  } else {
-    byte = ram[address - 0x8000];
   }
 
-  // cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
-  // cout << " 0x" << hex << unsigned(byte) << " (GET) " << endl;
+  if (address >= ROM_BANK_0_START && address <= ROM_BANK_0_END) {
+    return cartridge_->GetROMByteAt(address);
+  } else if (address >= ROM_BANK_1_START && address <= ROM_BANK_1_END) {
+    // TODO: Handle switchable ROM banks.
+    return cartridge_->GetROMByteAt(address - ROM_BANK_1_START + rom_bank_ * 0x4000);
+  } else if (address >= VIDEO_RAM_START && address <= VIDEO_RAM_END) {
+    // PPU should handle this.
+    assert(false);
+  } else if (address >= EXTERNAL_RAM_START && address <= EXTERNAL_RAM_END) {
+    return cartridge_->GetRAMorRTC(address - EXTERNAL_RAM_START);
+  } else if (address >= WORK_RAM_START && address <= WORK_RAM_END) {
+    return GetRAM(address - WORK_RAM_START);
+  } else if (address >= ECHO_RAM_START && address <= ECHO_RAM_END) {
+    return GetRAM(address - ECHO_RAM_START);
+  } else if (address >= OAM_RAM_START && address <= OAM_RAM_END) {
+    // PPU should handle this.
+    assert(false);
+  } else if (address >= FORBIDDEN_RAM_START && address <= FORBIDDEN_RAM_END) {
+    assert(false);
+  } else if (address >= IO_RAM_START && address <= IO_RAM_END) {
+    // Hanled Elsewhere
+    assert(false);
+  } else if (address >= HIGH_RAM_START && address <= HIGH_RAM_END) {
+    return high_memory_[address - HIGH_RAM_START];
+  } 
 
-  return byte;
+  std::cout << "Unknown access to 0x" << hex << unsigned(address) << endl;
+  assert(false);
+  return 0;
 }
 
 uint16_t MMU::GetWordAt(uint16_t address) {
@@ -108,101 +123,83 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
   if (disasembler_mode_) {
     return;
   }
-
-  if (address >= 0x2000 && address <= 0x3FFF) {
-    UpdateROMBank(byte);
+  // if (overlay_boot_rom_ && address < 0x8000) {
+  //   assert(false);
+  // }
+  
+  if (address >= RAM_RTC_ENABLE_REGISTER_START && address <= RAM_RTC_ENABLE_REGISTER_END) {
+    cartridge_->SetRAMRTCEnable(byte);
     return;
-  } else if (address < 0x8000) {
-    if (cartridge_->GetCartridgeType() == CartridgeType_ROM_MBC1_RAM) {
-      UpdateRAMBank(address, byte);
-    } else {
-      cout << "Can't Write to: ";
-      cout << AddressRegion(address) << "[0x" << hex << unsigned(address)
-           << "]";
-      cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
-
-      assert(false);
-    }
+  } else if (address >= ROM_BANK_SELECT_REGISTER_START && address <= ROM_BANK_SELECT_REGISTER_END) {
+    register_2000_3fff_ = byte;
+    UpdateROMBank();
     return;
-  } else if (address >= 0xA000 && address < 0xC000) {
-    assert(switchable_ram_bank_enabled_);
-    switchable_ram_bank_[address - 0xA000 +
-                         switchable_ram_bank_active_ * 0x2000] = byte;
+  } else if (address >= RAM_BANK_RTC_SELECT_REGISTER_START && address <= RAM_BANK_RTC_SELECT_REGISTER_END) {
+    cartridge_->SetRAMBankRTC(byte);
     return;
-  }
-  // cout << AddressRegion(address) << "[0x" << hex << unsigned(address) << "]";
-  // cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
-
-  if (address == 0xFF50) {
+  } else if (address >= LATCH_RTC_REGISTER_START && address <= LATCH_RTC_REGISTER_END) {
+    cartridge_->LatchRTC(byte);
+    return;
+  } else if (address >= VIDEO_RAM_START && address <= VIDEO_RAM_END) {
+    // PPU should handle this.
+    assert(false);
+  } else if (address >= EXTERNAL_RAM_START && address <= EXTERNAL_RAM_END) {
+    cartridge_->SetRAMorRTC(address - EXTERNAL_RAM_START, byte);
+  } else if (address >= WORK_RAM_START && address <= WORK_RAM_END) {
+    SetRAM(address - WORK_RAM_START, byte);
+  } else if (address >= ECHO_RAM_START && address <= ECHO_RAM_END) {
+    SetRAM(address - ECHO_RAM_START, byte);
+  } else if (address >= OAM_RAM_START && address <= OAM_RAM_END) {
+    // PPU should handle this.
+    assert(false);
+  } else if (address >= FORBIDDEN_RAM_START && address <= FORBIDDEN_RAM_END) {
+    cout << "FORBIDDEN RAM: ";
+    cout << AddressRegion(address) << "[0x" << hex << unsigned(address)
+          << "]";
+    cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
+    // assert(false);
+  } else if (address >= HIGH_RAM_START && address <= HIGH_RAM_END) {
+    high_memory_[address - HIGH_RAM_START] = byte;
+    return;
+  } else if (address == 0xFF50) {
     overlay_boot_rom_ = false;
     cout << "**** REMOVED OVERLAY BOOT ROM ***" << endl;
-  }
-
-  // TODO: Test general setting.
-  // TODO: Probably shouldn't be setting the ROM, how does RAM work?
-  ram[address - 0x8000] = byte;
-
-  // Echo of Internal 8 Bit RAM.
-  if (address >= 0xE000 && address < 0xFE00) {
-    uint16_t echoAddress = 0xC000 + (address - 0xE000);
-    ram[echoAddress - 0x8000] = byte;
-  }
-
-  if (address >= 0xC000 && address < 0xDE00) {
-    uint16_t echoAddress = 0xE000 + (address - 0xC000);
-    ram[echoAddress - 0x8000] = byte;
-  }
-}
-
-void MMU::UpdateROMBank(uint8_t byte) {
-  if (byte == 0x00) {
-    // Bank 0 is always mapped low.
-    byte = 0x01;
-  }
-  bank_ = byte;
-  cout << "Switched to ROM bank: 0x" << hex << unsigned(bank_) << endl;
-  int max_bank;
-  switch (cartridge_->GetROMSizeType()) {
-    case ROMSize_32k:
-      max_bank = 2;
-      break;
-    case ROMSize_64k:
-      max_bank = 4;
-      break;
-    case ROMSize_128k:
-      max_bank = 8;
-      break;
-    case ROMSize_256k:
-      max_bank = 16;
-      break;
-    case ROMSize_512k:
-      max_bank = 32;
-      break;
-    default:
-      assert(false);
-      break;
-  }
-  assert(bank_ < max_bank);
-}
-
-void MMU::UpdateRAMBank(uint16_t address, uint8_t byte) {
-  if (address <= 0x1FFF) {
-    switchable_ram_bank_enabled_ = byte & 0xA;
-  } else if (address >= 0x4000 && address <= 0x5FFF) {
-    uint8_t bank_num = byte & 0b11;
-    assert(bank_num < switchable_ram_bank_count_);
-    switchable_ram_bank_active_ = bank_num;
-    switchable_ram_bank_enabled_ =
-        false;  // TODO - does this need to be per switchable bank?
-  } else if (address >= 0x6000 && address <= 0x7FFF) {
-    if (byte & 0b1) {
-      switchable_ram_bank_count_ = 4;
-    } else {
-      switchable_ram_bank_count_ = 1;
-    }
+  } else if (address >= IO_RAM_START && address <= IO_RAM_END) {
+    cout << "IO RAM: ";
+    cout << AddressRegion(address) << "[0x" << hex << unsigned(address)
+          << "]";
+    cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
   } else {
+    cout << "Can't Write to: ";
+    cout << AddressRegion(address) << "[0x" << hex << unsigned(address)
+          << "]";
+    cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
+
     assert(false);
   }
+}
+
+uint8_t MMU::GetRAM(uint16_t address) {
+  assert(address <= WORK_RAM_END - WORK_RAM_START);
+  return ram_[address];
+}
+
+void MMU::SetRAM(uint16_t address, uint8_t byte) {
+  // TODO: For CBB, the second half is switchable.
+  assert(address <= WORK_RAM_END - WORK_RAM_START);
+  ram_[address] = byte;
+}
+
+void MMU::UpdateROMBank() {
+  uint8_t rom_bank = register_2000_3fff_ & 0x7;
+  rom_bank_ = rom_bank;
+  if (rom_bank == 0) {
+    cout << "ROM bank 0 is not allowed. Switching to bank 1." << endl;
+    rom_bank_ = 1;
+  }
+  cout << "Switched to ROM bank: 0x" << hex << unsigned(rom_bank_) << endl;
+
+  assert(rom_bank_ < cartridge_->ROMBankCount());
 }
 
 void MMU::SetWordAt(uint16_t address, uint16_t word) {

@@ -13,13 +13,13 @@ TEST(MMUTest, SetBankRange) {
   MMU *mmu = getTestingMMU();
 
   mmu->SetByteAt(0x2000, 0x2);
-  ASSERT_EQ(mmu->bank(), 2);
+  ASSERT_EQ(mmu->rom_bank(), 2);
   mmu->SetByteAt(0x2500, 0x1);
-  ASSERT_EQ(mmu->bank(), 1);
+  ASSERT_EQ(mmu->rom_bank(), 1);
   mmu->SetByteAt(0x3500, 0x2);
-  ASSERT_EQ(mmu->bank(), 2);
+  ASSERT_EQ(mmu->rom_bank(), 2);
   mmu->SetByteAt(0x3FFF, 0x1);
-  ASSERT_EQ(mmu->bank(), 1);
+  ASSERT_EQ(mmu->rom_bank(), 1);
 }
 
 TEST(MMUTest, ReadBank) {
@@ -28,7 +28,7 @@ TEST(MMUTest, ReadBank) {
   // Disable ROM overlay.
   mmu->SetByteAt(0xFF50, 0x1);
 
-  ASSERT_EQ(mmu->bank(), 1);
+  ASSERT_EQ(mmu->rom_bank(), 1);
   ASSERT_EQ(mmu->GetByteAt(bank1_address), 0x00);
 
   mmu->SetByteAt(0x2000, 0x2);
