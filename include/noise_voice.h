@@ -30,7 +30,7 @@ class NoiseVoice {
  private:
   void PrintDebug();
 
-  bool LFSRShort() { return (ff22_ >> 3) & 0x1; }
+  bool LFSRShort();
   uint8_t ClockDivider() { return (ff22_ & 0b111); }
   uint8_t ClockShift() { return (ff22_ & 0xF0) >> 4; }
 

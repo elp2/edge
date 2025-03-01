@@ -32,8 +32,8 @@ void NoiseVoice::SetFF23(uint8_t value) {
         cycles_ = 0; // TODO: Should the clock reset each time?
         enabled_ = true;
         length_ = ff20_ & 0x3F;
-        lfsr_ = 0x00;
-        // TODO: Envelope.
+        lfsr_ = 0x7FFF;
+
         volume_ = (ff21_ & 0xF0) >> 4;
 
         next_timer_cycle_ = CYCLES_PER_SOUND_TIMER_TICK;
@@ -60,17 +60,16 @@ void NoiseVoice::PrintDebug() {
     std::cout << "Volume: " << (int)volume_ << std::endl;
     std::cout << "Sweep pace: " << (int)SweepPace() << std::endl;
     std::cout << "Sweep up: " << SweepUp() << std::endl;
+    std::cout << "Cycles per LFSR: " << (int)cycles_per_lfsr_ << std::endl;
 }
 
 bool NoiseVoice::TickLFSR() {
-    bool xnored = !(bit_set(lfsr_, 0) ^ bit_set(lfsr_, 1));
-    if (xnored) {
-        lfsr_ |= 0x8000;
-        if (LFSRShort()) {
-            lfsr_ |= 0x0080;
-        }
+    uint16_t xored = bit_set(lfsr_, 0) ^ bit_set(lfsr_, 1);
+    if (LFSRShort()) {
+        lfsr_ = ((lfsr_ >> 1) & ~0x40) | (xored << 6);
+    } else {
+        lfsr_ = ((lfsr_ >> 1) & ~0x4000) | (xored << 14);
     }
-    lfsr_ >>= 1;
     return 0x1 & lfsr_;
 }
 
@@ -132,3 +131,5 @@ float NoiseVoice::FrequencyHz() {
 }
 
 NoiseVoice::~NoiseVoice() {}
+
+bool NoiseVoice::LFSRShort() { return bit_set(ff22_, 3); }

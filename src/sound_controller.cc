@@ -311,9 +311,9 @@ uint8_t SoundController::GetFF26() {
 }
 
 bool SoundController::ChannelLeftEnabled(int channel) {
-  return bit_set(channel_control_, channel);
+  return bit_set(sound_output_terminals_, channel);
 }
 
 bool SoundController::ChannelRightEnabled(int channel) {
-  return bit_set(channel_control_, channel + 4);
+  return bit_set(sound_output_terminals_, channel + 4);
 }
