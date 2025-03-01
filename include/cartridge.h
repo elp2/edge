@@ -11,6 +11,7 @@ enum CartridgeType {
   CartridgeType_ROM_MBC1_RAM,
   CartridgeType_Unsupported
 };
+
 enum ROMSizeType {
   ROMSize_32k,
   ROMSize_64k,
@@ -20,22 +21,21 @@ enum ROMSizeType {
   ROMSize_Unsupported
 };
 
-class ROM {
+uint8_t *UnsignedCartridgeBytes(string filename);
+class Cartridge {
  public:
-  ROM();
-  ~ROM();
+  Cartridge(string filename);
+  ~Cartridge();
 
   bool LoadFile(string filename);
   uint8_t GetByteAt(uint16_t address);
 
   CartridgeType GetCartridgeType();
   ROMSizeType GetROMSizeType();
-
-  streampos Size() { return romSize; }
+  int ROMSize();
 
   string GameTitle();
 
  private:
-  uint8_t *rom;
-  streampos romSize;
+  uint8_t *rom_;
 };

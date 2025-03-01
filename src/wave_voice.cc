@@ -25,7 +25,7 @@ void WaveVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
       if (length_ >= 256) {
         enabled_ = false;
       }
-      next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
+      next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK; 
     }
 
     if (cycles_ >= next_sample_cycle_) {

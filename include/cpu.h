@@ -37,7 +37,7 @@ class CPU : public InterruptExecutor {
   // Points to the stack position.
   uint16_t sp_ = 0;
 
-  bool disasemblerMode_ = false;
+  bool disasembler_mode_ = false;
   uint32_t cycles_ = 0;
   bool debugPrint_ = false;
 

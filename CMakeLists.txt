@@ -34,6 +34,7 @@ add_library (edge_lib
     src/address_router.cc
     src/bit_command.cc
     src/call_command.cc
+    src/cartridge.cc
     src/cb_command.cc
     src/command_factory.cc
     src/cpu.cc
@@ -50,7 +51,6 @@ add_library (edge_lib
     src/pulse_voice.cc
     src/ppu.cc
     src/return_command.cc
-    src/rom.cc
     src/screen.cc
     src/serial_controller.cc
     src/sound_controller.cc

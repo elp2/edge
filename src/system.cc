@@ -55,16 +55,14 @@ System::System(string rom_filename) {
 }
 
 MMU *System::GetMMU(string rom_filename, bool skip_boot_rom) {
-  ROM *boot_rom = nullptr;
-  if (!skip_boot_rom) {
-    boot_rom = new ROM();
-    assert(boot_rom->LoadFile("../roms/boot.gb"));
-  }
-  ROM *cartridge_rom = new ROM();
-  assert(cartridge_rom->LoadFile(rom_filename));
-
   MMU *mmu = new MMU();
-  mmu->SetROMs(boot_rom, cartridge_rom);
+
+  if (!skip_boot_rom) {
+    mmu->SetBootROM(UnsignedCartridgeBytes("../roms/boot.gb"));
+  }
+  Cartridge *cartridge = new Cartridge(rom_filename);
+  mmu->SetCartridge(cartridge);
+
   return mmu;
 }
 

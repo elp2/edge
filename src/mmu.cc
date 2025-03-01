@@ -11,22 +11,19 @@ MMU::MMU() {
   ram = new uint8_t[0x8000];
   // Create a bank big enough for the 32KB RAM if necessary.
   switchable_ram_bank_ = new uint8_t[0x10000];
-  bootROM = NULL;
-  cartridgeROM = NULL;
-  overlayBootROM = true;
+  boot_rom_ = NULL;
+  cartridge_ = NULL;
 }
 
-void MMU::SetROMs(ROM *bootROM, ROM *cartridgeROM) {
-  if (bootROM) {
-    overlayBootROM = true;
-    this->bootROM = bootROM;
-  } else {
-    overlayBootROM = false;
-  }
-  this->cartridgeROM = cartridgeROM;
+void MMU::SetBootROM(uint8_t *bytes) {
+  boot_rom_ = bytes;
+  overlay_boot_rom_ = true;
+}
 
-  assert(this->cartridgeROM->GetCartridgeType() != CartridgeType_Unsupported);
-  assert(this->cartridgeROM->GetROMSizeType() != ROMSize_Unsupported);
+void MMU::SetCartridge(Cartridge *cartridge) {
+  cartridge_ = cartridge;
+  assert(cartridge_->GetCartridgeType() != CartridgeType_Unsupported);
+  assert(cartridge_->GetROMSizeType() != ROMSize_Unsupported);
   bank_ = 1;
 }
 
@@ -61,31 +58,31 @@ string MMU::AddressRegion(uint16_t address) {
 }
 
 bool MMU::UseBootROMForAddress(uint16_t address) {
-  return overlayBootROM && address < bootROM->Size();
+  return overlay_boot_rom_ && address < 256;
 }
 
 uint8_t MMU::GetByteAt(uint16_t address) {
-  if (disasemblerMode_) {
+  if (disasembler_mode_) {
     return 0xed;
   }
 
   uint8_t byte;
   if (UseBootROMForAddress(address)) {
-    byte = bootROM->GetByteAt(address);
+    byte = boot_rom_[address];
   } else if (address < 0x8000) {
-    if (overlayBootROM && address > 0x14E) {
+    if (overlay_boot_rom_ && address > 0x14E) {
       cout << "ROM access above logo while overlaid at 0x" << hex
            << unsigned(address) << endl;
       assert(false);
     }
     if (address < 0x4000) {
-      byte = cartridgeROM->GetByteAt(address);
+      byte = cartridge_->GetByteAt(address);
     } else {
       uint16_t bank_address = address + (bank() - 1) * 0x4000;
-      byte = cartridgeROM->GetByteAt(bank_address);
+      byte = cartridge_->GetByteAt(bank_address);
     }
   } else if (address >= 0xA000 && address < 0xC000) {
-    assert(cartridgeROM->GetCartridgeType() == CartridgeType_ROM_MBC1_RAM);
+    assert(cartridge_->GetCartridgeType() == CartridgeType_ROM_MBC1_RAM);
     return switchable_ram_bank_[address - 0xA000 +
                                 switchable_ram_bank_active_ * 0x2000];
   } else {
@@ -99,7 +96,7 @@ uint8_t MMU::GetByteAt(uint16_t address) {
 }
 
 uint16_t MMU::GetWordAt(uint16_t address) {
-  if (disasemblerMode_) {
+  if (disasembler_mode_) {
     return 0xed02;
   }
   uint8_t lsb = GetByteAt(address);
@@ -108,7 +105,7 @@ uint16_t MMU::GetWordAt(uint16_t address) {
 }
 
 void MMU::SetByteAt(uint16_t address, uint8_t byte) {
-  if (disasemblerMode_) {
+  if (disasembler_mode_) {
     return;
   }
 
@@ -116,7 +113,7 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
     UpdateROMBank(byte);
     return;
   } else if (address < 0x8000) {
-    if (cartridgeROM->GetCartridgeType() == CartridgeType_ROM_MBC1_RAM) {
+    if (cartridge_->GetCartridgeType() == CartridgeType_ROM_MBC1_RAM) {
       UpdateRAMBank(address, byte);
     } else {
       cout << "Can't Write to: ";
@@ -137,7 +134,7 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
   // cout << " = 0x" << hex << unsigned(byte) << " (SET)" << endl;
 
   if (address == 0xFF50) {
-    overlayBootROM = false;
+    overlay_boot_rom_ = false;
     cout << "**** REMOVED OVERLAY BOOT ROM ***" << endl;
   }
 
@@ -165,7 +162,7 @@ void MMU::UpdateROMBank(uint8_t byte) {
   bank_ = byte;
   cout << "Switched to ROM bank: 0x" << hex << unsigned(bank_) << endl;
   int max_bank;
-  switch (cartridgeROM->GetROMSizeType()) {
+  switch (cartridge_->GetROMSizeType()) {
     case ROMSize_32k:
       max_bank = 2;
       break;
@@ -209,7 +206,7 @@ void MMU::UpdateRAMBank(uint16_t address, uint8_t byte) {
 }
 
 void MMU::SetWordAt(uint16_t address, uint16_t word) {
-  if (disasemblerMode_) {
+  if (disasembler_mode_) {
     return;
   }
 

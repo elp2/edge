@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "rom.h"
+#include "cartridge.h"
 
 using namespace std;
 
@@ -20,11 +20,12 @@ class MMU {
   // Returns the max 16 character upper case game title.
   std::string GameTitle();
 
-  void SetROMs(ROM *bootROM, ROM *cartridgeROM);
-
+  void SetBootROM(uint8_t *bytes);
+  void SetCartridge(Cartridge *cartridge);
+ 
   // Hacks to simulate a disassembler.
   void EnableDisassemblerMode(bool disassemblerMode) {
-    disasemblerMode_ = disassemblerMode;
+    disasembler_mode_ = disassemblerMode;
   };
 
   uint8_t bank() { return bank_; };
@@ -37,10 +38,11 @@ class MMU {
 
   uint8_t *ram;
 
-  bool disasemblerMode_ = false;
-  bool overlayBootROM;
-  ROM *bootROM;
-  ROM *cartridgeROM;
+  bool disasembler_mode_ = false;
+  bool overlay_boot_rom_;
+
+  uint8_t *boot_rom_;
+  Cartridge *cartridge_;
   uint8_t bank_ = 0x1;
 
   uint8_t *switchable_ram_bank_;

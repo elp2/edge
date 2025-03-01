@@ -1,8 +1,8 @@
+#include "cartridge.h"
 #include "cpu.h"
 #include "gtest/gtest.h"
 #include "mmu.h"
 #include "ppu.h"
-#include "rom.h"
 #include "utils.h"
 
 class BitCommandsTest : public ::testing::Test {

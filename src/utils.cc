@@ -4,10 +4,10 @@
 #include <iostream>
 #include <sstream>
 
+#include "cartridge.h"
 #include "cpu.h"
 #include "mmu.h"
 #include "ppu.h"
-#include "rom.h"
 
 using namespace std;
 
@@ -112,40 +112,33 @@ std::string descriptionforPixel(Pixel p) {
 }
 
 MMU *getTestingMMU() {
+  MMU *mmu = new MMU();
+
 #if defined WIN32
-  ROM *bootROM = new ROM();
-  assert(bootROM->LoadFile("../../roms/boot.gb"));
-  ROM *cartridgeROM = new ROM();
-  assert(
-      cartridgeROM->LoadFile("../../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+  mmu->SetBootROM(UnsignedCartridgeBytes("../../roms/boot.gb"));
+  Cartridge *cartridge = new Cartridge("../../gb-test-roms/cpu_instrs/cpu_instrs.gb");
+  mmu->SetCartridge(cartridge);
 #else
-  ROM *bootROM = new ROM();
-  assert(bootROM->LoadFile("../roms/boot.gb"));
-  ROM *cartridgeROM = new ROM();
-  assert(cartridgeROM->LoadFile("../../gb-test-roms/cpu_instrs/cpu_instrs.gb"));
+  mmu->SetBootROM(UnsignedCartridgeBytes("../roms/boot.gb"));
+  Cartridge *cartridge = new Cartridge("../../gb-test-roms/cpu_instrs/cpu_instrs.gb");
+  mmu->SetCartridge(cartridge);
 #endif
 
-  MMU *mmu = new MMU();
-  mmu->SetROMs(bootROM, cartridgeROM);
   return mmu;
 }
 
 MMU *getTestingMMURAM() {
+  MMU *mmu = new MMU();
 #if defined WIN32
-  ROM *bootROM = new ROM();
-  assert(bootROM->LoadFile("../../roms/boot.gb"));
-  ROM *cartridgeROM = new ROM();
-  assert(
-      cartridgeROM->LoadFile("../../../gb-test-roms/cgb_sound/cgb_sound.gb"));
+  mmu->SetBootROM(UnsignedCartridgeBytes("../../roms/boot.gb"));
+  Cartridge *cartridgeROM = new Cartridge("../../gb-test-roms/cgb_sound/cgb_sound.gb");
+  mmu->SetCartridge(cartridgeROM);
 #else
-  ROM *bootROM = new ROM();
-  assert(bootROM->LoadFile("../roms/boot.gb"));
-  ROM *cartridgeROM = new ROM();
-  assert(cartridgeROM->LoadFile("../../gb-test-roms/cgb_sound/cgb_sound.gb"));
+  mmu->SetBootROM(UnsignedCartridgeBytes("../roms/boot.gb"));
+  Cartridge *cartridge = new Cartridge("../../gb-test-roms/cgb_sound/cgb_sound.gb");
+  mmu->SetCartridge(cartridge);
 #endif
 
-  MMU *mmu = new MMU();
-  mmu->SetROMs(bootROM, cartridgeROM);
   return mmu;
 }
 

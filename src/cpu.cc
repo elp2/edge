@@ -331,7 +331,7 @@ void CPU::Set16Bit(Destination destination, uint16_t value) {
 }
 
 uint8_t CPU::ReadOpcodeAtPC() {
-  if (disasemblerMode_) {
+  if (disasembler_mode_) {
     address_router_->EnableDisassemblerMode(false);
     uint8_t opcode = address_router_->GetByteAt(pc_);
     address_router_->EnableDisassemblerMode(true);
@@ -366,12 +366,12 @@ uint16_t CPU::Pop16Bit() {
 }
 
 void CPU::EnableDisassemblerMode() {
-  disasemblerMode_ = true;
+  disasembler_mode_ = true;
   address_router_->EnableDisassemblerMode(true);
 }
 
 void CPU::JumpAddress(uint16_t address) {
-  if (disasemblerMode_) {
+  if (disasembler_mode_) {
     return;
   }
 
@@ -380,7 +380,7 @@ void CPU::JumpAddress(uint16_t address) {
 }
 
 void CPU::JumpRelative(uint8_t relative) {
-  if (disasemblerMode_) {
+  if (disasembler_mode_) {
     return;
   }
 
