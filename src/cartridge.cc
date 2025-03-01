@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "constants.h"
+
 const int RTC_SECONDS_REGISTER = 0x08;
 const int RTC_MINUTES_REGISTER = 0x09;
 const int RTC_HOURS_REGISTER = 0x0A;
@@ -37,11 +39,26 @@ Cartridge::Cartridge(string filename) {
    ram_ = new uint8_t[RAMSize()];
    // TODO: MBC1 uses a special addressing for large ROMS.
    assert(ROMSize() <= 524288 || GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT);
+
+  if (SUPER_DEBUG) {
+    PrintDebugInfo();
+  }
+}
+
+void Cartridge::PrintDebugInfo() {
+   std::cout << "Game Title: " << GameTitle() << std::endl;
+   std::cout << "Cartridge Type: 0x" << hex << GetCartridgeType() << std::endl;
+   std::cout << "ROMSizeType: 0x" << hex << GetROMSizeType() << std::endl;
+   std::cout << "ROM Bank Count: 0x" << hex << ROMBankCount() << std::endl;
+   std::cout << "ROM Size: 0x" << hex << ROMSize() << std::endl;
+   std::cout << "RAMSizeType: 0x" << hex << GetRAMSizeType() << std::endl;
+   std::cout << "RAM Size: 0x" << hex << RAMSize() << std::endl;
+   std::cout << "HasRTC: " << HasRTC() << std::endl;
 }
 
 Cartridge::~Cartridge() {}
 
-uint8_t Cartridge::GetROMByteAt(uint16_t address) {
+uint8_t Cartridge::GetROMByteAt(int address) {
   assert(rom_);
   assert(address < ROMSize());
 
@@ -100,25 +117,7 @@ ROMSizeType Cartridge::GetROMSizeType() {
 }
 
 int Cartridge::ROMSize() {
-  switch (GetROMSizeType()) {
-    case ROMSize_32k:
-      return 32768;
-    case ROMSize_64k:
-      return 65536;
-    case ROMSize_128k:
-      return 131072;
-    case ROMSize_256k:
-      return 262144;
-    case ROMSize_512k:
-      return 524288;
-    case ROMSize_1M:
-      return 1048576;
-    case ROMSize_2M:
-      return 2097152;
-    default:
-      assert(false);
-      return 0;
-  }
+  return 0x4000 * ROMBankCount();
 }
 
 RAMSizeType Cartridge::GetRAMSizeType() {
@@ -198,8 +197,7 @@ uint8_t Cartridge::GetRTC() {
   if (rtc_latched_) {
     return rtc_latched_value_;
   }
-  assert(false);
-  
+  std::cout << "TODO: GetRTC. Temporary return 7." << std::endl;
   return 7;
 }
 
@@ -207,29 +205,29 @@ void Cartridge::SetRTC(uint8_t byte) {
   assert(false);
 }
 
-uint8_t Cartridge::GetRAM(uint16_t address) {
-  uint16_t banked_address = GetBankedRAMAddress(address);
+uint8_t Cartridge::GetRAM(int address) {
+  int banked_address = GetBankedRAMAddress(address);
   if (banked_address >= RAMSize()) {
-    std::cout << "GetRAM: " << std::hex << (int)address << " size: " << std::dec << RAMSize() << std::endl;
+    std::cout << "GetRAM: " << std::hex << address << " size: " << std::hex << RAMSize() << std::endl;
     assert(false);
   }
 
   return ram_[banked_address];
 }
 
-void Cartridge::SetRAM(uint16_t address, uint8_t byte) {
-  uint16_t banked_address = GetBankedRAMAddress(address);
+void Cartridge::SetRAM(int address, uint8_t byte) {
+  int banked_address = GetBankedRAMAddress(address);
   if (banked_address >= RAMSize()) {
-    std::cout << "SetRAM: " << std::hex << (int)address << " size: " << std::dec << RAMSize() << std::endl;
+    std::cout << "SetRAM: " << std::hex << address << " size: " << std::hex << RAMSize() << std::endl;
     assert(false);
   }
 
   ram_[banked_address] = byte;
 }
 
-uint16_t Cartridge::GetBankedRAMAddress(uint16_t address) {
+int Cartridge::GetBankedRAMAddress(int address) {
   assert(ram_bank_rtc_ < RTC_SECONDS_REGISTER);
-  return address + (ram_bank_rtc_ * 0x4000);
+  return address + (int(ram_bank_rtc_) * 0x2000);
 }
 
 int Cartridge::ROMBankCount() {
@@ -271,7 +269,10 @@ void Cartridge::SetRAMRTCEnable(uint8_t byte) {
 
 void Cartridge::SetRAMBankRTC(uint8_t byte) {
   assert(HasRAM());
-  assert(byte <= RTC_DAYS_HIGH_CARRY_HALT_REGISTER);
+  if (byte > RTC_DAYS_HIGH_CARRY_HALT_REGISTER) {
+    std::cout << "Unexpected too high value for SetRAMBankRTC: " << std::hex << (int)byte << std::endl;
+    assert(false);
+  }
   if (byte >= RTC_SECONDS_REGISTER) {
     assert(HasRTC());
   }

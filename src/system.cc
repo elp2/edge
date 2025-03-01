@@ -100,7 +100,9 @@ void System::Advance(int stepped) {
 }
 
 void System::Main() {
-  // cpu_->SetDebugPrint(true);
+  if (SUPER_DEBUG) {
+    cpu_->SetDebugPrint(true);
+  }
   while (true) {
     Advance(cpu_->Step());
   }

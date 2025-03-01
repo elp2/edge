@@ -82,8 +82,11 @@ uint8_t MMU::GetByteAt(uint16_t address) {
   if (address >= ROM_BANK_0_START && address <= ROM_BANK_0_END) {
     return cartridge_->GetROMByteAt(address);
   } else if (address >= ROM_BANK_1_START && address <= ROM_BANK_1_END) {
-    // TODO: Handle switchable ROM banks.
-    return cartridge_->GetROMByteAt(address - ROM_BANK_1_START + rom_bank_ * 0x4000);
+    int banked_address = address - ROM_BANK_1_START + (int)rom_bank_ * 0x4000;
+    if (SUPER_DEBUG) {
+      std::cout << "GetByteAt: " << std::hex << (int)address << " banked_address: " << std::hex << banked_address << std::endl;
+    }
+    return cartridge_->GetROMByteAt(banked_address);
   } else if (address >= VIDEO_RAM_START && address <= VIDEO_RAM_END) {
     // PPU should handle this.
     assert(false);
@@ -123,15 +126,13 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
   if (disasembler_mode_) {
     return;
   }
-  // if (overlay_boot_rom_ && address < 0x8000) {
-  //   assert(false);
-  // }
   
   if (address >= RAM_RTC_ENABLE_REGISTER_START && address <= RAM_RTC_ENABLE_REGISTER_END) {
     std::cout << "SetRAMRTCEnable: " << std::hex << (int)address << " = 0x" << (int)byte << std::endl;
     cartridge_->SetRAMRTCEnable(byte);
     return;
   } else if (address >= ROM_BANK_SELECT_REGISTER_START && address <= ROM_BANK_SELECT_REGISTER_END) {
+    std::cout << "SetROMBank: " << std::hex << (int)address << " = 0x" << (int)byte << std::endl;
     register_2000_3fff_ = byte;
     UpdateROMBank();
     return;
@@ -192,7 +193,7 @@ void MMU::SetRAM(uint16_t address, uint8_t byte) {
 }
 
 void MMU::UpdateROMBank() {
-  uint8_t rom_bank = register_2000_3fff_ & 0x7;
+  uint8_t rom_bank = register_2000_3fff_;
   rom_bank_ = rom_bank;
   if (rom_bank == 0) {
     cout << "ROM bank 0 is not allowed. Switching to bank 1." << endl;

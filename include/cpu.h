@@ -44,6 +44,9 @@ class CPU : public InterruptExecutor {
   bool haltNextLoop_ = false;
   bool stopNextLoop_ = false;
 
+  void SetSP(uint16_t sp);
+  uint16_t SP();
+
  public:
   flags_t flags;
 

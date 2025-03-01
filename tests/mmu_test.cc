@@ -64,40 +64,22 @@ TEST(MMUTest, OverlayBootROM) {
   ASSERT_EQ(mmu->GetByteAt(0x00), 0x3C);
 }
 
-TEST(MMUTest, RAMBankReadWrite) {
+TEST(MMUTest, RAMBankFullReadWrite) {
   MMU *mmu = getTestingMMURAM();
 
   // Enable RAM Bank.
   mmu->SetByteAt(0x0000, 0xA);
+  for (int bank = 1; bank < 4; bank++) {
+    mmu->SetByteAt(0x4000, bank);
+    for (int i = 0; i < 0x2000; i++) {
+      mmu->SetByteAt(0xA000 + i, bank + 10 + i % 128);
+    }
+  }
 
-  mmu->SetByteAt(0xA000, 0x1);
-  ASSERT_EQ(mmu->GetByteAt(0xA000), 0x1);
-
-  mmu->SetByteAt(0xA000, 0x2);
-  ASSERT_EQ(mmu->GetByteAt(0xA000), 0x2);
-}
-
-TEST(MMUTest, SwitchableRAMBank) {
-  MMU *mmu = getTestingMMURAM();
-
-  // Enable RAM Bank.
-  mmu->SetByteAt(0x0000, 0xA);
-
-  mmu->SetByteAt(0xA000, 0x1);
-  ASSERT_EQ(mmu->GetByteAt(0xA000), 0x1);
-
-  // Swap to next RAM bank.
-  mmu->SetByteAt(0x4000, 0x1);
-  // Enable RAM Bank.
-  mmu->SetByteAt(0x0000, 0xA);
-
-  mmu->SetByteAt(0xA000, 0x2);
-  ASSERT_EQ(mmu->GetByteAt(0xA000), 0x2);
-
-  // Swap back to original RAM bank.
-  mmu->SetByteAt(0x4000, 0x0);
-  // Enable RAM Bank.
-  mmu->SetByteAt(0x0000, 0xA);
-
-  ASSERT_EQ(mmu->GetByteAt(0xA000), 0x1);
+  for (int bank = 1; bank < 4; bank++) {
+    mmu->SetByteAt(0x4000, bank);
+    for (int i = 0; i < 0x2000; i++) {
+      ASSERT_EQ(mmu->GetByteAt(0xA000 + i), bank + 10 + i % 128);
+    }
+  }
 }

@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "address_router.h"
+#include "constants.h"
 #include "command.h"
 #include "interrupt_controller.h"
 #include "ppu.h"
@@ -127,6 +128,9 @@ uint8_t CPU::Get8Bit(Destination destination) {
       return address_router_->GetByteAt(0xff00 + Get8Bit(Register_C));
     case Eat_PC_Byte: {
       pc_byte = address_router_->GetByteAt(pc_);
+      if (SUPER_DEBUG) {
+        std::cout << "Ate: 0x" << hex << unsigned(pc_byte) << std::endl;
+      }
       AdvancePC();
       return pc_byte;
       case Address_BC:
@@ -187,7 +191,7 @@ uint16_t CPU::Get16Bit(Destination destination) {
     case Register_HL:
       return buildMsbLsb16(h_, l_);
     case Register_SP:
-      return sp_;
+      return SP();
     case Register_PC:
       return pc_;
     case Eat_PC_Word:
@@ -305,7 +309,7 @@ void CPU::Set16Bit(Destination destination, uint16_t value) {
       pc_ = value;
       break;
     case Register_SP:
-      sp_ = value;
+      SetSP(value);
       break;
     case Eat_PC_Word:
       address_router_->SetWordAt(pc_, value);
@@ -342,8 +346,8 @@ uint8_t CPU::ReadOpcodeAtPC() {
 
 void CPU::Push8Bit(uint8_t byte) {
   // Stack pointer grows down before anything is pushed.
-  sp_ -= 1;
-  address_router_->SetByteAt(sp_, byte);
+  SetSP(SP() - 1);
+  address_router_->SetByteAt(SP(), byte);
 }
 
 void CPU::Push16Bit(uint16_t word) {
@@ -352,10 +356,10 @@ void CPU::Push16Bit(uint16_t word) {
 }
 
 uint8_t CPU::Pop8Bit() {
-  uint16_t oldSp = sp_;
-  uint8_t byte = address_router_->GetByteAt(sp_);
-  sp_ += 1;
-  assert(sp_ > oldSp);
+  uint16_t oldSp = SP();
+  uint8_t byte = address_router_->GetByteAt(SP());
+  SetSP(SP() + 1);
+  assert(SP() > oldSp);
   return byte;
 }
 
@@ -379,6 +383,20 @@ void CPU::JumpAddress(uint16_t address) {
   Set16Bit(Register_PC, address);
 }
 
+void CPU::SetSP(uint16_t sp) {
+  bool in_high_ram = sp >= HIGH_RAM_START && sp <= HIGH_RAM_END;
+  bool in_work_ram = sp >= WORK_RAM_START && sp <= WORK_RAM_END;
+  bool in_external_ram = sp >= EXTERNAL_RAM_START && sp <= EXTERNAL_RAM_END;
+  if (!in_high_ram && !in_work_ram && !in_external_ram) {
+    std::cout << "SetSP: " << std::hex << (int)sp << " is not in valid RAM range" << std::endl;
+    assert(false);
+  }
+  sp_ = sp; 
+}
+uint16_t CPU::SP() {
+  return sp_; 
+}
+
 void CPU::JumpRelative(uint8_t relative) {
   if (disasembler_mode_) {
     return;
@@ -398,7 +416,7 @@ void CPU::AdvancePC() { pc_++; }
 void CPU::Reset() {
   pc_ = 0;
   // Initialized on start, but most programs will move it themselves anyway.
-  sp_ = 0xfffe;
+  SetSP(0xfffe);
   flags.z = false;
   flags.h = false;
   flags.n = false;
@@ -434,7 +452,7 @@ void CPU::Debugger() {
        << unsigned(Get8Bit(Register_E));
   cout << " HL: " << hex << unsigned(Get8Bit(Register_H)) << "," << hex
        << unsigned(Get8Bit(Register_L));
-  cout << " SP: " << hex << unsigned(sp_);
+  cout << " SP: " << hex << unsigned(SP());
   cout << " PC: " << hex << unsigned(pc_);
   cout << " " << (flags.z ? "Z" : "_");
   cout << (flags.c ? "C" : "_");

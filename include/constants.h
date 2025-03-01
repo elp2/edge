@@ -61,3 +61,5 @@ const int RAM_BANK_RTC_SELECT_REGISTER_END = 0x5FFF;
 
 const int LATCH_RTC_REGISTER_START = 0x6000;
 const int LATCH_RTC_REGISTER_END = 0x7FFF;
+
+const bool SUPER_DEBUG = false;

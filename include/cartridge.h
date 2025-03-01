@@ -48,7 +48,9 @@ class Cartridge {
   ~Cartridge();
 
   bool LoadFile(string filename);
-  uint8_t GetROMByteAt(uint16_t address);
+  void PrintDebugInfo();
+
+  uint8_t GetROMByteAt(int address);
 
   CartridgeType GetCartridgeType();
 
@@ -82,9 +84,9 @@ class Cartridge {
   uint8_t rtc_latched_value_;
 
   uint8_t *ram_;
-  uint8_t GetRAM(uint16_t address);
-  void SetRAM(uint16_t address, uint8_t byte);
-  uint16_t GetBankedRAMAddress(uint16_t address);
+  uint8_t GetRAM(int address);
+  void SetRAM(int address, uint8_t byte);
+  int GetBankedRAMAddress(int address);
 
   uint8_t GetRTC();
   void SetRTC(uint8_t byte);
