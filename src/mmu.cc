@@ -99,8 +99,8 @@ uint8_t MMU::GetByteAt(uint16_t address) {
   } else if (address >= FORBIDDEN_RAM_START && address <= FORBIDDEN_RAM_END) {
     assert(false);
   } else if (address >= IO_RAM_START && address <= IO_RAM_END) {
-    // Hanled Elsewhere
-    assert(false);
+    std::cout << "Unexpected IO RAM Get: 0x" << hex << unsigned(address) << endl;
+    return 0x00;
   } else if (address >= HIGH_RAM_START && address <= HIGH_RAM_END) {
     return high_memory_[address - HIGH_RAM_START];
   } 
