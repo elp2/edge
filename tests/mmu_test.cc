@@ -82,8 +82,6 @@ TEST(MMUTest, SwitchableRAMBank) {
 
   // Enable RAM Bank.
   mmu->SetByteAt(0x0000, 0xA);
-  // Set 32k RAM Mode.
-  mmu->SetByteAt(0x6000, 0x1);
 
   mmu->SetByteAt(0xA000, 0x1);
   ASSERT_EQ(mmu->GetByteAt(0xA000), 0x1);

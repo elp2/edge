@@ -128,6 +128,7 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
   // }
   
   if (address >= RAM_RTC_ENABLE_REGISTER_START && address <= RAM_RTC_ENABLE_REGISTER_END) {
+    std::cout << "SetRAMRTCEnable: " << std::hex << (int)address << " = 0x" << (int)byte << std::endl;
     cartridge_->SetRAMRTCEnable(byte);
     return;
   } else if (address >= ROM_BANK_SELECT_REGISTER_START && address <= ROM_BANK_SELECT_REGISTER_END) {

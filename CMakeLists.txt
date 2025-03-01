@@ -146,8 +146,8 @@ find_program(RGBLINK rgblink)
 find_program(RGBFIX rgbfix)
 
 # Check if tools are found
-if(NOT RGBASM OR NOT RGBLINK)
-    message(FATAL_ERROR "RGBDS tools (rgbasm, rgblink) are required. Install them from https://github.com/gbdev/rgbds .")
+if(NOT RGBASM OR NOT RGBLINK OR NOT RGBFIX)
+    message(FATAL_ERROR "RGBDS tools (rgbasm, rgblink, rgbfix) are required. Install them from https://github.com/gbdev/rgbds .")
 endif()
 
 # Source directory for .asm files
@@ -173,21 +173,12 @@ endforeach()
 
 # Custom command to link and fix .o to .gb in build directory
 foreach(ROM ${ROMS})
-    if(RGBFIX)
-        add_custom_command(
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb
-            COMMAND ${RGBLINK} -o ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o && ${RGBFIX} -v ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb
-            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o
-            COMMENT "Linking and fixing ${ROM}.o to ${ROM}.gb"
-        )
-    else()
-        add_custom_command(
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb
-            COMMAND ${RGBLINK} -o ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o
-            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o
-            COMMENT "Linking ${ROM}.o to ${ROM}.gb (no rgbfix available)"
-        )
-    endif()
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb
+        COMMAND ${RGBLINK} -o ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o && ${RGBFIX} -m MBC3+RAM+BATTERY -r 3 -v ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.gb
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${ROM}.o
+        COMMENT "Linking and fixing ${ROM}.o to ${ROM}.gb"
+    )
 endforeach()
 
 # Define targets for each ROM

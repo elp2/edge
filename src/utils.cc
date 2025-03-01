@@ -131,11 +131,11 @@ MMU *getTestingMMURAM() {
   MMU *mmu = new MMU();
 #if defined WIN32
   mmu->SetBootROM(UnsignedCartridgeBytes("../../roms/boot.gb"));
-  Cartridge *cartridgeROM = new Cartridge("../../gb-test-roms/cgb_sound/cgb_sound.gb");
+  Cartridge *cartridgeROM = new Cartridge("pulse1.gb");
   mmu->SetCartridge(cartridgeROM);
 #else
   mmu->SetBootROM(UnsignedCartridgeBytes("../roms/boot.gb"));
-  Cartridge *cartridge = new Cartridge("../../gb-test-roms/cgb_sound/cgb_sound.gb");
+  Cartridge *cartridge = new Cartridge("pulse1.gb");
   mmu->SetCartridge(cartridge);
 #endif
 

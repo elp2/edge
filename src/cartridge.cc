@@ -34,6 +34,7 @@ uint8_t *UnsignedCartridgeBytes(string filename) {
 
 Cartridge::Cartridge(string filename) {
    rom_ = UnsignedCartridgeBytes(filename);
+   ram_ = new uint8_t[RAMSize()];
    // TODO: MBC1 uses a special addressing for large ROMS.
    assert(ROMSize() <= 524288 || GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT);
 }
@@ -207,18 +208,28 @@ void Cartridge::SetRTC(uint8_t byte) {
 }
 
 uint8_t Cartridge::GetRAM(uint16_t address) {
-  std::cout << "GetRAM: " << std::hex << (int)address << " size: " << std::dec << RAMSize() << std::endl;
-  assert(address < RAMSize());
+  uint16_t banked_address = GetBankedRAMAddress(address);
+  if (banked_address >= RAMSize()) {
+    std::cout << "GetRAM: " << std::hex << (int)address << " size: " << std::dec << RAMSize() << std::endl;
+    assert(false);
+  }
 
-  assert(false); // TODO: Implement.
-
-  return 0;
+  return ram_[banked_address];
 }
 
 void Cartridge::SetRAM(uint16_t address, uint8_t byte) {
-  assert(address < RAMSize());
+  uint16_t banked_address = GetBankedRAMAddress(address);
+  if (banked_address >= RAMSize()) {
+    std::cout << "SetRAM: " << std::hex << (int)address << " size: " << std::dec << RAMSize() << std::endl;
+    assert(false);
+  }
 
-  assert(false);
+  ram_[banked_address] = byte;
+}
+
+uint16_t Cartridge::GetBankedRAMAddress(uint16_t address) {
+  assert(ram_bank_rtc_ < RTC_SECONDS_REGISTER);
+  return address + (ram_bank_rtc_ * 0x4000);
 }
 
 int Cartridge::ROMBankCount() {
@@ -251,7 +262,10 @@ bool Cartridge::HasRAM() {
 }
 
 void Cartridge::SetRAMRTCEnable(uint8_t byte) {
-  assert(byte <= 0x0A);
+  if (byte > 0x0A) {
+    std::cout << "Unexpected too high value for SetRAMRTCEnable - will treat as disable: " << std::hex << (int)byte << std::endl;
+    byte = 0;
+  }
   ram_rtc_enable_ = byte;
 }
 

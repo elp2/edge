@@ -81,8 +81,10 @@ class Cartridge {
   bool rtc_latched_;
   uint8_t rtc_latched_value_;
 
+  uint8_t *ram_;
   uint8_t GetRAM(uint16_t address);
   void SetRAM(uint16_t address, uint8_t byte);
+  uint16_t GetBankedRAMAddress(uint16_t address);
 
   uint8_t GetRTC();
   void SetRTC(uint8_t byte);
