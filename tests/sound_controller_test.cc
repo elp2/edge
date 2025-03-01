@@ -1,6 +1,5 @@
 #include "sound_controller.h"
 
-#include "SDL.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "interrupt_controller.h"

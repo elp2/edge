@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "SDL.h"
 #include "system.h"
 
 int main(int argc, char* argv[]) {

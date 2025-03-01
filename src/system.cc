@@ -5,7 +5,6 @@
 #include <iostream>
 #include <thread>
 
-#include "SDL.h"
 #include "address_router.h"
 #include "bit_command.h"
 #include "command_factory.h"

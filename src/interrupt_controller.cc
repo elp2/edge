@@ -3,7 +3,6 @@
 #include <cassert>
 #include <iostream>
 
-#include "SDL.h"
 #include "input_controller.h"
 
 const int INTERRUPTS_ENABLE_DISABLE_LOOPS = 2;
