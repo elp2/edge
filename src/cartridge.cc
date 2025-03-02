@@ -208,7 +208,7 @@ void Cartridge::SetRTC(uint8_t byte) {
 uint8_t Cartridge::GetRAM(int address) {
   int banked_address = GetBankedRAMAddress(address);
   if (banked_address >= RAMSize()) {
-    std::cout << "GetRAM: " << std::hex << address << " size: " << std::hex << RAMSize() << std::endl;
+    std::cout << "GetRAM out of bounds: " << std::hex << address << " past size: " << std::hex << RAMSize() << std::endl;
     assert(false);
   }
 
@@ -216,9 +216,13 @@ uint8_t Cartridge::GetRAM(int address) {
 }
 
 void Cartridge::SetRAM(int address, uint8_t byte) {
+  if (RAMSize() == 0) {
+    // Ignore all writes to RAM when there is none. For example, Mario clears all memory inclding non-existent RAM.
+    return;
+  }
   int banked_address = GetBankedRAMAddress(address);
   if (banked_address >= RAMSize()) {
-    std::cout << "SetRAM: " << std::hex << address << " size: " << std::hex << RAMSize() << std::endl;
+    std::cout << "SetRAM out of bounds: " << std::hex << address << " past size: " << std::hex << RAMSize() << std::endl;
     assert(false);
   }
 
