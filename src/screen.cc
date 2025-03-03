@@ -10,6 +10,7 @@ const uint32_t DARK_GREEN = 0xFF306230;
 const uint32_t LIGHT_GREEN = 0xFF8BAC0F;
 const uint32_t LIGHEST_GREEN = 0xFF9BBC0F;
 const uint8_t DEFAULT_PALETTE = 0xE4;  // 11100100.
+const int PIXEL_SCALE = 4;
 
 Screen::Screen() { InitSDL(); }
 
@@ -21,7 +22,7 @@ void Screen::InitSDL() {
   }
   window_ =
       SDL_CreateWindow("EDGE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, 0);
+                       SCREEN_WIDTH * PIXEL_SCALE, SCREEN_HEIGHT * PIXEL_SCALE, 0);
 
   renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_SOFTWARE);
   texture_ =
