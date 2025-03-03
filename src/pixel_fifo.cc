@@ -186,7 +186,7 @@ void PixelFIFO::StartSpriteFetch(Sprite sprite) {
   fetch_->cycles_remaining_ = FETCH_CYCLES;
 
   uint16_t sprite_row_pixels = ppu_->SpritePixels(sprite, pixely_ - sprite.y_);
-  Palette p = bit_set(sprite.flags_, 4) ? SpritePalette1 : SpritePalette0;
+  Palette p = SpriteUsesPalette1(sprite) ? SpritePalette1 : SpritePalette0;
 
   PixelList(sprite_row_pixels, p, fetch_->pixels_);
   fetch_->strategy_ = OverlayFirst8FetchStrategy;

@@ -11,28 +11,11 @@ struct Sprite {
   uint8_t flags_;  // Priority, flips, palette.
 };
 
-bool SpriteYIntersectsRow(uint8_t sprite_y, int row, int sprite_height);
+// At one point, these were objects but it was too slow.
+// Now they are just functions.
+bool SpriteYIntersectsRow(int sprite_y, int row, int sprite_height);
 
-/*
-class Sprite {
-private:
-    int x_;
-    int y_;
-    uint8_t tile_number_;
-    uint8_t flags_; // Priority, flips, palette.
-
-public:
-    Sprite();
-    ~Sprite() = default;
-
-    bool IntersectsRow(int row, int sprite_height);
-
-    // If false, only overrites color 0 of BG and window.
-    bool priority() { return flags_ & 0x80; };
-    uint8_t tile_number() { return tile_number_; };
-    bool x_flip() { return flags_ & 0x40; };
-    bool y_flip() { return flags_ & 0x20; };
-    Palette palette() { return flags_ & 0x10 ?  SpritePalette1 : SpritePalette0;
-};
-};
-*/
+bool SpritePriority(Sprite sprite);
+bool SpriteFlippedY(Sprite sprite);
+bool SpriteFlippedX(Sprite sprite);
+bool SpriteUsesPalette1(Sprite sprite);

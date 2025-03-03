@@ -418,33 +418,26 @@ void PPU::OAMSearchY(int row) {
   }
 
   if (!(bit_set(lcdc(), 1))) {
-    row_sprites_count_ = 0;
     // OBJ (Sprites) disabled.
+    row_sprites_count_ = 0;
     return;
-  }
-
-  const int SPRITE_HEIGHT = 8;
-  bool tall_sprites = bit_set(lcdc(), 2);
-  if (tall_sprites) {
-    // TODO: Support tall sprites here and fetching.
-    std::cout << "Tall sprites not supported" << std::endl;
   }
 
   int sprites_found = 0;
   for (int i = 0; i < NUM_OAM_SPRITES; i++) {
     int offset = 4 * i;
 
-    uint8_t sprite_y = oam_ram_[offset + 0];
-    uint8_t sprite_x = oam_ram_[offset + 1];
+    int sprite_y = oam_ram_[offset + 0];
+    int sprite_x = oam_ram_[offset + 1];
 
     if ((sprite_x == 0 && sprite_y == 0)) {
       continue;
     }
-    // Sprites are arranged with their maximum bottom right location.
+    // Transform sprite origin to be top left from bottom right 8x16.
     sprite_x -= 8;
     sprite_y -= 16;
-    if (SpriteYIntersectsRow(sprite_y, row, SPRITE_HEIGHT)) {
-      assert(sprite_y - row < 8);
+    if (SpriteYIntersectsRow(sprite_y, row, SpriteHeight())) {
+      assert(sprite_y - row < SpriteHeight());
 
       row_sprites_[sprites_found].x_ = sprite_x;
       row_sprites_[sprites_found].y_ = sprite_y;
@@ -495,18 +488,21 @@ uint16_t PPU::BackgroundTile(int x, int y) {
 }
 
 uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
-  if (sprite_row < 0 || sprite_row > 7) {
-    std::cout << "Sprite row out of range: " << sprite_row << std::endl;
-    return 0xEDED;
+  if (sprite_row < 0 || sprite_row >= SpriteHeight()) {
+    cout << "Sprite row out of range: " << sprite_row << endl;
+    assert(false);
   }
 
-  if (bit_set(sprite.flags_, 6)) {
-    sprite_row = 7 - sprite_row;
+  if (SpriteFlippedY(sprite)) {
+    sprite_row = SpriteHeight() - sprite_row - 1;
   }
 
   uint16_t sprite_tile_address =
       0x8000 + sprite.tile_number_ * BYTES_PER_8X8_TILE;
   sprite_tile_address += (sprite_row % 8) * 2;
+  if (sprite_row > 7) {
+    sprite_tile_address += BYTES_PER_8X8_TILE;
+  }
   uint16_t tile_data = buildMsbLsb16(GetByteAt(sprite_tile_address),
                                      GetByteAt(sprite_tile_address + 1));
   return tile_data;
@@ -520,3 +516,5 @@ uint16_t PPU::WindowTile(int x, int y) {
   assert(false);
   return GetByteAt(window_map_address_base);
 }
+
+int PPU::SpriteHeight() { return bit_set(lcdc(), 2) ? 16 : 8; }

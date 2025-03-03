@@ -1,9 +1,23 @@
 #include "sprite.h"
 
-#include <iostream>
+#include "utils.h"
 
-using namespace std;
-
-bool SpriteYIntersectsRow(uint8_t sprite_y, int row, int sprite_height) {
+bool SpriteYIntersectsRow(int sprite_y, int row, int sprite_height) {
   return row >= sprite_y && row < (sprite_y + sprite_height);
+}
+
+bool SpritePriority(Sprite sprite) { 
+  return bit_set(sprite.flags_, 7);
+}
+
+bool SpriteFlippedY(Sprite sprite) { 
+  return bit_set(sprite.flags_, 6); 
+}
+
+bool SpriteFlippedX(Sprite sprite) {
+  return bit_set(sprite.flags_, 5);
+}
+
+bool SpriteUsesPalette1(Sprite sprite) {
+  return bit_set(sprite.flags_, 4);
 }

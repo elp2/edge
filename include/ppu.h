@@ -120,4 +120,6 @@ class PPU {
   // Performs the OAM Search function, finding up to 10 sprites visible at this
   // row.
   void OAMSearchY(int row);
+
+  int SpriteHeight();
 };
