@@ -133,7 +133,7 @@ void PPU::VisibleCycle(int remaining_cycles) {
     state_ = OAM_Search;
     OAMSearchY(row);
     set_ly(row);
-    fifo_->NewRow(row, row_sprites_);
+    fifo_->NewRow(row, row_sprites_, row_sprites_count_);
   }
 
   if (row_cycles < OAM_SEARCH_CYCLES) {
@@ -418,6 +418,7 @@ void PPU::OAMSearchY(int row) {
   }
 
   if (!(bit_set(lcdc(), 1))) {
+    row_sprites_count_ = 0;
     // OBJ (Sprites) disabled.
     return;
   }
@@ -455,11 +456,7 @@ void PPU::OAMSearchY(int row) {
       break;
     }
   }
-  if (sprites_found < 10) {
-    // Use an invisible sprite to bound.
-    row_sprites_[sprites_found].x_ = 0;
-    row_sprites_[sprites_found].y_ = 0;
-  }
+  row_sprites_count_ = sprites_found;
 }
 
 uint16_t PPU::BackgroundTile(int x, int y) {

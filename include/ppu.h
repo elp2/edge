@@ -66,6 +66,7 @@ class PPU {
   void AdvanceFrame(int frame_cycles);
 
   Sprite *row_sprites_ = NULL;
+  int row_sprites_count_ = 0;
 
   void VisibleCycle(int clockCycles);
   void InvisibleCycle(int clockCycles);

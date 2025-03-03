@@ -35,14 +35,17 @@ class PixelFIFO {
   PPU *ppu_;
   int scx_shift_ = 0;
   int pixels_outputted_ = 0;
-  int x_ = 0;
-  int y_ = 0;
-  int row_ = 0;
+ 
+  int bgx_ = 0;
+ 
+  int pixelx_ = 0;
+  int pixely_ = 0;
 
   Fetch *fetch_ = NULL;
 
   void StartSpriteFetch(Sprite sprite);
   Sprite *row_sprites_;
+  int row_sprites_count_;
   // Which index are we due to potentially fetch next.
   int sprite_index_ = 0;
   void OverlaySpriteFetch(int i);
@@ -61,6 +64,6 @@ class PixelFIFO {
   ~PixelFIFO() = default;
 
   // Starts the new row 0->144.
-  void NewRow(int row, Sprite *row_sprites);
+  void NewRow(int row, Sprite *row_sprites, int row_sprites_count);
   bool Advance(Screen *screen);
 };

@@ -25,17 +25,20 @@ void PixelFIFO::Reset() {
   fifo_start_ = 0;
 }
 
-void PixelFIFO::NewRow(int row, Sprite *row_sprites) {
+void PixelFIFO::NewRow(int pixely, Sprite *row_sprites, int row_sprites_count) {
   if (fifo_ != NULL) {
     free(fifo_);
     fifo_ = NULL;
   }
   Reset();
-  row_ = row;
+
+  pixelx_ = 0;
+  pixely_ = pixely;
   row_sprites_ = row_sprites;
-  y_ = row_ + ppu_->scy();
+  row_sprites_count_ = row_sprites_count;
   scx_shift_ = ppu_->scx() % 8;
-  x_ = ppu_->scx() - scx_shift_;
+  bgx_ = ppu_->scx() - scx_shift_;
+
   assert(pixels_outputted_ == 160 || pixels_outputted_ == 0);
   pixels_outputted_ = 0;
 }
@@ -70,7 +73,7 @@ bool PixelFIFO::Advance(Screen *screen) {
     // Need to keep the fetch running.
     return false;
   }
-  int sprite_i = SpriteIndexForX(x_);
+  int sprite_i = SpriteIndexForX(pixelx_);
   if (fetch_->cycles_remaining_ > 0 && sprite_i != -1) {
     // BG fetch happening, but we also need to apply a sprite here.
     return false;
@@ -83,13 +86,12 @@ bool PixelFIFO::Advance(Screen *screen) {
   if (scx_shift_) {
     scx_shift_--;
     PopFront();
-    x_++;
     return false;
   }
 
   screen->DrawPixel(PeekFront());
   PopFront();
-  x_++;
+  pixelx_++;
   sprite_index_ = 0;
   return (++pixels_outputted_ == SCREEN_WIDTH);
 }
@@ -158,7 +160,7 @@ void PixelFIFO::StartFetch() {
   if (fifo_length_ <= 8) {
     StartBackgroundFetch();
   } else {
-    int sprite_i = SpriteIndexForX(x_);
+    int sprite_i = SpriteIndexForX(pixelx_);
     if (sprite_i == -1) {
       return;
     }
@@ -172,10 +174,7 @@ void PixelFIFO::StartFetch() {
 // Returns the first sprite at x past sprite_index_, or -1 if there is no such
 // sprite.
 int PixelFIFO::SpriteIndexForX(int x) {
-  for (int i = sprite_index_; i < 10; i++) {
-    if (row_sprites_[i].x_ == 0 && row_sprites_[i].y_ == 0) {
-      return -1;
-    }
+  for (int i = sprite_index_; i < row_sprites_count_; i++) {
     if (row_sprites_[i].x_ == x) {
       return i;
     }
@@ -186,7 +185,7 @@ int PixelFIFO::SpriteIndexForX(int x) {
 void PixelFIFO::StartSpriteFetch(Sprite sprite) {
   fetch_->cycles_remaining_ = FETCH_CYCLES;
 
-  uint16_t sprite_row_pixels = ppu_->SpritePixels(sprite, y_ - sprite.y_);
+  uint16_t sprite_row_pixels = ppu_->SpritePixels(sprite, pixely_ - sprite.y_);
   Palette p = bit_set(sprite.flags_, 4) ? SpritePalette1 : SpritePalette0;
 
   PixelList(sprite_row_pixels, p, fetch_->pixels_);
@@ -196,11 +195,9 @@ void PixelFIFO::StartSpriteFetch(Sprite sprite) {
 
 void PixelFIFO::StartBackgroundFetch() {
   fetch_->cycles_remaining_ = FETCH_CYCLES;
-
-  // TODO: Find the right next tile based on where we are.
-  int next_tile = x_ + fifo_length_;
-  // cout << "Fetching next tile: 0x" << hex << unsigned(next_tile) << endl;
-  uint16_t background_tile = ppu_->BackgroundTile(next_tile, y_);
+  // TODO: Sometimes chooses the next row's tile for first tile.
+  bgx_ += fifo_length_;
+  uint16_t background_tile = ppu_->BackgroundTile(bgx_, pixely_ + ppu_->scy());
   PixelList(background_tile, BackgroundWindowPalette, fetch_->pixels_);
   fetch_->strategy_ = AppendFetchStrategy;
 }
