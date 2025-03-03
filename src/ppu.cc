@@ -503,9 +503,14 @@ uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
   if (sprite_row > 7) {
     sprite_tile_address += BYTES_PER_8X8_TILE;
   }
-  uint16_t tile_data = buildMsbLsb16(GetByteAt(sprite_tile_address),
-                                     GetByteAt(sprite_tile_address + 1));
-  return tile_data;
+  uint16_t tile_row = buildMsbLsb16(GetByteAt(sprite_tile_address),
+                                    GetByteAt(sprite_tile_address + 1));
+
+  if (SpriteFlippedX(sprite)) {
+    return ReverseTileRow(tile_row);
+  } else {
+    return tile_row;
+  }
 }
 
 uint16_t PPU::WindowTile(int x, int y) {
@@ -518,3 +523,20 @@ uint16_t PPU::WindowTile(int x, int y) {
 }
 
 int PPU::SpriteHeight() { return bit_set(lcdc(), 2) ? 16 : 8; }
+
+uint16_t PPU::ReverseTileRow(uint16_t tile_row) {
+  // Process each byte separately
+  uint16_t top = HIGHER8(tile_row);
+  uint16_t bottom = LOWER8(tile_row);
+
+    // Reverse bits in each byte.
+    top = ((top & 0xF0) >> 4) | ((top & 0x0F) << 4);  // Swap nibbles
+    top = ((top & 0xCC) >> 2) | ((top & 0x33) << 2);  // Swap 2-bit pairs
+    top = ((top & 0xAA) >> 1) | ((top & 0x55) << 1);  // Swap adjacent bits
+    
+    bottom = ((bottom & 0xF0) >> 4) | ((bottom & 0x0F) << 4);
+    bottom = ((bottom & 0xCC) >> 2) | ((bottom & 0x33) << 2);
+    bottom = ((bottom & 0xAA) >> 1) | ((bottom & 0x55) << 1);
+    
+    return (top << 8) | bottom;
+}

@@ -109,15 +109,8 @@ void PixelFIFO::ApplyFetch() {
       break;
     case OverlayFirst8FetchStrategy:
       assert(fifo_length_ >= 8);
-      if (bit_set(fetch_->sprite_.flags_, 5)) {
-        // X flipped, apply bits backwards.
-        for (int i = 7; i >= 0; i--) {
-          OverlaySpriteFetch(i);
-        }
-      } else {
-        for (int i = 0; i < 8; i++) {
-          OverlaySpriteFetch(i);
-        }
+      for (int i = 0; i < 8; i++) {
+        OverlaySpriteFetch(i);
       }
       break;
     case ReplaceFetchStrategy:
