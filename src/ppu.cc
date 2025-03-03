@@ -453,6 +453,10 @@ void PPU::OAMSearchY(int row) {
 }
 
 uint16_t PPU::BackgroundTile(int x, int y) {
+  if (!bit_set(lcdc(), 0)) {
+    // Background disabled.
+    return 0x0000;
+  }
   assert(x % 8 == 0);
   // cout << "Getting bg tile: 0x" << hex << unsigned(tile_x) << " x 0x" << hex
   // << unsigned(tile_y) << endl;
