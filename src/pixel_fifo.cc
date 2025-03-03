@@ -142,13 +142,13 @@ void PixelFIFO::OverlaySpriteFetch(int i) {
 }
 
 void PixelList(uint16_t pixels, Palette palette, Pixel *list) {
-  uint8_t row_a = HIGHER8(pixels);
-  uint8_t row_b = LOWER8(pixels);
+  uint8_t high = HIGHER8(pixels);
+  uint8_t low = LOWER8(pixels);
   for (int i = 7; i >= 0; i--) {
     list[i].palette_ = palette;
-    list[i].two_bit_color_ = ((row_a & 0x1) << 1) | (row_b & 0x1);
-    row_a >>= 1;
-    row_b >>= 1;
+    list[i].two_bit_color_ = ((high & 0x1)) | ((low & 0x1) << 1);
+    high >>= 1;
+    low >>= 1;
   }
 }
 
