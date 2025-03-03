@@ -121,25 +121,30 @@ void PixelFIFO::ApplyFetch() {
 }
 
 void PixelFIFO::OverlaySpriteFetch(int i) {
-  Pixel sp = fetch_->pixels_[i];
+  Pixel sprite_pixel = fetch_->pixels_[i];
   int pos = (fifo_start_ + i) % 16;
-  Pixel fp = fifo_[pos];
-  if (fp.palette_ == BackgroundWindowPalette) {
-    // TODO: Priority.
-    if (sp.two_bit_color_ != 0x00) {
-      if (fp.palette_ == BackgroundWindowPalette) {
-        fifo_[pos] = sp;
+  Pixel fifo_pixel = fifo_[pos];
+  if (fifo_pixel.palette_ == BackgroundWindowPalette) {
+    if (sprite_pixel.sprite_over_background_window_ || fifo_pixel.two_bit_color_ == 0x00) {
+      if (sprite_pixel.two_bit_color_ != 0x00) {
+        fifo_[pos] = sprite_pixel;
       }
+    }
+  } else {
+    // Sprite over sprite if existing pixel is transparent.
+    if (fifo_pixel.two_bit_color_ == 0x00) {
+      fifo_[pos] = sprite_pixel;
     }
   }
 }
 
-void PixelList(uint16_t pixels, Palette palette, Pixel *list) {
+void PixelList(uint16_t pixels, Palette palette, Pixel *list, bool sprite_over_background_window) {
   uint8_t high = HIGHER8(pixels);
   uint8_t low = LOWER8(pixels);
   for (int i = 7; i >= 0; i--) {
     list[i].palette_ = palette;
     list[i].two_bit_color_ = ((high & 0x1)) | ((low & 0x1) << 1);
+    list[i].sprite_over_background_window_ = sprite_over_background_window;
     high >>= 1;
     low >>= 1;
   }
@@ -181,7 +186,7 @@ void PixelFIFO::StartSpriteFetch(Sprite sprite) {
   uint16_t sprite_row_pixels = ppu_->SpritePixels(sprite, pixely_ - sprite.y_);
   Palette p = SpriteUsesPalette1(sprite) ? SpritePalette1 : SpritePalette0;
 
-  PixelList(sprite_row_pixels, p, fetch_->pixels_);
+  PixelList(sprite_row_pixels, p, fetch_->pixels_, SpriteOverBackgroundWindow(sprite));
   fetch_->strategy_ = OverlayFirst8FetchStrategy;
   fetch_->sprite_ = sprite;
 }
@@ -191,6 +196,6 @@ void PixelFIFO::StartBackgroundFetch() {
   // TODO: Sometimes chooses the next row's tile for first tile.
   bgx_ += fifo_length_;
   uint16_t background_tile = ppu_->BackgroundTile(bgx_, pixely_ + ppu_->scy());
-  PixelList(background_tile, BackgroundWindowPalette, fetch_->pixels_);
+  PixelList(background_tile, BackgroundWindowPalette, fetch_->pixels_, false);
   fetch_->strategy_ = AppendFetchStrategy;
 }

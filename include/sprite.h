@@ -15,7 +15,7 @@ struct Sprite {
 // Now they are just functions.
 bool SpriteYIntersectsRow(int sprite_y, int row, int sprite_height);
 
-bool SpritePriority(Sprite sprite);
+bool SpriteOverBackgroundWindow(Sprite sprite);
 bool SpriteFlippedY(Sprite sprite);
 bool SpriteFlippedX(Sprite sprite);
 bool SpriteUsesPalette1(Sprite sprite);

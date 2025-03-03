@@ -453,8 +453,7 @@ void PPU::OAMSearchY(int row) {
 }
 
 uint16_t PPU::BackgroundTile(int x, int y) {
-  if (!bit_set(lcdc(), 0)) {
-    // Background disabled.
+  if (!BackgroundWindowEnablePriority()) {
     return 0x0000;
   }
   assert(x % 8 == 0);
@@ -484,7 +483,7 @@ uint16_t PPU::BackgroundTile(int x, int y) {
       assert(false);
       break;
   }
-  // Each row in title is two bytes.
+  // Each row in tile is two bytes.
   tile_data_address += (y % 8) * 2;
   uint16_t tile_data = buildMsbLsb16(GetByteAt(tile_data_address),
                                      GetByteAt(tile_data_address + 1));
@@ -543,4 +542,8 @@ uint16_t PPU::ReverseTileRow(uint16_t tile_row) {
     bottom = ((bottom & 0xAA) >> 1) | ((bottom & 0x55) << 1);
     
     return (top << 8) | bottom;
+}
+
+bool PPU::BackgroundWindowEnablePriority() {
+  return bit_set(lcdc(), 0);
 }
