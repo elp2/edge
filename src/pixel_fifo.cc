@@ -11,36 +11,42 @@
 const int FETCH_CYCLES = 3;
 
 PixelFIFO::PixelFIFO(PPU *ppu) {
-  ppu_ = ppu;
-  Reset();
+  ppu_ = ppu; 
+ 
   fetch_ = new Fetch();
   fetch_->cycles_remaining_ = 0;
   fetch_->pixels_ = (Pixel *)calloc(8, sizeof(Pixel));
   fetch_->strategy_ = AppendFetchStrategy;
+  
+  fifo_ = (Pixel *)calloc(16, sizeof(Pixel));
+  ClearFifo();
 }
 
-void PixelFIFO::Reset() {
-  fifo_ = (Pixel *)calloc(16, sizeof(Pixel));
+PixelFIFO::~PixelFIFO() {
+  free(fetch_->pixels_);
+  free(fetch_);
+  free(fifo_);
+}
+
+void PixelFIFO::ClearFifo() {
   fifo_length_ = 0;
   fifo_start_ = 0;
 }
 
 void PixelFIFO::NewRow(int pixely, Sprite *row_sprites, int row_sprites_count) {
-  if (fifo_ != NULL) {
-    free(fifo_);
-    fifo_ = NULL;
-  }
-  Reset();
+  std::cout << "New row: " << pixely << std::endl;
+  ClearFifo();
+
+  window_triggered_ = false;
+  window_x_ = 0;
 
   pixelx_ = 0;
+  pixels_outputted_ = 0;
   pixely_ = pixely;
   row_sprites_ = row_sprites;
   row_sprites_count_ = row_sprites_count;
   scx_shift_ = ppu_->scx() % 8;
   bgx_ = ppu_->scx() - scx_shift_;
-
-  assert(pixels_outputted_ == 160 || pixels_outputted_ == 0);
-  pixels_outputted_ = 0;
 }
 
 void PixelFIFO::PopFront() {
@@ -93,6 +99,22 @@ bool PixelFIFO::Advance(Screen *screen) {
   PopFront();
   pixelx_++;
   sprite_index_ = 0;
+
+  bool new_window_triggered = ppu_->WindowEnabledAt(pixelx_, pixely_);
+  if (new_window_triggered != window_triggered_) { 
+    window_triggered_ = new_window_triggered;
+    ClearFifo();
+    StartFetch();
+    std::cout << "0 Fetch cycles remaining: " << (int)fetch_->cycles_remaining_ << std::endl;
+
+    std::cout << "Window enabled: " << (int)window_triggered_ << std::endl;
+
+    if (!window_triggered_) {
+      std::cout << "Unexpected: Window disabled during the line." << std::endl;
+      assert(false);
+    }
+  }
+
   return (++pixels_outputted_ == SCREEN_WIDTH);
 }
 
@@ -156,7 +178,11 @@ void PixelFIFO::StartFetch() {
     return;
   }
   if (fifo_length_ <= 8) {
-    StartBackgroundFetch();
+    if (window_triggered_) {
+      StartWindowFetch();
+    } else {
+      StartBackgroundFetch();
+    }
   } else {
     int sprite_i = SpriteIndexForX(pixelx_);
     if (sprite_i == -1) {
@@ -193,9 +219,18 @@ void PixelFIFO::StartSpriteFetch(Sprite sprite) {
 
 void PixelFIFO::StartBackgroundFetch() {
   fetch_->cycles_remaining_ = FETCH_CYCLES;
-  // TODO: Sometimes chooses the next row's tile for first tile.
+  // TODO: Sometimes chooses the next row's tile for first tile. #18.
   bgx_ += fifo_length_;
   uint16_t background_tile = ppu_->BackgroundTile(bgx_, pixely_ + ppu_->scy());
   PixelList(background_tile, BackgroundWindowPalette, fetch_->pixels_, false);
   fetch_->strategy_ = AppendFetchStrategy;
+}
+
+void PixelFIFO::StartWindowFetch() {
+  fetch_->cycles_remaining_ = FETCH_CYCLES;
+  uint16_t window_tile = ppu_->WindowTile(window_x_);
+  PixelList(window_tile, BackgroundWindowPalette, fetch_->pixels_, false);
+  fetch_->strategy_ = AppendFetchStrategy;
+  std::cout << "Fetching window tile" << std::hex << window_tile << std::endl;
+  window_x_ += 8;
 }

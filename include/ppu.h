@@ -35,7 +35,7 @@ class PPU {
   void SetByteAt(uint16_t address, uint8_t byte);
 
   uint16_t BackgroundTile(int tile_x, int tile_y);
-  uint16_t WindowTile(int x, int y);
+  uint16_t WindowTile(int x);
 
   // Sprite, y is 0-sprite_height.
   uint16_t SpritePixels(Sprite sprite, int sprite_y);
@@ -48,6 +48,8 @@ class PPU {
   };
 
   void SkipBootROM();
+
+  bool WindowEnabledAt(int x, int y);
 
  private:
   uint8_t *oam_ram_ = NULL;
@@ -104,8 +106,11 @@ class PPU {
   void set_wy(uint8_t value);
   uint8_t wy();
 
-  void set_wx(uint8_t value);
-  uint8_t wx();
+  void SetWXPlus7(uint8_t value);
+  uint8_t GetWXPlus7();
+
+  // WX with the adjustment applied since wx = 7 is pixel 0.
+  uint8_t WXPixelX() { return GetWXPlus7() - 7; }
 
   uint8_t bgp();
   uint8_t obp0();
@@ -114,8 +119,6 @@ class PPU {
   void set_bgp(uint8_t address);
   void set_obp0(uint8_t address);
   void set_obp1(uint8_t address);
-
-  bool DisplayWindow();
 
   // Performs the OAM Search function, finding up to 10 sprites visible at this
   // row.
@@ -126,4 +129,12 @@ class PPU {
   uint16_t ReverseTileRow(uint16_t tile_row);
 
   bool BackgroundWindowEnablePriority();
+
+  bool BackgroundTileMapHigh();
+  bool WindowTileMapHigh();
+  bool BackgroundWindowTileDataAreaLow();
+
+  // The next window line to render is only incremented when we actually render a window,
+  // not just versus the WY register.
+  int window_render_line_ = 0;
 };

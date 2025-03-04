@@ -48,22 +48,31 @@ class PixelFIFO {
   int row_sprites_count_;
   // Which index are we due to potentially fetch next.
   int sprite_index_ = 0;
+
+  bool window_triggered_ = false;
+  int window_x_ = 0;
+
   void OverlaySpriteFetch(int i);
 
   void StartFetch();
   void StartBackgroundFetch();
+  void StartWindowFetch();
   void ApplyFetch();
-  void Reset();
   void PopFront();
   Pixel PeekFront();
   void Append(Pixel p);
   int SpriteIndexForX(int x);
 
+  void ClearFifo();
+
+  uint16_t BackgroundWindowTile(int x, int y, uint16_t tile_map_address_base);
+
  public:
   PixelFIFO(PPU *ppu);
-  ~PixelFIFO() = default;
+  ~PixelFIFO();
 
   // Starts the new row 0->144.
   void NewRow(int row, Sprite *row_sprites, int row_sprites_count);
   bool Advance(Screen *screen);
+  bool WindowTriggered() { return window_triggered_; }
 };

@@ -151,6 +151,9 @@ void PPU::VisibleCycle(int remaining_cycles) {
 
   while (max_cycles > 0 && state_ != HBlank) {
     if (fifo_->Advance(screen_)) {
+      if (fifo_->WindowTriggered()) {
+        window_render_line_++;
+      }
       BeginHBlank();
     }
 
@@ -212,9 +215,9 @@ void PPU::set_wy(uint8_t value) { SetIORAM(WY_ADDRESS, value); }
 
 uint8_t PPU::wy() { return GetIORAM(WY_ADDRESS); }
 
-void PPU::set_wx(uint8_t value) { SetIORAM(WX_ADDRESS, value); }
+void PPU::SetWXPlus7(uint8_t value) { SetIORAM(WX_ADDRESS, value); }
 
-uint8_t PPU::wx() { return GetIORAM(WX_ADDRESS); }
+uint8_t PPU::GetWXPlus7() { return GetIORAM(WX_ADDRESS); }
 
 void PPU::set_bgp(uint8_t value) {
   screen_->SetPalette(BackgroundWindowPalette, value);
@@ -308,7 +311,7 @@ uint8_t PPU::GetByteAt(uint16_t address) {
       case WY_ADDRESS:
         return wy();
       case WX_ADDRESS:
-        return wx();
+        return GetWXPlus7();
       default:
         cout << "Unknown GetByte " << hex << unsigned(address) << endl;
         assert(false);
@@ -369,7 +372,7 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
         set_wy(byte);
         break;
       case WX_ADDRESS:
-        set_wx(byte);
+        SetWXPlus7(byte);
         break;
       default:
         cout << "Unknown GetByte " << hex << unsigned(address) << endl;
@@ -401,7 +404,10 @@ void PPU::BeginVBlank() {
   }
 }
 
-void PPU::EndVBlank() { screen_->VBlankEnded(); }
+void PPU::EndVBlank() { 
+  screen_->VBlankEnded();
+  window_render_line_ = 0;
+}
 
 bool PPU::CanAccessOAM() { return state_ == HBlank || state_ == VBlank; }
 
@@ -409,8 +415,6 @@ bool PPU::CanAccessVRAM() {
   // TODO Writes are nops, reads are 0xFF.
   return state_ != Pixel_Transfer;
 }
-
-bool PPU::DisplayWindow() { return 0x20 == (GetByteAt(LCDC_ADDRESS) & 0x20); }
 
 void PPU::OAMSearchY(int row) {
   if (bit_set(stat(), 5)) {
@@ -463,12 +467,12 @@ uint16_t PPU::BackgroundTile(int x, int y) {
   int tile_map_y = (y / 8) % TILES_PER_ROW;
 
   int tile_index = (tile_map_x + tile_map_y * TILES_PER_ROW);
-  uint16_t tile_map_address_base = bit_set(lcdc(), 3) ? 0x9C00 : 0x9800;
+  uint16_t tile_map_address_base = BackgroundTileMapHigh() ? 0x9C00 : 0x9800;
   uint16_t tile_map_address_ = tile_map_address_base + tile_index;
   uint8_t tile_number = GetByteAt(tile_map_address_);
 
   uint16_t tile_data_address;
-  uint16_t tile_data_base_address = bit_set(lcdc(), 4) ? 0x8000 : 0x8800;
+  uint16_t tile_data_base_address = BackgroundWindowTileDataAreaLow() ? 0x8000 : 0x8800;
   int8_t signed_tile_number;
   switch (tile_data_base_address) {
     case 0x8000:
@@ -515,16 +519,6 @@ uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
     return tile_row;
   }
 }
-
-uint16_t PPU::WindowTile(int x, int y) {
-  (void)x;
-  (void)y;
-  uint16_t window_map_address_base = bit_set(lcdc(), 6) ? 0x9800 : 0x9C00;
-  // TODO: Windows not implemented.
-  assert(false);
-  return GetByteAt(window_map_address_base);
-}
-
 int PPU::SpriteHeight() { return bit_set(lcdc(), 2) ? 16 : 8; }
 
 uint16_t PPU::ReverseTileRow(uint16_t tile_row) {
@@ -546,4 +540,69 @@ uint16_t PPU::ReverseTileRow(uint16_t tile_row) {
 
 bool PPU::BackgroundWindowEnablePriority() {
   return bit_set(lcdc(), 0);
+}
+
+bool PPU::WindowEnabledAt(int x, int y) {
+  if (!bit_set(lcdc(), 5)) {
+    return false;
+  }
+
+  assert(x >= 0 && x <= 160);
+  assert(y >= 0 && y <= 144);
+
+  return y >= wy() && x >= WXPixelX();
+}
+
+uint16_t PPU::WindowTile(int x) {
+  if (!BackgroundWindowEnablePriority()) {
+    return 0x0000;
+  }
+
+  assert(x % 8 == 0);
+  int y = window_render_line_;
+  assert(y>=0);
+
+  int tile_map_x = (x / 8) % TILES_PER_ROW;
+  int tile_map_y = (y / 8) % TILES_PER_ROW;
+
+  int tile_index = (tile_map_x + tile_map_y * TILES_PER_ROW);
+
+  uint16_t tile_map_address_base = WindowTileMapHigh() ? 0x9C00 : 0x9800;
+  uint16_t tile_map_address_ = tile_map_address_base + tile_index;
+  uint8_t tile_number = GetByteAt(tile_map_address_);
+
+  uint16_t tile_data_address;
+  uint16_t tile_data_base_address = BackgroundWindowTileDataAreaLow() ? 0x8000 : 0x8800;
+  int8_t signed_tile_number;
+  switch (tile_data_base_address) {
+    case 0x8000:
+      tile_data_address =
+          tile_data_base_address + tile_number * BYTES_PER_8X8_TILE;
+      break;
+    case 0x8800:
+      signed_tile_number = tile_number;
+      tile_data_address = 0x9000 + signed_tile_number * BYTES_PER_8X8_TILE;
+      break;
+    default:
+      assert(false);
+      return 0x0000;
+      break;
+  }
+  // Each row in tile is two bytes.
+  tile_data_address += (y % 8) * 2;
+  uint16_t tile_data = buildMsbLsb16(GetByteAt(tile_data_address),
+                                     GetByteAt(tile_data_address + 1));
+  return tile_data;
+}
+
+bool PPU::BackgroundTileMapHigh() {
+  return bit_set(lcdc(), 3);
+}
+
+bool PPU::WindowTileMapHigh() {
+  return bit_set(lcdc(), 6);
+}
+
+bool PPU::BackgroundWindowTileDataAreaLow() {
+  return bit_set(lcdc(), 4);
 }
