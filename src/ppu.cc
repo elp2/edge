@@ -516,9 +516,6 @@ uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
   uint16_t sprite_tile_address =
       0x8000 + tile_number * BYTES_PER_8X8_TILE;
   sprite_tile_address += (sprite_row % 8) * 2;
-  if (sprite_row > 7) {
-    sprite_tile_address += BYTES_PER_8X8_TILE;
-  }
   uint16_t tile_row = buildMsbLsb16(GetByteAt(sprite_tile_address),
                                     GetByteAt(sprite_tile_address + 1));
 
