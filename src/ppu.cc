@@ -498,14 +498,25 @@ uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
   if (sprite_row < 0 || sprite_row >= SpriteHeight()) {
     cout << "Sprite row out of range: " << sprite_row << endl;
     assert(false);
+    return 0x0000;
   }
 
   if (SpriteFlippedY(sprite)) {
     sprite_row = SpriteHeight() - sprite_row - 1;
   }
 
+  uint8_t tile_number = sprite.tile_number_;
+  if (SpriteHeight() == 16) {
+    // Special HW enforced logic for 8x16 sprites.
+    if (sprite_row < 8) {
+      tile_number &= 0xFE;
+    } else {
+      tile_number |= 0x01;
+    }
+  }
+
   uint16_t sprite_tile_address =
-      0x8000 + sprite.tile_number_ * BYTES_PER_8X8_TILE;
+      0x8000 + tile_number * BYTES_PER_8X8_TILE;
   sprite_tile_address += (sprite_row % 8) * 2;
   if (sprite_row > 7) {
     sprite_tile_address += BYTES_PER_8X8_TILE;
