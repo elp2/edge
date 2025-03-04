@@ -421,12 +421,7 @@ void PPU::OAMSearchY(int row) {
     interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
   }
 
-  if (!(bit_set(lcdc(), 1))) {
-    // OBJ (Sprites) disabled.
-    row_sprites_count_ = 0;
-    return;
-  }
-
+  // We should still find sprites, even if they are disabled in LCDC currently.
   int sprites_found = 0;
   for (int i = 0; i < NUM_OAM_SPRITES; i++) {
     int offset = 4 * i;
@@ -500,6 +495,9 @@ uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
     assert(false);
     return 0x0000;
   }
+  if (!SpritesEnabled()) {
+    return 0x0000;
+  }
 
   if (SpriteFlippedY(sprite)) {
     sprite_row = SpriteHeight() - sprite_row - 1;
@@ -531,6 +529,8 @@ uint16_t PPU::SpritePixels(Sprite sprite, int sprite_row) {
   }
 }
 int PPU::SpriteHeight() { return bit_set(lcdc(), 2) ? 16 : 8; }
+
+bool PPU::SpritesEnabled() { return bit_set(lcdc(), 1); }
 
 uint16_t PPU::ReverseTileRow(uint16_t tile_row) {
   // Process each byte separately

@@ -124,6 +124,7 @@ class PPU {
   // row.
   void OAMSearchY(int row);
 
+  bool SpritesEnabled();
   int SpriteHeight();
 
   uint16_t ReverseTileRow(uint16_t tile_row);

@@ -34,7 +34,6 @@ void PixelFIFO::ClearFifo() {
 }
 
 void PixelFIFO::NewRow(int pixely, Sprite *row_sprites, int row_sprites_count) {
-  std::cout << "New row: " << pixely << std::endl;
   ClearFifo();
 
   window_triggered_ = false;
@@ -105,9 +104,6 @@ bool PixelFIFO::Advance(Screen *screen) {
     window_triggered_ = new_window_triggered;
     ClearFifo();
     StartFetch();
-    std::cout << "0 Fetch cycles remaining: " << (int)fetch_->cycles_remaining_ << std::endl;
-
-    std::cout << "Window enabled: " << (int)window_triggered_ << std::endl;
 
     if (!window_triggered_) {
       std::cout << "Unexpected: Window disabled during the line." << std::endl;
@@ -231,6 +227,5 @@ void PixelFIFO::StartWindowFetch() {
   uint16_t window_tile = ppu_->WindowTile(window_x_);
   PixelList(window_tile, BackgroundWindowPalette, fetch_->pixels_, false);
   fetch_->strategy_ = AppendFetchStrategy;
-  std::cout << "Fetching window tile" << std::hex << window_tile << std::endl;
   window_x_ += 8;
 }
