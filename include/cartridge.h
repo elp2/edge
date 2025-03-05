@@ -6,17 +6,16 @@
 using namespace std;
 
 enum CartridgeType {
-  CartridgeType_ROM_only,
-  CartridgeType_ROM_MBC1,
-  CartridgeType_ROM_MBC1_RAM,
-  CartridgeType_ROM_MBC1_RAM_BATT,
-  CartridgeType_ROM_MBC2,
-  CartridgeType_ROM_MBC2_BATT,
-  CartridgeType_ROM_MBC3,
-  CartridgeType_ROM_MBC3_BATT,
-  CartridgeType_ROM_MBC3_RAM,
-  CartridgeType_ROM_MBC3_RAM_BATT,
-  CartridgeType_Unsupported
+  CartridgeType_ROM_only = 0x00,
+  CartridgeType_ROM_MBC1 = 0x01,
+  CartridgeType_ROM_MBC1_RAM = 0x02,
+  CartridgeType_ROM_MBC1_RAM_BATT = 0x03,
+  CartridgeType_ROM_MBC2 = 0x05,
+  CartridgeType_ROM_MBC2_BATT = 0x06,
+  CartridgeType_ROM_MBC3 = 0x11,
+  CartridgeType_ROM_MBC3_RAM = 0x12,
+  CartridgeType_ROM_MBC3_RAM_BATT = 0x13,
+  CartridgeType_Unsupported = 0x15,
 };
 
 enum ROMSizeType {
@@ -73,7 +72,6 @@ class Cartridge {
 
  private:
   uint8_t *rom_;
-  bool HasRAM();
   bool HasRTC();
 
   uint8_t ram_rtc_enable_;
@@ -90,4 +88,7 @@ class Cartridge {
 
   uint8_t GetRTC();
   void SetRTC(uint8_t byte);
+
+  bool IsMBC2();
+  bool IsMBC3();
 };

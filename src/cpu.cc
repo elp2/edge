@@ -389,7 +389,7 @@ void CPU::SetSP(uint16_t sp) {
   bool in_external_ram = sp >= EXTERNAL_RAM_START && sp <= EXTERNAL_RAM_END;
   if (!in_high_ram && !in_work_ram && !in_external_ram) {
     std::cout << "SetSP: " << std::hex << (int)sp << " is not in valid RAM range" << std::endl;
-    assert(false);
+    // assert(false); Some ROMS such as CPU_INSTRS, Pokemon, Final Fantasy set weird SPs.
   }
   sp_ = sp; 
 }

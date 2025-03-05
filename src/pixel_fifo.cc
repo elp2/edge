@@ -97,7 +97,7 @@ bool PixelFIFO::Advance(Screen *screen) {
 
     if (!window_triggered_) {
       std::cout << "Unexpected: Window disabled during the line." << std::endl;
-      assert(false);
+      // assert(false); FF Legend does this during battle transitions.
     }
   }
 

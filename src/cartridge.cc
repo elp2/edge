@@ -40,7 +40,7 @@ Cartridge::Cartridge(string filename) {
    // TODO: MBC1 uses a special addressing for large ROMS.
    assert(ROMSize() <= 524288 || GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT);
 
-  if (SUPER_DEBUG) {
+ if (SUPER_DEBUG) {
     PrintDebugInfo();
   }
 }
@@ -80,10 +80,8 @@ CartridgeType Cartridge::GetCartridgeType() {
       return CartridgeType_ROM_MBC2;
     case 0x06:
       return CartridgeType_ROM_MBC2_BATT;
-    case 0x10:
-      return CartridgeType_ROM_MBC3;
     case 0x11:
-      return CartridgeType_ROM_MBC3_BATT;
+      return CartridgeType_ROM_MBC3;
     case 0x12:
       return CartridgeType_ROM_MBC3_RAM;
     case 0x13:
@@ -145,6 +143,10 @@ RAMSizeType Cartridge::GetRAMSizeType() {
 }
 
 int Cartridge::RAMSize() {
+  if (IsMBC2()) {
+    // No RAM banks, just 512 half bytes of built-RAM.
+    return 512 * 4;
+  }
   switch (GetRAMSizeType()) {
     case RAMSize_0k:
       return 0;
@@ -185,6 +187,11 @@ uint8_t Cartridge::GetRAMorRTC(uint16_t address) {
 }
 
 void Cartridge::SetRAMorRTC(uint16_t address, uint8_t byte) {
+  if (!IsMBC3()) {
+    std::cout << "SetRAMorRTC: " << std::hex << address << " to " << std::hex << (int)byte << 
+                  " but cartridge is not MBC3. Ignoring." << std::endl;
+    return;
+  }
   if (ram_bank_rtc_ >= RTC_SECONDS_REGISTER) {
     SetRTC(byte);
   } else {
@@ -211,8 +218,12 @@ uint8_t Cartridge::GetRAM(int address) {
     std::cout << "GetRAM out of bounds: " << std::hex << address << " past size: " << std::hex << RAMSize() << std::endl;
     assert(false);
   }
-
-  return ram_[banked_address];
+  uint8_t byte = ram_[banked_address];
+  if (IsMBC2()) {
+    // Half bytes of RAM - upper 4 bits are unreliable.
+    byte &= 0x0F;
+  }
+  return byte;
 }
 
 void Cartridge::SetRAM(int address, uint8_t byte) {
@@ -256,13 +267,6 @@ int Cartridge::ROMBankCount() {
   }
 }
 
-bool Cartridge::HasRAM() {
-  return GetCartridgeType() == CartridgeType_ROM_MBC1_RAM ||
-         GetCartridgeType() == CartridgeType_ROM_MBC1_RAM_BATT ||
-         GetCartridgeType() == CartridgeType_ROM_MBC3_RAM ||
-         GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT;
-}
-
 void Cartridge::SetRAMRTCEnable(uint8_t byte) {
   if (byte > 0x0A) {
     std::cout << "Unexpected too high value for SetRAMRTCEnable - will treat as disable: " << std::hex << (int)byte << std::endl;
@@ -272,7 +276,6 @@ void Cartridge::SetRAMRTCEnable(uint8_t byte) {
 }
 
 void Cartridge::SetRAMBankRTC(uint8_t byte) {
-  assert(HasRAM());
   if (byte > RTC_DAYS_HIGH_CARRY_HALT_REGISTER) {
     std::cout << "Unexpected too high value for SetRAMBankRTC: " << std::hex << (int)byte << std::endl;
     assert(false);
@@ -292,7 +295,17 @@ void Cartridge::LatchRTC(uint8_t byte) {
 
 bool Cartridge::HasRTC() {
   return GetCartridgeType() == CartridgeType_ROM_MBC3 ||
-         GetCartridgeType() == CartridgeType_ROM_MBC3_BATT ||
          GetCartridgeType() == CartridgeType_ROM_MBC3_RAM ||
+         GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT;
+}
+
+bool Cartridge::IsMBC2() {
+  return GetCartridgeType() == CartridgeType_ROM_MBC2 || 
+         GetCartridgeType() == CartridgeType_ROM_MBC2_BATT;
+}
+
+bool Cartridge::IsMBC3() {
+  return GetCartridgeType() == CartridgeType_ROM_MBC3 ||
+         GetCartridgeType() == CartridgeType_ROM_MBC3_RAM || 
          GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT;
 }
