@@ -1,6 +1,7 @@
 #include "ppu.h"
 
 #include "gtest/gtest.h"
+#include "screen.h"
 #include "utils.h"
 
 class PPUTest : public ::testing::Test {
@@ -10,7 +11,7 @@ class PPUTest : public ::testing::Test {
 };
 
 TEST(PPUTest, GetByte) {
-  PPU *ppu = new PPU();
+  PPU *ppu = new PPU(new Screen());
 
   ppu->SetByteAt(0xFF40, 0x91);
   uint8_t lcdc = ppu->GetByteAt(0xFF40);

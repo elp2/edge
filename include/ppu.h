@@ -24,7 +24,7 @@ enum PPUState {
 
 class PPU {
  public:
-  PPU();
+  PPU(Screen *screen);
   ~PPU() = default;
 
   void Advance(int cycles);

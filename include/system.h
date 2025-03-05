@@ -9,6 +9,7 @@ class InputController;
 class InterruptController;
 class MMU;
 class PPU;
+class Screen;
 class SerialController;
 class SoundController;
 class TimerController;
@@ -32,6 +33,8 @@ class System {
   SerialController *serial_controller_;
   SoundController *sound_controller_;
   TimerController *timer_controller_;
+  Screen *screen_;
+
   int frame_cycles_;
   std::chrono::high_resolution_clock::time_point last_frame_start_time_;
 

@@ -4,6 +4,7 @@
 #include "cartridge.h"
 #include "mmu.h"
 #include "ppu.h"
+#include "screen.h"
 #include "utils.h"
 
 class AddressRouterTest : public ::testing::Test {
@@ -13,7 +14,7 @@ class AddressRouterTest : public ::testing::Test {
 };
 
 TEST(AddressRouterTest, PPU) {
-  PPU *ppu = new PPU();
+  PPU *ppu = new PPU(new Screen());
   MMU *mmu = getTestingMMU();
   AddressRouter *addressRouter =
       new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
@@ -27,7 +28,7 @@ TEST(AddressRouterTest, PPU) {
 }
 
 TEST(AddressRouterTest, MMU) {
-  PPU *ppu = new PPU();
+  PPU *ppu = new PPU(new Screen());
   MMU *mmu = getTestingMMU();
   AddressRouter *addressRouter =
       new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);

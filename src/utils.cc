@@ -8,6 +8,7 @@
 #include "cpu.h"
 #include "mmu.h"
 #include "ppu.h"
+#include "screen.h"
 
 using namespace std;
 
@@ -144,7 +145,7 @@ MMU *getTestingMMURAM() {
 
 CPU *getTestingCPU() {
   MMU *mmu = getTestingMMU();
-  PPU *ppu = new PPU();
+  PPU *ppu = new PPU(new Screen());
   AddressRouter *address_router =
       new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
   CPU *cpu = new CPU(address_router);
@@ -156,7 +157,7 @@ CPU *getTestingCPU() {
 
 CPU *getTestingCPUWithInstructions(std::vector<uint8_t> instructions) {
   MMU *mmu = getTestingMMU();
-  PPU *ppu = new PPU();
+  PPU *ppu = new PPU(new Screen());
   AddressRouter *address_router =
       new AddressRouter(mmu, ppu, NULL, NULL, NULL, NULL, NULL);
   CPU *cpu = new CPU(address_router);

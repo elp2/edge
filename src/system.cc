@@ -23,7 +23,9 @@
 System::System(string rom_filename) {
   bool skip_boot_rom = true;
   mmu_ = GetMMU(rom_filename, skip_boot_rom);
-  ppu_ = new PPU();
+
+  screen_ = new Screen();
+  ppu_ = new PPU(screen_);
 
   serial_controller_ = new SerialController();
   interrupt_controller_ = new InterruptController();
@@ -69,9 +71,6 @@ void System::Advance(int stepped) {
   input_controller_->PollAndApplyEvents();
   ppu_->Advance(stepped);
   timer_controller_->Advance(stepped);
-  // if (cpu_->Get16Bit(Register_PC) >= 0xC200) {
-  // 	timer_controller_->Debugger();
-  // }
 
   sound_controller_->Advance(stepped);
 

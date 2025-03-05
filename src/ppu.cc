@@ -46,7 +46,7 @@ const uint16_t OAM_RAM_ADDRESS = 0xFE00;
 const int NUM_OAM_SPRITES = 40;
 const int OAM_SPRITE_BYTES = 4;  // Technically only uses the first 28 bits.
 
-PPU::PPU() {
+PPU::PPU(Screen *screen) {
   oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
   video_ram_ = (uint8_t *)calloc(0x2000, sizeof(uint8_t));
   for (int i = 0; i < 0x2000; i++) {
@@ -58,7 +58,7 @@ PPU::PPU() {
   frame_cycles_ = 0;
   state_ = OAM_Search;
   row_sprites_ = (Sprite *)calloc(10, sizeof(Sprite));
-  screen_ = new Screen();
+  screen_ = screen;
   fifo_ = new PixelFIFO(this);
 }
 
