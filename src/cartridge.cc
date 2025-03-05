@@ -187,11 +187,6 @@ uint8_t Cartridge::GetRAMorRTC(uint16_t address) {
 }
 
 void Cartridge::SetRAMorRTC(uint16_t address, uint8_t byte) {
-  if (!IsMBC3()) {
-    std::cout << "SetRAMorRTC: " << std::hex << address << " to " << std::hex << (int)byte << 
-                  " but cartridge is not MBC3. Ignoring." << std::endl;
-    return;
-  }
   if (ram_bank_rtc_ >= RTC_SECONDS_REGISTER) {
     SetRTC(byte);
   } else {
