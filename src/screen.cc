@@ -5,10 +5,6 @@
 
 #include "SDL.h"
 
-const uint32_t DARKEST_GREEN = 0xFF0F380F;
-const uint32_t DARK_GREEN = 0xFF306230;
-const uint32_t LIGHT_GREEN = 0xFF8BAC0F;
-const uint32_t LIGHEST_GREEN = 0xFF9BBC0F;
 const uint8_t DEFAULT_PALETTE = 0xE4;  // 11100100.
 const int PIXEL_SCALE = 4;
 
@@ -40,31 +36,45 @@ void Screen::InitSDL() {
 }
 
 void Screen::DrawPixel(Pixel pixel) {
+  int pixel_index = x_ + y_ * SCREEN_WIDTH;
+  assert(pixel_index < SCREEN_PIXELS);
+  pixels_[pixel_index] = GetScreenColor(pixel);;
+  x_++;
+}
+
+uint32_t Screen::GetScreenColor(Pixel pixel) {
   uint8_t palette_pixel = palettes_[pixel.palette_];
   palette_pixel >>= (pixel.two_bit_color_ * 2);
 
-  uint32_t color = 0;
-  switch (palette_pixel & 0x3) {
-    case 0x00:
-      color = LIGHEST_GREEN;
-      break;
-    case 0x01:
-      color = LIGHT_GREEN;
-      break;
-    case 0x02:
-      color = DARK_GREEN;
-      break;
-    case 0x03:
-      color = DARKEST_GREEN;
-      break;
-    default:
-      color = 0xFFFF69B4;  // Hot pink error.
-      break;
+  if (style_ == ScreenStyle_Green) {
+    switch (palette_pixel & 0x3) {
+      case 0x00:
+        return 0xFF9BBC0F;
+      case 0x01:
+        return 0xFF8BAC0F; // Light green.
+      case 0x02:
+        return 0xFF306230; // Dark green.
+      case 0x03:
+        return 0xFF0F380F; // Darkest green.
+      default:
+        return 0xFFFF69B4;  // Hot pink error.
+    }
+  } else if (style_ == ScreenStyle_White) {
+    switch (palette_pixel & 0x3) {
+      case 0x00:
+        return 0xFFFFFFFF; // White.
+      case 0x01:
+        return 0xFFAAAAAA; // Light gray.
+      case 0x02:
+        return 0xFF555555; // Gray.
+      case 0x03:
+        return 0xFF000000; // Black.
+      default:
+        return 0xFFFF69B4;  // Hot pink error.
+    }
   }
-  int pixel_index = x_ + y_ * SCREEN_WIDTH;
-  assert(pixel_index < SCREEN_PIXELS);
-  pixels_[pixel_index] = color;
-  x_++;
+  assert(false);
+  return 0;
 }
 
 void Screen::NewLine() {

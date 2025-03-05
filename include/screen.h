@@ -15,6 +15,11 @@ struct SDL_Window;
 
 using namespace std;
 
+enum ScreenStyle {
+  ScreenStyle_Green = 0,
+  ScreenStyle_White = 1,
+};
+
 class Screen {
  private:
   bool on_ = false;
@@ -30,7 +35,9 @@ class Screen {
   SDL_Window *window_;
   unsigned int frame_start_ms_ = 0;
   int frames_ = 0;
+  ScreenStyle style_ = ScreenStyle_White;
 
+  uint32_t GetScreenColor(Pixel pixel);
  public:
   Screen();
   ~Screen() = default;
@@ -42,4 +49,6 @@ class Screen {
   void SetPalette(Palette palette, uint8_t value);
   bool on() { return on_; };
   void set_on(bool on) { on_ = on; };
+
+  void SetStyle(ScreenStyle style) { style_ = style; }
 };
