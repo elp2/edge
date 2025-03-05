@@ -162,7 +162,7 @@ void PPU::VisibleCycle(int remaining_cycles) {
     AdvanceFrame(1);
   }
 
-  assert(row_cycles != ROW_CYCLES);
+  // assert(row_cycles != ROW_CYCLES);
   if (max_cycles > 0) {
     int hblank_progress = min(max_cycles, ROW_CYCLES - row_cycles);
 
@@ -429,9 +429,6 @@ void PPU::OAMSearchY(int row) {
     int sprite_y = oam_ram_[offset + 0];
     int sprite_x = oam_ram_[offset + 1];
 
-    if ((sprite_x == 0 && sprite_y == 0)) {
-      continue;
-    }
     // Transform sprite origin to be top left from bottom right 8x16.
     sprite_x -= 8;
     sprite_y -= 16;

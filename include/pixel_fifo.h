@@ -13,8 +13,7 @@ class PPU;
 class Screen;
 
 enum FetchStrategy {
-  ReplaceFetchStrategy = 0,
-  AppendFetchStrategy,
+  AppendFetchStrategy = 0,
   OverlayFirst8FetchStrategy,
 };
 
@@ -43,25 +42,25 @@ class PixelFIFO {
 
   Fetch *fetch_ = NULL;
 
-  void StartSpriteFetch(Sprite sprite);
   Sprite *row_sprites_;
   int row_sprites_count_;
-  // Which index are we due to potentially fetch next.
-  int sprite_index_ = 0;
 
   bool window_triggered_ = false;
   int window_x_ = 0;
 
+  // What pixel to fetch sprites for. Starts < 0 to capture sprites off of the left edge.
+  int sprite_fetch_x = -7;
+
   void OverlaySpriteFetch(int i);
 
-  void StartFetch();
   void StartBackgroundFetch();
   void StartWindowFetch();
+  void StartSpriteFetch(Sprite sprite, bool immediately_apply, int left_shift);
   void ApplyFetch();
-  void PopFront();
-  Pixel PeekFront();
+
+  Pixel PopFrontPixel();
   void Append(Pixel p);
-  int SpriteIndexForX(int x);
+  int FirstSpriteIndexForX(int x);
 
   void ClearFifo();
 
@@ -71,7 +70,7 @@ class PixelFIFO {
   PixelFIFO(PPU *ppu);
   ~PixelFIFO();
 
-  // Starts the new row 0->144.
+  // Starts the new row 0->143.
   void NewRow(int row, Sprite *row_sprites, int row_sprites_count);
   bool Advance(Screen *screen);
   bool WindowTriggered() { return window_triggered_; }
