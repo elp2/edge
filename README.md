@@ -1,29 +1,31 @@
 # Ed's Gameboy Emulator
 
-## Status:
+## Features:
 
-✔️ Boot Screen Works
+✔️ Loads and plays major games
 
 ✔️ Pulse, Wave, and Noise Voices play in all games
 
-✔️ PPU features excluding tall sprites
+✔️ Graphics pass all tests.
 
-### Games
+## Games
 ✔️ Dr. Mario
 
 ✔️ Tetris
 
-🌓 Zelda
+✔️ Zelda
 
-🌓 Ducktales
+✔️ Ducktales
 
-❌ Pokemón Red
+✔️ Pokemón Red
 
-### Tests
+## Tests
 
-✔️ All Blarg CPU tests pass
+✔️ [Blargg](https://github.com/retrio/gb-test-roms) cpu_instrs
 
-🌓 Many DMG_SOUND tests pass
+🌓 [Blargg](https://github.com/retrio/gb-test-roms) dmg_sound - some tests
+
+✔️ [dmg-acid2](https://github.com/mattcurrie/dmg-acid2) passes
 
 ## Instructions
 * Install cmake, [rgbds](https://github.com/gbdev/rgbds), and SDL-dev libraries
