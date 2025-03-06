@@ -110,7 +110,7 @@ class PPU {
   uint8_t GetWXPlus7();
 
   // WX with the adjustment applied since wx = 7 is pixel 0.
-  uint8_t WXPixelX() { return GetWXPlus7() - 7; }
+  int WXPixelX() { return GetWXPlus7() - 7; }
 
   uint8_t bgp();
   uint8_t obp0();
