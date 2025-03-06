@@ -128,11 +128,9 @@ void MMU::SetByteAt(uint16_t address, uint8_t byte) {
   }
   
   if (address >= RAM_RTC_ENABLE_REGISTER_START && address <= RAM_RTC_ENABLE_REGISTER_END) {
-    std::cout << "SetRAMRTCEnable: " << std::hex << (int)address << " = 0x" << (int)byte << std::endl;
     cartridge_->SetRAMRTCEnable(byte);
     return;
   } else if (address >= ROM_BANK_SELECT_REGISTER_START && address <= ROM_BANK_SELECT_REGISTER_END) {
-    std::cout << "SetROMBank: " << std::hex << (int)address << " = 0x" << (int)byte << std::endl;
     register_2000_3fff_ = byte;
     UpdateROMBank();
     return;
@@ -199,7 +197,6 @@ void MMU::UpdateROMBank() {
     cout << "ROM bank 0 is not allowed. Switching to bank 1." << endl;
     rom_bank_ = 1;
   }
-  cout << "Switched to ROM bank: 0x" << hex << unsigned(rom_bank_) << endl;
 
   assert(rom_bank_ < cartridge_->ROMBankCount());
 }
