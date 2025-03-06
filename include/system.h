@@ -4,6 +4,7 @@
 #include <string>
 
 class AddressRouter;
+class Cartridge;
 class CPU;
 class InputController;
 class InterruptController;
@@ -24,6 +25,7 @@ class System {
   void Main();
 
  private:
+  Cartridge *cartridge_;
   MMU *mmu_;
   CPU *cpu_;
   PPU *ppu_;
@@ -35,6 +37,7 @@ class System {
   TimerController *timer_controller_;
   Screen *screen_;
 
+  int frame_count_;
   int frame_cycles_;
   std::chrono::high_resolution_clock::time_point last_frame_start_time_;
 

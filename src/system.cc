@@ -53,6 +53,8 @@ System::System(string rom_filename) {
     cpu_->SkipBootROM();
     ppu_->SkipBootROM();
   }
+
+  frame_count_ = 0;
 }
 
 MMU *System::GetMMU(string rom_filename, bool skip_boot_rom) {
@@ -61,8 +63,8 @@ MMU *System::GetMMU(string rom_filename, bool skip_boot_rom) {
   if (!skip_boot_rom) {
     mmu->SetBootROM(UnsignedCartridgeBytes("../roms/boot.gb"));
   }
-  Cartridge *cartridge = new Cartridge(rom_filename);
-  mmu->SetCartridge(cartridge);
+  cartridge_ = new Cartridge(rom_filename);
+  mmu->SetCartridge(cartridge_);
 
   return mmu;
 }
@@ -94,6 +96,10 @@ void System::Advance(int stepped) {
       std::this_thread::sleep_for(FRAME_TIME - elapsed);
     }
     last_frame_start_time_ = std::chrono::high_resolution_clock::now();
+    frame_count_++;
+    if (frame_count_ % 1000 == 0) {
+      screen_->SaveScreenshot(cartridge_->GameTitle());
+    }
   }
 }
 

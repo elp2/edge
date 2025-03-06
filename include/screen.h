@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 #include "palette.h"
 #include "pixel.h"
@@ -51,4 +52,6 @@ class Screen {
   void set_on(bool on) { on_ = on; };
 
   void SetStyle(ScreenStyle style) { style_ = style; }
+
+  void SaveScreenshot(const string& base_name);
 };

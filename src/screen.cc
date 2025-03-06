@@ -22,7 +22,7 @@ void Screen::InitSDL() {
 
   renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_SOFTWARE);
   texture_ =
-      SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_ARGB8888,
+      SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGB888,
                         SDL_TEXTUREACCESS_STATIC, SCREEN_WIDTH, SCREEN_HEIGHT);
 
   SDL_RenderClear(renderer_);
@@ -49,28 +49,28 @@ uint32_t Screen::GetScreenColor(Pixel pixel) {
   if (style_ == ScreenStyle_Green) {
     switch (palette_pixel & 0x3) {
       case 0x00:
-        return 0xFF9BBC0F;
+        return 0x9BBC0F;
       case 0x01:
-        return 0xFF8BAC0F; // Light green.
+        return 0x8BAC0F; // Light green.
       case 0x02:
-        return 0xFF306230; // Dark green.
+        return 0x306230; // Dark green.
       case 0x03:
-        return 0xFF0F380F; // Darkest green.
+        return 0x0F380F; // Darkest green.
       default:
-        return 0xFFFF69B4;  // Hot pink error.
+        return 0xFF69B4;  // Hot pink error.
     }
   } else if (style_ == ScreenStyle_White) {
     switch (palette_pixel & 0x3) {
       case 0x00:
-        return 0xFFFFFFFF; // White.
+        return 0xFFFFFF;
       case 0x01:
-        return 0xFFAAAAAA; // Light gray.
+        return 0xAAAAAA;
       case 0x02:
-        return 0xFF555555; // Gray.
+        return 0x555555;
       case 0x03:
-        return 0xFF000000; // Black.
+        return 0x000000;
       default:
-        return 0xFFFF69B4;  // Hot pink error.
+        return 0xFFB469;
     }
   }
   assert(false);
@@ -102,4 +102,42 @@ void Screen::VBlankEnded() {
 
 void Screen::SetPalette(Palette palette, uint8_t value) {
   palettes_[palette] = value;
+}
+
+void Screen::SaveScreenshot(const string& base_name) {
+    int counter = 0;
+    string filename;
+    do {
+        filename = base_name + "_" + to_string(counter) + ".bmp";
+        counter++;
+        if (counter > 1000) {
+            cout << "Too many screenshots, aborting." << endl;
+            return;
+        }
+    } while (SDL_RWFromFile(filename.c_str(), "r") != NULL);
+
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(
+        pixels_,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT,
+        32,
+        SCREEN_WIDTH * 4,
+        0x00FF0000,
+        0x0000FF00,
+        0x000000FF,
+        0
+    );
+
+    if (surface == NULL) {
+        cout << "Failed to create surface for screenshot: " << SDL_GetError() << endl;
+        return;
+    }
+
+    if (SDL_SaveBMP(surface, filename.c_str()) != 0) {
+        cout << "Failed to save screenshot: " << SDL_GetError() << endl;
+    } else {
+        cout << "Screenshot saved as: " << filename << endl;
+    }
+
+    SDL_FreeSurface(surface);
 }
