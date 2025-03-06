@@ -44,7 +44,7 @@ class NoiseVoice {
 
   uint8_t length_;
   uint16_t lfsr_; // https://en.wikipedia.org/wiki/Linear-feedback_shift_register
-  uint8_t volume_;
+  int volume_;
   bool length_enable_ = false;
   
   int cycles_ = 0;

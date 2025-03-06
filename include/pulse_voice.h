@@ -31,9 +31,9 @@ class PulseVoice {
   uint8_t GetNRX4() { return 0xBF | nrx4_; };
 
   bool Playing() { return enabled_; }
+  void PrintDebug();
 
  private:
-  void PrintDebug();
 
   bool VolumeSweepUp() { return (nrx2_ & 0b1000) >> 3; }
   uint8_t VolumeSweepPace() { return nrx2_ & 0b111; }
@@ -63,7 +63,7 @@ class PulseVoice {
   bool enabled_ = false;
   uint8_t length_ = 0;
   uint8_t length_enable_ = false;
-  uint8_t volume_ = 0;
+  int volume_ = 0;
 
   int voice_number_ = 0;
 
