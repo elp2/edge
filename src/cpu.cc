@@ -485,6 +485,8 @@ void CPU::SkipBootROM() {
   address_router_->SetByteAt(0xFF07, 0xF8);
   address_router_->SetByteAt(0xFF0F, 0xE1);
   address_router_->SetByteAt(0xFF10, 0x80);
+  /* 
+  Do not play any sounds from the boot ROM.
   address_router_->SetByteAt(0xFF11, 0xBF);
   address_router_->SetByteAt(0xFF12, 0xF3);
   address_router_->SetByteAt(0xFF13, 0xFF);
@@ -501,6 +503,7 @@ void CPU::SkipBootROM() {
   address_router_->SetByteAt(0xFF20, 0xFF);
   address_router_->SetByteAt(0xFF21, 0x00);
   address_router_->SetByteAt(0xFF22, 0x00);
+  */
   address_router_->SetByteAt(0xFF23, 0xBF);
   address_router_->SetByteAt(0xFF24, 0x77);
   address_router_->SetByteAt(0xFF25, 0xF3);
