@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 #include "constants.h"
 #include "noise_voice.h"
 #include "pulse_voice.h"

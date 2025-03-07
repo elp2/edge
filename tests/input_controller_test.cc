@@ -1,6 +1,6 @@
 #include "input_controller.h"
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "interrupt_controller.h"

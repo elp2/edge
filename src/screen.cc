@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 
 const uint8_t DEFAULT_PALETTE = 0xE4;  // 11100100.
 const int PIXEL_SCALE = 4;

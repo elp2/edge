@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 #include "interrupt_controller.h"
 
 const uint16_t P0_ADDRESS = 0xFF00;
