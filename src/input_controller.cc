@@ -7,9 +7,6 @@
 #include "interrupt_controller.h"
 
 const uint16_t P0_ADDRESS = 0xFF00;
-const uint8_t P0_GET_DPAD = 0x20;  // P14 low, P15 high.
-const uint8_t P0_GET_BTN = 0x10;  // P15 low, P14 high.
-const uint8_t P0_RESET = 0x30;
 
 int KeyNibble(SDL_Scancode scancode) {
   // Returns 0 if the key is in the DPAD nibble, 1 if it is in the BTN nibble, -1 if it is not a valid key.
