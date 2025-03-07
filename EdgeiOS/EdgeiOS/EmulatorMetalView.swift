@@ -61,6 +61,7 @@ struct EmulatorMetalView: UIViewRepresentable {
         func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
 
         func draw(in view: MTKView) {
+            let bridge = EmulatorBridge.sharedInstance()
             let pixelData = UnsafeMutablePointer<UInt32>.allocate(capacity: 160 * 144)
             
             // Fill with base color
