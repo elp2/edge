@@ -24,6 +24,10 @@ class System {
 
   void Main();
 
+  void AdvanceOneInstruction();
+
+  const uint32_t* pixels();
+
  private:
   Cartridge *cartridge_;
   MMU *mmu_;

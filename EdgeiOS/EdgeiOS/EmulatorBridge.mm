@@ -13,6 +13,8 @@
     std::unique_ptr<System> system_;
 }
 
+@property (nonatomic, assign) BOOL isRunning;
+@property (nonatomic, assign) BOOL sdlInitialized;
 @property (nonatomic, strong) AVAudioSession *audioSession;
 
 @end
@@ -34,45 +36,71 @@
 
 - (instancetype)init {
     if (self = [super init]) {
-        NSError *error = nil;
-        
-        // Set up audio session
-        self.audioSession = [AVAudioSession sharedInstance];
-        if (![self.audioSession setCategory:AVAudioSessionCategoryPlayback
-                                    error:&error]) {
-            NSLog(@"Failed to set audio session category: %@", error);
-        }
-        
-        if (![self.audioSession setActive:YES error:&error]) {
-            NSLog(@"Failed to activate audio session: %@", error);
-        }
-        
-        SDL_SetMainReady();
 
-        NSBundle* bundle = [NSBundle mainBundle];
-        NSArray<NSString*>* files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[bundle bundlePath] error:nil];
-
-        NSString* romPath = [[bundle bundlePath] stringByAppendingPathComponent:@"pocket.gb"];
-        const char* cPath = [romPath UTF8String];
-        if (cPath) {
-            std::string cppPath(cPath);
-            system_ = std::make_unique<System>(cppPath);
-            system_->Main();
-        } else {
-        }
-        
     }
     return self;
 }
 
-#pragma mark - Emulator Control
+- (void)initializeSDL {
+    if (_sdlInitialized) {
+        return;
+    }
+    NSError *error = nil;
+    // Set up audio session
+    self.audioSession = [AVAudioSession sharedInstance];
+    if (![self.audioSession setCategory:AVAudioSessionCategoryPlayback
+                                error:&error]) {
+        NSLog(@"Failed to set audio session category: %@", error);
+    }
+    
+    if (![self.audioSession setActive:YES error:&error]) {
+        NSLog(@"Failed to activate audio session: %@", error);
+    }
+    
+    SDL_SetMainReady();
 
-- (void)pauseEmulation {
-    // TODO.
+    _sdlInitialized = YES;
 }
 
-- (void)resumeEmulation {
-    // TODO.
+- (void)loadROM:(NSString *)romName {
+    NSBundle* bundle = [NSBundle mainBundle];
+    NSArray<NSString*>* files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[bundle bundlePath] error:nil];
+
+    NSString* romPath = [[bundle bundlePath] stringByAppendingPathComponent:romName];
+    const char* cPath = [romPath UTF8String];
+    if (cPath) {
+        std::string cppPath(cPath);
+        system_ = std::make_unique<System>(cppPath);
+        [self startRunLoop];
+    } else {
+    }
+}
+
+#pragma mark - Emulator Control
+
+- (void)startRunLoop {
+    _isRunning = true;
+    [self runEmulationLoop];
+}
+
+- (void)runEmulationLoop {
+    if (!_isRunning) return;
+    
+    // Run one iteration
+    system_->AdvanceOneInstruction();
+    
+    // Immediately queue up the next iteration
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self runEmulationLoop];
+    });
+}
+
+- (void)pauseEmulation {
+    _isRunning = false;
+}
+
+- (void)stopEmulation {
+    _isRunning = false;
 }
 
 #pragma mark - Input Handling
@@ -87,13 +115,15 @@
 
 #pragma mark - Display
 
-- (uint32_t *)pixelData {
-    return NULL;
+- (const uint32_t *)pixels {
+    NSAssert(_sdlInitialized, @"SDL Must be initialized");
+    return system_->pixels();
 }
 
 #pragma mark - Cleanup
 
 - (void)dealloc {
+    [self stopEmulation];
     NSError *error = nil;
     if (![self.audioSession setActive:NO error:&error]) {
         NSLog(@"Failed to deactivate audio session: %@", error);

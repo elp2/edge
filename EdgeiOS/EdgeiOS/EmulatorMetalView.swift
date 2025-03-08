@@ -57,35 +57,21 @@ struct EmulatorMetalView: UIViewRepresentable {
                  1, -1, 1, 1,
             ]
             vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.size)
+
+            let bridge = EmulatorBridge.sharedInstance()
+            bridge.initializeSDL()
+            bridge.loadROM("pocket.gb")
+
         }
 
         func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
 
         func draw(in view: MTKView) {
             let bridge = EmulatorBridge.sharedInstance()
-            let pixelData = UnsafeMutablePointer<UInt32>.allocate(capacity: 160 * 144)
+            let pixels = bridge.pixels()
             
-            // Fill with base color
-            for i in 0..<160*144 {
-                pixelData[i] = 0xFF306230  // Dark green background
-            }
-            
-            // Calculate band position (moves down 1 pixel per frame)
-            let bandY = frameCount % 144  // Wrap around at screen height
-            
-            // Draw 10-pixel high band
-            for y in 0..<10 {
-                let currentY = (bandY + y) % 144  // Wrap around for band overflow
-                let startIndex = currentY * 160
-                for x in 0..<160 {
-                    pixelData[startIndex + x] = 0xFF8BAC0F  // Light green band
-                }
-            }
-            
-            frameCount += 1  // Increment frame counter
-
             texture.replace(region: MTLRegionMake2D(0, 0, 160, 144),
-                          mipmapLevel: 0, withBytes: pixelData, bytesPerRow: 160 * 4)
+                          mipmapLevel: 0, withBytes: pixels, bytesPerRow: 160 * 4)
 
             guard let commandBuffer = commandQueue.makeCommandBuffer(),
                   let renderPass = view.currentRenderPassDescriptor,
@@ -100,8 +86,6 @@ struct EmulatorMetalView: UIViewRepresentable {
             encoder.endEncoding()
             commandBuffer.present(drawable)
             commandBuffer.commit()
-
-            pixelData.deallocate()
         }
 
         deinit {

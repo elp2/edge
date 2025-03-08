@@ -106,11 +106,17 @@ void System::Advance(int stepped) {
   }
 }
 
+const uint32_t* System::pixels() { return screen_->pixels(); }
+
+void System::AdvanceOneInstruction() {
+  Advance(cpu_->Step());
+}
+
 void System::Main() {
   if (SUPER_DEBUG) {
     cpu_->SetDebugPrint(true);
   }
   while (true) {
-    Advance(cpu_->Step());
+    AdvanceOneInstruction();
   }
 }

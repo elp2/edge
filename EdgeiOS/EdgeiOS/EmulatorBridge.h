@@ -19,6 +19,10 @@ typedef NS_ENUM(NSInteger, GameboyButton) {
 // Singleton access.
 + (EmulatorBridge *)sharedInstance;
 
+- (void)initializeSDL;
+- (void)loadROM:(NSString *)romName;
+- (void)advanceOneInstruction;
+
 // Emulator control
 - (void)pauseEmulation;
 - (void)resumeEmulation;
@@ -28,7 +32,7 @@ typedef NS_ENUM(NSInteger, GameboyButton) {
 - (void)didReleaseButton:(GameboyButton)button;
 
 // Display.
-- (uint32_t *)pixelData;
+- (const uint32_t *)pixels;
 
 @end
 
