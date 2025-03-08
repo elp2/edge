@@ -3,6 +3,7 @@
 #include <cstdint>
 
 class InterruptHandler;
+struct SDL_KeyboardEvent;
 union SDL_Event;
 
 class InputController {
@@ -11,7 +12,9 @@ class InputController {
   ~InputController() = default;
 
   void SetInterruptHandler(InterruptHandler* handler);
-  bool HandleEvent(SDL_Event e);
+    
+  bool HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool pressed);
+  void HandleEvent(const SDL_Event& e);
   void PollAndApplyEvents();
 
   void SetByteAt(uint16_t address, uint8_t byte);

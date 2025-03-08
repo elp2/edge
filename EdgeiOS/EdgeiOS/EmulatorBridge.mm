@@ -1,11 +1,8 @@
 #import "EmulatorBridge.h"
 
-#ifdef BUILD_IOS
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_main.h>
-#else
-#include "SDL.h"
-#endif
+#define SDL_MAIN_HANDLED 1
+#include <SDL3//SDL.h>
+#include <SDL3/SDL_main.h>
 
 #include "system.h"
 
@@ -45,6 +42,7 @@
     if (_sdlInitialized) {
         return;
     }
+    NSLog(@"Emulator Bridge creating AudioSession.");
     NSError *error = nil;
     // Set up audio session
     self.audioSession = [AVAudioSession sharedInstance];
@@ -56,13 +54,14 @@
     if (![self.audioSession setActive:YES error:&error]) {
         NSLog(@"Failed to activate audio session: %@", error);
     }
-    
+
     SDL_SetMainReady();
 
     _sdlInitialized = YES;
 }
 
 - (void)loadROM:(NSString *)romName {
+    NSAssert(_sdlInitialized, @"SDL Must be initialized.");
     NSBundle* bundle = [NSBundle mainBundle];
     NSArray<NSString*>* files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[bundle bundlePath] error:nil];
 

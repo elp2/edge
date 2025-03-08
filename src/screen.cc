@@ -4,7 +4,7 @@
 #include <iostream>
 
 #ifdef BUILD_IOS
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #else
 #include "SDL.h"
 #endif
@@ -15,28 +15,39 @@ const int PIXEL_SCALE = 4;
 Screen::Screen() { InitSDL(); }
 
 void Screen::InitSDL() {
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
-    const char* error = SDL_GetError();
-    cout << "Error in SDL_Init: " << error << endl;
-    assert(false);
-  }
-  window_ =
-      SDL_CreateWindow("EDGE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       SCREEN_WIDTH * PIXEL_SCALE, SCREEN_HEIGHT * PIXEL_SCALE, 0);
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+        const char* error = SDL_GetError();
+        std::cout << "Error in SDL_Init: " << error << std::endl;
+        assert(false);
+    }
+    
+    /* TODO Re-enable window.
+    // Window creation is mostly the same, but SDL_WINDOWPOS_CENTERED is now SDL_WINDOWPOS_CENTER
+    window_ = SDL_CreateWindow("EDGE",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        SCREEN_WIDTH * PIXEL_SCALE,
+        SCREEN_HEIGHT * PIXEL_SCALE,
+        0);
 
-  renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_SOFTWARE);
-  texture_ =
-      SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_ARGB8888,
-                        SDL_TEXTUREACCESS_STATIC, SCREEN_WIDTH, SCREEN_HEIGHT);
+    // Renderer creation is similar, but driver index -1 is now nullptr
+    renderer_ = SDL_CreateRenderer(window_, nullptr, SDL_RENDERER_SOFTWARE);
+    */
+    // Texture creation uses SDL_CreateTexture still, but pixel format constants have changed
+    texture_ = SDL_CreateTexture(renderer_,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STATIC,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT);
 
-  SDL_RenderClear(renderer_);
-  SDL_RenderPresent(renderer_);
+    SDL_RenderClear(renderer_);
+    SDL_RenderPresent(renderer_);
 
-  pixels_ = new uint32_t[SCREEN_WIDTH * SCREEN_HEIGHT];
-  palettes_ = new uint32_t[3];
-  palettes_[0] = palettes_[1] = palettes_[2] = DEFAULT_PALETTE;
-  frame_start_ms_ = SDL_GetTicks();
-  frames_ = 0;
+    pixels_ = new uint32_t[SCREEN_WIDTH * SCREEN_HEIGHT];
+    palettes_ = new uint32_t[3];
+    palettes_[0] = palettes_[1] = palettes_[2] = DEFAULT_PALETTE;
+    frame_start_ms_ = SDL_GetTicks();  // SDL_GetTicks returns uint32_t in SDL3
+    frames_ = 0;
 }
 
 void Screen::DrawPixel(Pixel pixel) {
@@ -89,10 +100,12 @@ void Screen::NewLine() {
 void Screen::VBlankBegan() { y_ = 0; }
 
 void Screen::VBlankEnded() {
-  SDL_UpdateTexture(texture_, NULL, pixels_, SCREEN_WIDTH * sizeof(Uint32));
+  // SDL_UpdateTexture signature is slightly different in SDL3 but compatible
+  SDL_UpdateTexture(texture_, nullptr, pixels_, SCREEN_WIDTH * sizeof(uint32_t));
   SDL_RenderClear(renderer_);
-  SDL_RenderCopy(renderer_, texture_, NULL, NULL);
+  SDL_RenderTexture(renderer_, texture_, nullptr, nullptr);
   SDL_RenderPresent(renderer_);
+        
   if (++frames_ == 60) {
     if (debugger_) {
       unsigned int sixty_frames_ms = SDL_GetTicks() - frame_start_ms_;
@@ -118,19 +131,16 @@ void Screen::SaveScreenshot(const string& base_name) {
             cout << "Too many screenshots, aborting." << endl;
             return;
         }
-    } while (SDL_RWFromFile(filename.c_str(), "r") != NULL);
+    } while (SDL_IOFromFile(filename.c_str(), "r") != NULL);
 
-    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(
-        pixels_,
-        SCREEN_WIDTH,
-        SCREEN_HEIGHT,
-        32,
-        SCREEN_WIDTH * 4,
-        0x00FF0000,
-        0x0000FF00,
-        0x000000FF,
-        0
-    );
+    // (int width, int height, SDL_PixelFormat format, void *pixels, int pitch);
+    SDL_Surface* surface = SDL_CreateSurfaceFrom(
+                                                 SCREEN_WIDTH,
+                                                 SCREEN_HEIGHT,
+                                                 SDL_PIXELFORMAT_ARGB8888,
+            pixels_,
+            SCREEN_WIDTH * 4
+        );
 
     if (surface == NULL) {
         cout << "Failed to create surface for screenshot: " << SDL_GetError() << endl;
@@ -143,5 +153,5 @@ void Screen::SaveScreenshot(const string& base_name) {
         cout << "Screenshot saved as: " << filename << endl;
     }
 
-    SDL_FreeSurface(surface);
+    SDL_DestroySurface(surface);
 }

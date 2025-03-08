@@ -87,4 +87,4 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
-EDGEiOS/SDL2.framework/*
+EdgeiOS/SDL3.xcframework/*

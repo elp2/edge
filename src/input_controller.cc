@@ -4,7 +4,7 @@
 #include <iostream>
 
 #ifdef BUILD_IOS
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #else
 #include "SDL.h"
 #endif
@@ -82,36 +82,41 @@ void InputController::PollAndApplyEvents() {
   return;
 }
 
-bool InputController::HandleEvent(SDL_Event event) {
-  if (event.type != SDL_KEYDOWN && event.type != SDL_KEYUP) {
-    return false;
-  }
-  SDL_KeyboardEvent kevent = event.key;
-  int nibble = KeyNibble(kevent.keysym.scancode);
-  if (nibble == -1) {
-    return false;
-  }
-
-  if (nibble == 0) {
-    if (event.type == SDL_KEYDOWN) {
-      dpad_nibble_ &= ~ReleasedNibbleBit(kevent.keysym.scancode);
-    } else {
-      dpad_nibble_ |= ReleasedNibbleBit(kevent.keysym.scancode);
+bool InputController::HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool pressed) {
+    int nibble = KeyNibble(event.scancode);
+    if (nibble == -1) {
+        return false;
     }
-  } else if (nibble == 1) {
-    if (event.type == SDL_KEYDOWN) {
-      button_nibble_ &= ~ReleasedNibbleBit(kevent.keysym.scancode);
-    } else {
-      button_nibble_ |= ReleasedNibbleBit(kevent.keysym.scancode);
+
+    if (nibble == 0) {
+        if (pressed) {
+            dpad_nibble_ &= ~ReleasedNibbleBit(event.scancode);
+        } else {
+            dpad_nibble_ |= ReleasedNibbleBit(event.scancode);
+        }
+    } else if (nibble == 1) {
+        if (pressed) {
+            button_nibble_ &= ~ReleasedNibbleBit(event.scancode);
+        } else {
+            button_nibble_ |= ReleasedNibbleBit(event.scancode);
+        }
     }
-  }
 
-  if (event.type == SDL_KEYDOWN) {
-    // Immediately request interrupt since we don't have to worry about debouncing on this HW.
-    interrupt_handler_->RequestInterrupt(Interrupt_Input);
-  }
+    if (pressed) {  // Trigger interrupt only on press
+        interrupt_handler_->RequestInterrupt(Interrupt_Input);
+    }
 
-  return true;
+    return true;
+}
+
+void InputController::HandleEvent(const SDL_Event& e) {
+    switch (e.type) {
+        case SDL_EVENT_KEY_DOWN:
+        case SDL_EVENT_KEY_UP:
+            HandleKeyboardEvent(e.key, e.type == SDL_EVENT_KEY_DOWN);
+            break;
+        // Add other event types if needed
+    }
 }
 
 void InputController::SetInterruptHandler(InterruptHandler* handler) {

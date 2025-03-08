@@ -4,7 +4,7 @@
 #include <iostream>
 
 #ifdef BUILD_IOS
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #else
 #include "SDL.h"
 #endif
@@ -16,63 +16,77 @@
 #include "wave_voice.h"
 
 
-void audioCallback(void* userdata, Uint8* stream, int len) {
-  int samples = len / sizeof(int16_t);
+static void audioCallback(void* userdata, SDL_AudioStream* stream, int min_len, int max_len) {
+    // We'll use min_len to ensure we provide at least the minimum requested samples
+    int samples = min_len / sizeof(int16_t);
+    int16_t* buffer = new int16_t[samples];
+    
+    for (int i = 0; i < samples; i++) {
+        buffer[i] = 0;
+    }
 
-  int16_t* buffer = reinterpret_cast<int16_t*>(stream);
-  // The buffer is reused, clear it since we'll add each voice.
-  for (int i = 0; i < samples; i++) {
-    buffer[i] = 0;
-  }
-
-  static_cast<SoundController*>(userdata)->MixSamplesToBuffer(buffer, samples);
+    static_cast<SoundController*>(userdata)->MixSamplesToBuffer(buffer, samples);
+    SDL_PutAudioStreamData(stream, buffer, min_len); // Use min_len for the byte size
+    delete[] buffer;
 }
 
 SoundController::SoundController() {
-  voice1_ = new PulseVoice(1);
-  voice2_ = new PulseVoice(2);  // We will not set the sweep on this voice.
-  voice3_ = new WaveVoice();
-  voice4_ = new NoiseVoice();
+    voice1_ = new PulseVoice(1);
+    voice2_ = new PulseVoice(2);
+    voice3_ = new WaveVoice();
+    voice4_ = new NoiseVoice();
+    global_sound_on_ = true;
 
-  global_sound_on_ = true;
+    SDL_AudioSpec spec;
+    SDL_zero(spec);
+    spec.freq = SAMPLE_RATE;
+    spec.format = SDL_AUDIO_S16;
+    spec.channels = 1;
 
-  SDL_AudioSpec spec, obtained;
-  SDL_zero(spec);
-  spec.freq = SAMPLE_RATE;
-  spec.format = AUDIO_S16SYS;
-  spec.channels = 1;
-  spec.samples = 512;
-  spec.callback = audioCallback;
-  spec.userdata = this;
+    SDL_AudioStream* audio_stream = SDL_OpenAudioDeviceStream(
+                                                              SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,
+        &spec,
+        audioCallback,
+        this
+    );
 
-  // Open audio device
-  if (SDL_OpenAudio(&spec, &obtained) < 0) {
-      std::cerr << "Failed to open audio: " << SDL_GetError() << std::endl;
-      return;
-  }
+    if (!audio_stream) {
+        std::cerr << "Failed to open audio stream: " << SDL_GetError() << std::endl;
+        return;
+    }
 
-  std::cout << "Audio initialized with buffer size: " << obtained.samples << " samples" << std::endl;
+    audio_stream_ = audio_stream;
+    SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(audio_stream));
+}
 
-  // Start audio playback (unpauses the callback)
-  SDL_PauseAudio(0);
+// Add destructor to clean up the audio stream
+SoundController::~SoundController() {
+    if (audio_stream_) {
+        SDL_CloseAudioDevice(SDL_GetAudioStreamDevice(audio_stream_));
+        audio_stream_ = nullptr;
+    }
+    delete voice1_;
+    delete voice2_;
+    delete voice3_;
+    delete voice4_;
 }
 
 void SoundController::MixSamplesToBuffer(int16_t* buffer, int samples) {
-  if (!global_sound_on_) {
-    return;
-  }
-  if (ChannelLeftEnabled(0) || ChannelRightEnabled(0)) {
-    voice1_->AddSamplesToBuffer(buffer, samples);
-  }
-  if (ChannelLeftEnabled(1) || ChannelRightEnabled(1)) {
-    voice2_->AddSamplesToBuffer(buffer, samples);
-  }
-  if (ChannelLeftEnabled(2) || ChannelRightEnabled(2)) {
-    voice3_->AddSamplesToBuffer(buffer, samples);
-  }
-  if (ChannelLeftEnabled(3) || ChannelRightEnabled(3)) {
-    voice4_->AddSamplesToBuffer(buffer, samples);
-  }
+    if (!global_sound_on_) {
+        return;
+    }
+    if (ChannelLeftEnabled(0) || ChannelRightEnabled(0)) {
+        voice1_->AddSamplesToBuffer(buffer, samples);
+    }
+    if (ChannelLeftEnabled(1) || ChannelRightEnabled(1)) {
+        voice2_->AddSamplesToBuffer(buffer, samples);
+    }
+    if (ChannelLeftEnabled(2) || ChannelRightEnabled(2)) {
+        voice3_->AddSamplesToBuffer(buffer, samples);
+    }
+    if (ChannelLeftEnabled(3) || ChannelRightEnabled(3)) {
+        voice4_->AddSamplesToBuffer(buffer, samples);
+    }
 }
 
 bool SoundController::Advance(int cycles) {

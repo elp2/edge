@@ -4,12 +4,13 @@
 
 class NoiseVoice;
 class PulseVoice;
+class SDL_AudioStream;
 class WaveVoice;
 
 class SoundController {
  public:
   SoundController();
-  ~SoundController() = default;
+  ~SoundController();
 
   bool Advance(int cycles);
 
@@ -30,7 +31,7 @@ class SoundController {
   WaveVoice *voice3_;
   NoiseVoice *voice4_;
 
-  uint32_t audio_device_ = 0;
+  SDL_AudioStream* audio_stream_;
 
   bool ChannelLeftEnabled(int channel);
   bool ChannelRightEnabled(int channel);

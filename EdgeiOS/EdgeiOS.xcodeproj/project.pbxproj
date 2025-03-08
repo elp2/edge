@@ -37,8 +37,8 @@
 		FA61BC6D2D7AADD800B0DD28 /* wave_voice.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA61BC4F2D7AADD800B0DD28 /* wave_voice.cc */; };
 		FA61BC6E2D7AADD800B0DD28 /* cpu.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA61BC372D7AADD800B0DD28 /* cpu.cc */; };
 		FA61BC6F2D7AADD800B0DD28 /* interrupt_controller.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA61BC392D7AADD800B0DD28 /* interrupt_controller.cc */; };
-		FA61BCE02D7BEB3F00B0DD28 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA61BCDF2D7BEB3F00B0DD28 /* SDL2.framework */; };
-		FA61BCE12D7BECBD00B0DD28 /* SDL2.framework in Resources */ = {isa = PBXBuildFile; fileRef = FA61BCDF2D7BEB3F00B0DD28 /* SDL2.framework */; };
+		FABDA4992D7CC47E004AE9ED /* SDL3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FABDA4982D7CC47E004AE9ED /* SDL3.xcframework */; };
+		FABDA49E2D7CD8D2004AE9ED /* SDL3.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FABDA4982D7CC47E004AE9ED /* SDL3.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +57,20 @@
 			remoteInfo = EDGEiOS;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FABDA49C2D7CD85A004AE9ED /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FABDA49E2D7CD8D2004AE9ED /* SDL3.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		FA12E91D2D7A965600620FD7 /* EDGEiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EDGEiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -127,7 +141,7 @@
 		FA61BC4D2D7AADD800B0DD28 /* unimplemented_command.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = unimplemented_command.cc; sourceTree = "<group>"; };
 		FA61BC4E2D7AADD800B0DD28 /* utils.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cc; sourceTree = "<group>"; };
 		FA61BC4F2D7AADD800B0DD28 /* wave_voice.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = wave_voice.cc; sourceTree = "<group>"; };
-		FA61BCDF2D7BEB3F00B0DD28 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = "/Users/edwardpalmer/Library/Developer/Xcode/DerivedData/SDL-dulaehhroehbypfmraixlhepymca/Build/Products/Debug-iphonesimulator/SDL2.framework"; sourceTree = "<absolute>"; };
+		FABDA4982D7CC47E004AE9ED /* SDL3.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = SDL3.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -159,7 +173,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA61BCE02D7BEB3F00B0DD28 /* SDL2.framework in Frameworks */,
+				FABDA4992D7CC47E004AE9ED /* SDL3.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,7 +197,7 @@
 		FA12E9142D7A965600620FD7 = {
 			isa = PBXGroup;
 			children = (
-				FA61BCDF2D7BEB3F00B0DD28 /* SDL2.framework */,
+				FABDA4982D7CC47E004AE9ED /* SDL3.xcframework */,
 				FA61BCCA2D7BACAA00B0DD28 /* roms */,
 				FA61BC502D7AADD800B0DD28 /* src */,
 				FA61BC302D7AADBE00B0DD28 /* include */,
@@ -295,6 +309,7 @@
 				FA12E9192D7A965600620FD7 /* Sources */,
 				FA12E91A2D7A965600620FD7 /* Frameworks */,
 				FA12E91B2D7A965600620FD7 /* Resources */,
+				FABDA49C2D7CD85A004AE9ED /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -380,7 +395,7 @@
 					};
 				};
 			};
-			buildConfigurationList = FA12E9182D7A965600620FD7 /* Build configuration list for PBXProject "EDGEiOS" */;
+			buildConfigurationList = FA12E9182D7A965600620FD7 /* Build configuration list for PBXProject "EdgeiOS" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -406,7 +421,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA61BCE12D7BECBD00B0DD28 /* SDL2.framework in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -644,7 +658,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
+					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.elp.EDGEiOS;
@@ -680,7 +694,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
+					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.elp.EDGEiOS;
@@ -761,7 +775,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FA12E9182D7A965600620FD7 /* Build configuration list for PBXProject "EDGEiOS" */ = {
+		FA12E9182D7A965600620FD7 /* Build configuration list for PBXProject "EdgeiOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FA12E9402D7A965800620FD7 /* Debug */,
