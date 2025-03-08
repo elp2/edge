@@ -244,7 +244,7 @@ uint8_t PPU::lcdc() { return GetIORAM(LCDC_ADDRESS); }
 
 void PPU::set_lcdc(uint8_t value) {
   bool screen_on = bit_set(value, 7);
-  cout << "LCDC " << screen_on << " 0x" << hex << unsigned(value) << endl;
+  // cout << "LCDC " << screen_on << " 0x" << hex << unsigned(value) << endl;
   screen_->set_on(screen_on);
   if (!screen_on && state_ != VBlank) {
     cout << "Turning off screen must happen in vblank but is " << hex << unsigned(state_) << endl;
