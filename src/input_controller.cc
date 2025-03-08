@@ -3,7 +3,12 @@
 #include <cassert>
 #include <iostream>
 
+#ifdef BUILD_IOS
 #include <SDL2/SDL.h>
+#else
+#include "SDL.h"
+#endif
+
 #include "interrupt_controller.h"
 
 const uint16_t P0_ADDRESS = 0xFF00;
@@ -66,6 +71,7 @@ uint8_t ReleasedNibbleBit(SDL_Scancode scancode) {
 InputController::InputController() {}
 
 void InputController::PollAndApplyEvents() {
+#ifndef BUILD_IOS
   SDL_Event e;
   while (SDL_PollEvent(&e) != 0) {
     if (e.type == SDL_QUIT) {
@@ -75,6 +81,7 @@ void InputController::PollAndApplyEvents() {
       HandleEvent(e);
     }
   }
+#endif
   return;
 }
 

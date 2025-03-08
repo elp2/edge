@@ -97,9 +97,12 @@ void System::Advance(int stepped) {
     }
     last_frame_start_time_ = std::chrono::high_resolution_clock::now();
     frame_count_++;
+
+#ifndef BUILD_IOS
     if (frame_count_ % 1000 == 0) {
       screen_->SaveScreenshot(cartridge_->GameTitle());
     }
+#endif
   }
 }
 

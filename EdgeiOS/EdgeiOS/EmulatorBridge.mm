@@ -1,5 +1,12 @@
 #import "EmulatorBridge.h"
 
+#ifdef BUILD_IOS
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_main.h>
+#else
+#include "SDL.h"
+#endif
+
 #include "system.h"
 
 @interface EmulatorBridge () {
@@ -40,7 +47,20 @@
             NSLog(@"Failed to activate audio session: %@", error);
         }
         
-        system_ = std::make_unique<System>("roms/pocket.gb");
+        SDL_SetMainReady();
+
+        NSBundle* bundle = [NSBundle mainBundle];
+        NSArray<NSString*>* files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[bundle bundlePath] error:nil];
+
+        NSString* romPath = [[bundle bundlePath] stringByAppendingPathComponent:@"pocket.gb"];
+        const char* cPath = [romPath UTF8String];
+        if (cPath) {
+            std::string cppPath(cPath);
+            system_ = std::make_unique<System>(cppPath);
+            system_->Main();
+        } else {
+        }
+        
     }
     return self;
 }

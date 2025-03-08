@@ -10,6 +10,7 @@ struct EmulatorMetalView: UIViewRepresentable {
         mtkView.colorPixelFormat = .bgra8Unorm
         mtkView.preferredFramesPerSecond = 60
         context.coordinator.setupMetal(mtkView: mtkView)
+        mtkView.preferredFramesPerSecond = 60
         return mtkView
     }
 

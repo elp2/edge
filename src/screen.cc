@@ -3,7 +3,11 @@
 #include <cassert>
 #include <iostream>
 
+#ifdef BUILD_IOS
 #include <SDL2/SDL.h>
+#else
+#include "SDL.h"
+#endif
 
 const uint8_t DEFAULT_PALETTE = 0xE4;  // 11100100.
 const int PIXEL_SCALE = 4;
