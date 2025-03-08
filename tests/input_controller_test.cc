@@ -1,6 +1,11 @@
 #include "input_controller.h"
 
+#ifdef BUILD_IOS
+#include <SDL2/SDL.h>
+#else
 #include "SDL.h"
+#endif
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "interrupt_controller.h"

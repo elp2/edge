@@ -97,10 +97,19 @@ void System::Advance(int stepped) {
     }
     last_frame_start_time_ = std::chrono::high_resolution_clock::now();
     frame_count_++;
+
+#ifndef BUILD_IOS
     if (frame_count_ % 1000 == 0) {
       screen_->SaveScreenshot(cartridge_->GameTitle());
     }
+#endif
   }
+}
+
+const uint32_t* System::pixels() { return screen_->pixels(); }
+
+void System::AdvanceOneInstruction() {
+  Advance(cpu_->Step());
 }
 
 void System::Main() {
@@ -108,6 +117,6 @@ void System::Main() {
     cpu_->SetDebugPrint(true);
   }
   while (true) {
-    Advance(cpu_->Step());
+    AdvanceOneInstruction();
   }
 }

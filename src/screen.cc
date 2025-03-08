@@ -3,7 +3,11 @@
 #include <cassert>
 #include <iostream>
 
+#ifdef BUILD_IOS
+#include <SDL2/SDL.h>
+#else
 #include "SDL.h"
+#endif
 
 const uint8_t DEFAULT_PALETTE = 0xE4;  // 11100100.
 const int PIXEL_SCALE = 4;
@@ -22,7 +26,7 @@ void Screen::InitSDL() {
 
   renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_SOFTWARE);
   texture_ =
-      SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGB888,
+      SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_ARGB8888,
                         SDL_TEXTUREACCESS_STATIC, SCREEN_WIDTH, SCREEN_HEIGHT);
 
   SDL_RenderClear(renderer_);
@@ -49,28 +53,28 @@ uint32_t Screen::GetScreenColor(Pixel pixel) {
   if (style_ == ScreenStyle_Green) {
     switch (palette_pixel & 0x3) {
       case 0x00:
-        return 0x9BBC0F;
+        return 0xFF9BBC0F;
       case 0x01:
-        return 0x8BAC0F; // Light green.
+        return 0xFF8BAC0F; // Light green.
       case 0x02:
-        return 0x306230; // Dark green.
+        return 0xFF306230; // Dark green.
       case 0x03:
-        return 0x0F380F; // Darkest green.
+        return 0xFF0F380F; // Darkest green.
       default:
-        return 0xFF69B4;  // Hot pink error.
+        return 0xFFFF69B4;  // Hot pink error.
     }
   } else if (style_ == ScreenStyle_White) {
     switch (palette_pixel & 0x3) {
       case 0x00:
-        return 0xFFFFFF;
+        return 0xFFFFFFFF;
       case 0x01:
-        return 0xAAAAAA;
+        return 0xFFAAAAAA;
       case 0x02:
-        return 0x555555;
+        return 0xFF555555;
       case 0x03:
-        return 0x000000;
+        return 0xFF000000;
       default:
-        return 0xFFB469;
+        return 0xFFFFB469;
     }
   }
   assert(false);

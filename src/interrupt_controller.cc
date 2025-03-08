@@ -13,8 +13,8 @@ const uint16_t IE_ADDRESS = 0xFFFF;
 InterruptController::InterruptController() {}
 
 void InterruptController::RequestInterrupt(Interrupt interrupt) {
-  std::cout << "Requesting Interrupt: " << std::hex << unsigned(interrupt)
-            << std::endl;
+  // std::cout << "Requesting Interrupt: " << std::hex << unsigned(interrupt)
+  //           << std::endl;
   if (interrupt_enabled_flags() & interrupt) {
     is_halted_ = false;
   }
@@ -53,7 +53,7 @@ int InterruptController::HandleInterruptRequest() {
   }
 
   assert(rst_pc != 0x00);
-  std::cout << "Resetting to pc: " << std::hex << unsigned(rst_pc) << std::endl;
+  // std::cout << "Resetting to pc: " << std::hex << unsigned(rst_pc) << std::endl;
   interrupts_enabed_ = false;  // Must be re-enabled during the event loop.
   executor_->InterruptToPC(rst_pc);
   return 0;
