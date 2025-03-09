@@ -21,11 +21,7 @@ typedef NS_ENUM(NSInteger, GameboyButton) {
 
 - (void)initializeSDL;
 - (void)loadROM:(NSString *)romName;
-- (void)advanceOneInstruction;
-
-// Emulator control
-- (void)pauseEmulation;
-- (void)resumeEmulation;
+- (void)advanceOneFrame;
 
 // Input handling.
 - (void)didPressButton:(GameboyButton)button;

@@ -42,9 +42,8 @@
     if (_sdlInitialized) {
         return;
     }
-    NSLog(@"Emulator Bridge creating AudioSession.");
+
     NSError *error = nil;
-    // Set up audio session
     self.audioSession = [AVAudioSession sharedInstance];
     if (![self.audioSession setCategory:AVAudioSessionCategoryPlayback
                                 error:&error]) {
@@ -70,36 +69,18 @@
     if (cPath) {
         std::string cppPath(cPath);
         system_ = std::make_unique<System>(cppPath);
-        [self startRunLoop];
+        _isRunning = true;
     } else {
     }
 }
 
 #pragma mark - Emulator Control
 
-- (void)startRunLoop {
-    _isRunning = true;
-    [self runEmulationLoop];
-}
-
-- (void)runEmulationLoop {
-    if (!_isRunning) return;
-    
-    // Run one iteration
-    system_->AdvanceOneInstruction();
-    
-    // Immediately queue up the next iteration
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self runEmulationLoop];
-    });
-}
-
-- (void)pauseEmulation {
-    _isRunning = false;
-}
-
-- (void)stopEmulation {
-    _isRunning = false;
+- (void)advanceOneFrame {
+    if (!_isRunning) {
+        return;
+    }
+    system_->AdvanceOneFrame();
 }
 
 #pragma mark - Input Handling
@@ -122,13 +103,10 @@
 #pragma mark - Cleanup
 
 - (void)dealloc {
-    [self stopEmulation];
     NSError *error = nil;
     if (![self.audioSession setActive:NO error:&error]) {
         NSLog(@"Failed to deactivate audio session: %@", error);
     }
-    
-    // C++ cleanup happens automatically through RAII
 }
 
 @end 

@@ -69,7 +69,8 @@ MMU *System::GetMMU(string rom_filename, bool skip_boot_rom) {
   return mmu;
 }
 
-void System::Advance(int stepped) {
+int System::Advance() {
+  int stepped = cpu_->Step();
   input_controller_->PollAndApplyEvents();
   ppu_->Advance(stepped);
   timer_controller_->Advance(stepped);
@@ -83,40 +84,41 @@ void System::Advance(int stepped) {
   // interrupt controller. Advancing the IC is how we turn the flags on/off.
   // Have a separate "CPU Stepped" version?
   assert(interrupt_steps == 0);
+  return stepped;
+}
 
-  frame_cycles_ += stepped;
-  if (frame_cycles_ >= CYCLES_PER_FRAME) {
-    frame_cycles_ = 0;
-    static const std::chrono::duration<double> FRAME_TIME(1.0 / 60.0);
+void System::AdvanceOneFrame() {
+  while (frame_cycles_ < CYCLES_PER_FRAME) {
+    frame_cycles_ += Advance();
+  }
 
-    auto current_time = std::chrono::high_resolution_clock::now();
-    auto elapsed = current_time - last_frame_start_time_;
-
-    if (elapsed < FRAME_TIME) {
-      std::this_thread::sleep_for(FRAME_TIME - elapsed);
-    }
-    last_frame_start_time_ = std::chrono::high_resolution_clock::now();
-    frame_count_++;
+  frame_cycles_ = 0;
+  frame_count_++;
 
 #ifndef BUILD_IOS
-    if (frame_count_ % 1000 == 0) {
-      screen_->SaveScreenshot(cartridge_->GameTitle());
-    }
-#endif
+  static const std::chrono::duration<double> FRAME_TIME(1.0 / 60.0);
+
+  auto current_time = std::chrono::high_resolution_clock::now();
+  auto elapsed = current_time - last_frame_start_time_;
+
+  if (elapsed < FRAME_TIME) {
+    std::this_thread::sleep_for(FRAME_TIME - elapsed);
   }
+  last_frame_start_time_ = std::chrono::high_resolution_clock::now();
+
+  if (frame_count_ % 1000 == 0) {
+    screen_->SaveScreenshot(cartridge_->GameTitle());
+  }
+#endif
 }
 
 const uint32_t* System::pixels() { return screen_->pixels(); }
-
-void System::AdvanceOneInstruction() {
-  Advance(cpu_->Step());
-}
 
 void System::Main() {
   if (SUPER_DEBUG) {
     cpu_->SetDebugPrint(true);
   }
   while (true) {
-    AdvanceOneInstruction();
+    AdvanceOneFrame();
   }
 }

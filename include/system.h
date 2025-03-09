@@ -24,7 +24,7 @@ class System {
 
   void Main();
 
-  void AdvanceOneInstruction();
+  void AdvanceOneFrame();
 
   const uint32_t* pixels();
 
@@ -46,6 +46,6 @@ class System {
   std::chrono::high_resolution_clock::time_point last_frame_start_time_;
 
   MMU *GetMMU(string rom_filename, bool skip_boot_rom);
-  void Advance(int stepped);
+  int Advance();
   void FrameEnded();
 };

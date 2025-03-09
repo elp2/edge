@@ -68,6 +68,7 @@ struct EmulatorMetalView: UIViewRepresentable {
 
         func draw(in view: MTKView) {
             let bridge = EmulatorBridge.sharedInstance()
+            bridge.advanceOneFrame()
             let pixels = bridge.pixels()
             
             texture.replace(region: MTLRegionMake2D(0, 0, 160, 144),
