@@ -49,10 +49,6 @@ const int OAM_SPRITE_BYTES = 4;  // Technically only uses the first 28 bits.
 PPU::PPU(Screen *screen) {
   oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));
   video_ram_ = (uint8_t *)calloc(0x2000, sizeof(uint8_t));
-  for (int i = 0; i < 0x2000; i++) {
-    // Initialize junk data so corruption will reveal errors.
-    video_ram_[i] = i % 255;
-  }
   io_ram_ = (uint8_t *)calloc(0xD, sizeof(uint8_t));
 
   frame_cycles_ = 0;
