@@ -82,6 +82,28 @@ void InputController::PollAndApplyEvents() {
   return;
 }
 
+void InputController::SetButtons(bool dpadUp, bool dpadDown, bool dpadLeft, bool dpadRight, bool buttonA, bool buttonB, bool buttonSelect, bool buttonStart) {
+  uint8_t new_dpad = (!dpadDown);
+  new_dpad = (new_dpad << 1) | (!dpadUp);
+  new_dpad = (new_dpad << 1) | (!dpadLeft);
+  new_dpad = (new_dpad << 1) | (!dpadRight);
+
+  uint8_t new_button = (!buttonStart);
+  new_button = (new_button << 1) | (!buttonSelect);
+  new_button = (new_button << 1) | (!buttonB);
+  new_button = (new_button << 1) | (!buttonA);
+
+  uint8_t dpad_pressed = ((new_dpad ^ dpad_nibble_) & new_dpad) == 0;
+  uint8_t button_pressed = ((new_button ^ button_nibble_) & new_button) == 0;
+
+  if (dpad_pressed || button_pressed) {
+    interrupt_handler_->RequestInterrupt(Interrupt_Input);
+  }
+
+  dpad_nibble_ = new_dpad;
+  button_nibble_ = new_button;
+}
+
 bool InputController::HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool pressed) {
     int nibble = KeyNibble(event.scancode);
     if (nibble == -1) {
@@ -110,13 +132,12 @@ bool InputController::HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool p
 }
 
 void InputController::HandleEvent(const SDL_Event& e) {
-    switch (e.type) {
-        case SDL_EVENT_KEY_DOWN:
-        case SDL_EVENT_KEY_UP:
-            HandleKeyboardEvent(e.key, e.type == SDL_EVENT_KEY_DOWN);
-            break;
-        // Add other event types if needed
-    }
+  switch (e.type) {
+    case SDL_EVENT_KEY_DOWN:
+    case SDL_EVENT_KEY_UP:
+      HandleKeyboardEvent(e.key, e.type == SDL_EVENT_KEY_DOWN);
+      break;
+  }
 }
 
 void InputController::SetInterruptHandler(InterruptHandler* handler) {

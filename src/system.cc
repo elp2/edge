@@ -87,6 +87,10 @@ int System::Advance() {
   return stepped;
 }
 
+void System::SetButtons(bool dpadUp, bool dpadDown, bool dpadLeft, bool dpadRight, bool buttonA, bool buttonB, bool buttonSelect, bool buttonStart) {
+  input_controller_->SetButtons(dpadUp, dpadDown, dpadLeft, dpadRight, buttonA, buttonB, buttonSelect, buttonStart);
+}
+
 void System::AdvanceOneFrame() {
   while (frame_cycles_ < CYCLES_PER_FRAME) {
     frame_cycles_ += Advance();

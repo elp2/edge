@@ -80,17 +80,8 @@
     if (!_isRunning) {
         return;
     }
+    system_->SetButtons(self.dpadUp, self.dpadDown, self.dpadLeft, self.dpadRight, self.buttonA, self.buttonB, self.buttonSelect, self.buttonStart);
     system_->AdvanceOneFrame();
-}
-
-#pragma mark - Input Handling
-
-- (void)didPressButton:(GameboyButton)button {
-    // TODO.
-}
-
-- (void)didReleaseButton:(GameboyButton)button {
-    // TODO.
 }
 
 #pragma mark - Display

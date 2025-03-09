@@ -1,31 +1,28 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
+#include "constants.h"
 
-typedef NS_ENUM(NSInteger, GameboyButton) {
-    GameboyButtonA,
-    GameboyButtonB,
-    GameboyButtonStart,
-    GameboyButtonSelect,
-    GameboyButtonUp,
-    GameboyButtonLeft,
-    GameboyButtonDown,
-    GameboyButtonRight
-};
+NS_ASSUME_NONNULL_BEGIN
 
 @interface EmulatorBridge : NSObject
 
-// Singleton access.
+// Singleton access
 + (EmulatorBridge *)sharedInstance;
+
+// Public properties for button states
+@property (nonatomic, assign) BOOL dpadUp;
+@property (nonatomic, assign) BOOL dpadDown;
+@property (nonatomic, assign) BOOL dpadLeft;
+@property (nonatomic, assign) BOOL dpadRight;
+@property (nonatomic, assign) BOOL buttonA;
+@property (nonatomic, assign) BOOL buttonB;
+@property (nonatomic, assign) BOOL buttonSelect;
+@property (nonatomic, assign) BOOL buttonStart;
 
 - (void)initializeSDL;
 - (void)loadROM:(NSString *)romName;
 - (void)advanceOneFrame;
-
-// Input handling.
-- (void)didPressButton:(GameboyButton)button;
-- (void)didReleaseButton:(GameboyButton)button;
 
 // Display.
 - (const uint32_t *)pixels;

@@ -24,6 +24,7 @@ class System {
 
   void Main();
 
+  void SetButtons(bool dpadUp, bool dpadDown, bool dpadLeft, bool dpadRight, bool buttonA, bool buttonB, bool buttonSelect, bool buttonStart);
   void AdvanceOneFrame();
 
   const uint32_t* pixels();

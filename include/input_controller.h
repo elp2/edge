@@ -12,7 +12,9 @@ class InputController {
   ~InputController() = default;
 
   void SetInterruptHandler(InterruptHandler* handler);
-    
+
+  void SetButtons(bool dpadUp, bool dpadDown, bool dpadLeft, bool dpadRight, bool buttonA, bool buttonB, bool buttonSelect, bool buttonStart);
+
   bool HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool pressed);
   void HandleEvent(const SDL_Event& e);
   void PollAndApplyEvents();
