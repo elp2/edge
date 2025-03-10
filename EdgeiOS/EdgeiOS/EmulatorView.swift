@@ -5,55 +5,11 @@ struct EmulatorView: View {
         VStack(spacing: 20) {
             GeometryReader { geometry in
                 EmulatorMetalView()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: geometry.size.width)
+                    .frame(width: geometry.size.width)
+                    .frame(height: geometry.size.width * (144.0 / 160.0))
             }
             HStack(spacing: 40) {
-                // D-Pad (placeholder for now)
-                VStack(spacing: 10) {
-                    Button("↑") { }
-                        .simultaneousGesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { _ in
-                                    EmulatorBridge.sharedInstance().dpadUp = true;
-                                }
-                                .onEnded { _ in
-                                    EmulatorBridge.sharedInstance().dpadUp = false;
-                                }
-                        )
-                    HStack(spacing: 30) {
-                        Button("←") { }
-                            .simultaneousGesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onChanged { _ in
-                                        EmulatorBridge.sharedInstance().dpadLeft = true;
-                                    }
-                                    .onEnded { _ in
-                                        EmulatorBridge.sharedInstance().dpadLeft = false;
-                                    }
-                            )
-                        Button("→") { }
-                            .simultaneousGesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onChanged { _ in
-                                        EmulatorBridge.sharedInstance().dpadRight = true;
-                                    }
-                                    .onEnded { _ in
-                                        EmulatorBridge.sharedInstance().dpadRight = false;
-                                    }
-                            )
-                    }
-                    Button("↓") { }
-                        .simultaneousGesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { _ in
-                                    EmulatorBridge.sharedInstance().dpadDown = true;
-                                }
-                                .onEnded { _ in
-                                    EmulatorBridge.sharedInstance().dpadDown = false;
-                                }
-                        )
-                }
+                DirectionalPadView()
                 VStack(spacing: 30) {
                     // Action buttons
                     HStack(spacing: 20) {
