@@ -84,6 +84,21 @@
     system_->AdvanceOneFrame();
 }
 
+- (void)pauseEmulator {
+    NSLog(@"TODO: pauseEmulator");
+}
+
+- (void)resumeEmulator {
+    NSLog(@"TODO: resumeEmulator");
+}
+
+- (void)endEmulator {
+    NSLog(@"TODO: endEmulator");
+    // Make sure we're in a paused state, with audio off.
+    [self pauseEmulator];
+    // TODO: Save state.
+}
+
 #pragma mark - Display
 
 - (const uint32_t *)pixels {

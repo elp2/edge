@@ -57,11 +57,6 @@ struct EmulatorMetalView: UIViewRepresentable {
                  1, -1, 1, 1,
             ]
             vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.size)
-
-            let bridge = EmulatorBridge.sharedInstance()
-            bridge.initializeSDL()
-            bridge.loadROM("pocket.gb")
-
         }
 
         func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
@@ -94,7 +89,6 @@ struct EmulatorMetalView: UIViewRepresentable {
     }
 }
 
-// Preview
 struct EmulatorMetalView_Previews: PreviewProvider {
     static var previews: some View {
         EmulatorMetalView()

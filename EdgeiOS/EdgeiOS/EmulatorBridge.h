@@ -24,6 +24,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)loadROM:(NSString *)romName;
 - (void)advanceOneFrame;
 
+
+// Pauses a running emulator.
+- (void)pauseEmulator;
+// Resumes a paused emulator.
+- (void)resumeEmulator;
+// End this session, saving if necessary.
+- (void)endEmulator;
+
 // Display.
 - (const uint32_t *)pixels;
 

@@ -1,6 +1,15 @@
 import SwiftUI
 
 struct EmulatorView: View {
+    let romFilename: String
+    private let bridge: EmulatorBridge
+    @State private var loadError: Error?
+    
+    init(romFilename: String) {
+        self.romFilename = romFilename
+        self.bridge = EmulatorBridge.sharedInstance()
+    }
+    
     var body: some View {
         VStack(spacing: 20) {
             GeometryReader { geometry in
@@ -23,10 +32,10 @@ struct EmulatorView: View {
                                 .simultaneousGesture(
                                     DragGesture(minimumDistance: 0)
                                         .onChanged { _ in
-                                            EmulatorBridge.sharedInstance().buttonA = true;
+                                            bridge.buttonA = true;
                                         }
                                         .onEnded { _ in
-                                            EmulatorBridge.sharedInstance().buttonA = false;
+                                            bridge.buttonA = false;
                                         }
                                 )
                             Button("B") { }
@@ -37,10 +46,10 @@ struct EmulatorView: View {
                                 .simultaneousGesture(
                                     DragGesture(minimumDistance: 0)
                                         .onChanged { _ in
-                                            EmulatorBridge.sharedInstance().buttonB = true;
+                                            bridge.buttonB = true;
                                         }
                                         .onEnded { _ in
-                                            EmulatorBridge.sharedInstance().buttonB = false;
+                                            bridge.buttonB = false;
                                         }
                                 )
                         }
@@ -56,10 +65,10 @@ struct EmulatorView: View {
                             .simultaneousGesture(
                                 DragGesture(minimumDistance: 0)
                                     .onChanged { _ in
-                                        EmulatorBridge.sharedInstance().buttonSelect = true;
+                                        bridge.buttonSelect = true;
                                     }
                                     .onEnded { _ in
-                                        EmulatorBridge.sharedInstance().buttonSelect = false;
+                                        bridge.buttonSelect = false;
                                     }
                             )
 
@@ -73,15 +82,33 @@ struct EmulatorView: View {
                         .simultaneousGesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { _ in
-                                    EmulatorBridge.sharedInstance().buttonStart = true;
+                                    bridge.buttonStart = true;
                                 }
                                 .onEnded { _ in
-                                    EmulatorBridge.sharedInstance().buttonStart = false;
+                                    bridge.buttonStart = false;
                                 }
                         )
                     }
                 }
                 .padding()
+            }
+        }
+        .onAppear {
+            do {
+                try bridge.loadROM(romFilename)
+            } catch {
+                print("Failed to start emulator: \(error)")
+                loadError = error
+            }
+        }
+        .onDisappear {
+            bridge.endEmulator()
+        }
+        .alert("Failed to load ROM", isPresented: .constant(loadError != nil)) {
+            Button("OK", role: .cancel) { loadError = nil }
+        } message: {
+            if let error = loadError {
+                Text(error.localizedDescription)
             }
         }
     }
@@ -90,6 +117,6 @@ struct EmulatorView: View {
 // Preview provider
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        EmulatorView()
+        EmulatorView(romFilename: "pocket.gb")
     }
 }

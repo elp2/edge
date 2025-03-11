@@ -1,11 +1,14 @@
 import SwiftUI
 
 @main
+struct EdgeiOSApp: App {
+    init() {
+        EmulatorBridge.sharedInstance().initializeSDL()
+    }
 
-struct EDGEiOSApp: App {
     var body: some Scene {
         WindowGroup {
-            EmulatorView()
+            RomsListView()
         }
     }
 }
