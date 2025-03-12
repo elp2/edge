@@ -6,7 +6,10 @@
 #include <SDL3/SDL.h>
 
 const uint8_t DEFAULT_PALETTE = 0xE4;  // 11100100.
+
+#ifndef BUILD_IOS
 const int PIXEL_SCALE = 4;
+#endif
 
 Screen::Screen() { InitSDL(); }
 
@@ -100,7 +103,7 @@ void Screen::VBlankEnded() {
         
   if (++frames_ == 60) {
     if (debugger_) {
-      unsigned int sixty_frames_ms = SDL_GetTicks() - frame_start_ms_;
+      unsigned long long sixty_frames_ms = SDL_GetTicks() - frame_start_ms_;
       cout << "1 second: avg " << dec << unsigned((1000 * sixty_frames_ms) / 60)
            << " ms / frame." << endl;
     }

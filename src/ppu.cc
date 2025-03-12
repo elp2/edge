@@ -44,7 +44,6 @@ const int BYTES_PER_8X8_TILE = 16;
 
 const uint16_t OAM_RAM_ADDRESS = 0xFE00;
 const int NUM_OAM_SPRITES = 40;
-const int OAM_SPRITE_BYTES = 4;  // Technically only uses the first 28 bits.
 
 PPU::PPU(Screen *screen) {
   oam_ram_ = (uint8_t *)calloc(0xA0, sizeof(uint8_t));

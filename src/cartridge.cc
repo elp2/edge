@@ -20,7 +20,7 @@ uint8_t *UnsignedCartridgeBytes(string filename) {
   }
 
   file.seekg(0, ios::end);
-  uint32_t rom_size = file.tellg();
+  streamoff rom_size = file.tellg();
   file.seekg(0, ios::beg);
   uint8_t *rom = new uint8_t[rom_size];
   file.seekg(0, ios::beg);
@@ -195,6 +195,9 @@ void Cartridge::SetRAMorRTC(uint16_t address, uint8_t byte) {
 }
 
 uint8_t Cartridge::GetRTC() {
+  (void)RTC_MINUTES_REGISTER;
+  (void)RTC_HOURS_REGISTER;
+  (void)RTC_DAYS_LOW8_REGISTER;
   assert(HasRTC());
   if (rtc_latched_) {
     return rtc_latched_value_;

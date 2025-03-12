@@ -94,12 +94,7 @@ struct EmulatorView: View {
             }
         }
         .onAppear {
-            do {
-                try bridge.loadROM(romFilename)
-            } catch {
-                print("Failed to start emulator: \(error)")
-                loadError = error
-            }
+            bridge.loadROM(romFilename)
         }
         .onDisappear {
             bridge.endEmulator()

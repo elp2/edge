@@ -62,7 +62,6 @@
 - (void)loadROM:(NSString *)romName {
     NSAssert(_sdlInitialized, @"SDL Must be initialized.");
     NSBundle* bundle = [NSBundle mainBundle];
-    NSArray<NSString*>* files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[bundle bundlePath] error:nil];
 
     NSString* romPath = [[bundle bundlePath] stringByAppendingPathComponent:romName];
     const char* cPath = [romPath UTF8String];

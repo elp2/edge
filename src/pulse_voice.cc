@@ -88,7 +88,6 @@ void PulseVoice::DoPeriodSweep() {
 }
 
 void PulseVoice::PrintDebug() {
-  return;
   std::cout << "Pulse voice " << voice_number_ << " enabled: " << enabled_ << std::endl;
   std::cout << "Length: " << (int)length_ << std::endl;
   std::cout << "Length enable: " << (int)length_enable_ << std::endl;
@@ -115,7 +114,6 @@ void PulseVoice::SetNRX4(uint8_t byte) {
 
     waveform_position_ = 0;
     next_duty_cycle_cycle_ = CyclesPerDutyCycle();
-    PrintDebug();
   } else {
     enabled_ = false;
   }

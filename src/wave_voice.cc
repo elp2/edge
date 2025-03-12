@@ -61,7 +61,6 @@ float WaveVoice::CenteredSample() {
   }
   float centered = float(nibble) - 7.5f;
 
-  float ret;
   switch (output_level_) {
     case 0b00:
       return 0.0f; // Mute.
