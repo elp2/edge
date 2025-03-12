@@ -1,10 +1,6 @@
 #include "input_controller.h"
 
-#ifdef BUILD_IOS
-#include <SDL2/SDL.h>
-#else
-#include "SDL.h"
-#endif
+#include <SDL3/SDL.h>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -33,10 +29,11 @@ class InputControllerTest : public ::testing::Test {
   }
 
   SDL_Event Button(bool key_down, SDL_Scancode sc) {
-    SDL_Event button = SDL_Event();
-    button.type = key_down ? SDL_KEYDOWN : SDL_KEYUP;
-    button.key.keysym.scancode = sc;
-    return button;
+    SDL_Event event = SDL_Event();
+    event.key.type = key_down ? SDL_EVENT_KEY_DOWN : SDL_EVENT_KEY_UP;
+    event.key.scancode = sc;
+
+    return event;
   }
 
   MockInterruptHandler mock_handler_;

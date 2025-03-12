@@ -3,11 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-#ifdef BUILD_IOS
 #include <SDL3/SDL.h>
-#else
-#include "SDL.h"
-#endif
 
 const uint8_t DEFAULT_PALETTE = 0xE4;  // 11100100.
 const int PIXEL_SCALE = 4;
@@ -15,25 +11,21 @@ const int PIXEL_SCALE = 4;
 Screen::Screen() { InitSDL(); }
 
 void Screen::InitSDL() {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         const char* error = SDL_GetError();
         std::cout << "Error in SDL_Init: " << error << std::endl;
         assert(false);
     }
-    
-    /* TODO Re-enable window.
-    // Window creation is mostly the same, but SDL_WINDOWPOS_CENTERED is now SDL_WINDOWPOS_CENTER
+
+#ifndef BUILD_IOS
     window_ = SDL_CreateWindow("EDGE",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH * PIXEL_SCALE,
         SCREEN_HEIGHT * PIXEL_SCALE,
-        0);
+        SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
-    // Renderer creation is similar, but driver index -1 is now nullptr
-    renderer_ = SDL_CreateRenderer(window_, nullptr, SDL_RENDERER_SOFTWARE);
-    */
-    // Texture creation uses SDL_CreateTexture still, but pixel format constants have changed
+    renderer_ = SDL_CreateRenderer(window_, 0);
+#endif
+
     texture_ = SDL_CreateTexture(renderer_,
         SDL_PIXELFORMAT_ARGB8888,
         SDL_TEXTUREACCESS_STATIC,
@@ -46,7 +38,7 @@ void Screen::InitSDL() {
     pixels_ = new uint32_t[SCREEN_WIDTH * SCREEN_HEIGHT];
     palettes_ = new uint32_t[3];
     palettes_[0] = palettes_[1] = palettes_[2] = DEFAULT_PALETTE;
-    frame_start_ms_ = SDL_GetTicks();  // SDL_GetTicks returns uint32_t in SDL3
+    frame_start_ms_ = SDL_GetTicks();
     frames_ = 0;
 }
 

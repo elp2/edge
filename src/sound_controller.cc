@@ -3,11 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-#ifdef BUILD_IOS
 #include <SDL3/SDL.h>
-#else
-#include "SDL.h"
-#endif
 
 #include "constants.h"
 #include "noise_voice.h"

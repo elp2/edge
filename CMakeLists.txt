@@ -24,11 +24,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 if (WIN32)
-set(SDL2_DIR "C://Users/edwar/Documents/Dev/SDL2-2.0.10")
+# TODO: Test this.
 endif()
 
-find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
+find_package(SDL3 REQUIRED)
+include_directories(${SDL3_INCLUDE_DIRS})
 
 add_library (edge_lib
     src/address_router.cc
@@ -60,16 +60,16 @@ add_library (edge_lib
     src/unimplemented_command.cc
     src/utils.cc
     src/wave_voice.cc)
-target_include_directories(edge_lib PUBLIC ${SDL2_INCLUDE_DIR})
+target_include_directories(edge_lib PUBLIC ${SDL3_INCLUDE_DIR})
 target_include_directories(edge_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(edge_lib ${SDL2_LIBRARIES})
+target_link_libraries(edge_lib ${SDL3_LIBRARIES})
 
 
 add_executable(edge WIN32
     src/system.cc
     src/main.cc)
 target_link_libraries(edge edge_lib)
-target_link_libraries(edge ${SDL2_LIBRARIES})
+target_link_libraries(edge ${SDL3_LIBRARIES})
 
 
 target_include_directories(edge PUBLIC ${PROJECT_SOURCE_DIR}/include)

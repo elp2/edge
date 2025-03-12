@@ -3,11 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-#ifdef BUILD_IOS
 #include <SDL3/SDL.h>
-#else
-#include "SDL.h"
-#endif
 
 #include "interrupt_controller.h"
 
@@ -71,8 +67,8 @@ void InputController::PollAndApplyEvents() {
 #ifndef BUILD_IOS
   SDL_Event e;
   while (SDL_PollEvent(&e) != 0) {
-    if (e.type == SDL_QUIT) {
-      std::cout << "SDL_QUIT" << std::endl;
+    if (e.type == SDL_EVENT_QUIT) {
+      std::cout << "SDL_EVENT_QUIT" << std::endl;
       exit(0);
     } else {
       HandleEvent(e);
