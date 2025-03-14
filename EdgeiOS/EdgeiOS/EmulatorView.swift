@@ -5,6 +5,7 @@ struct EmulatorView: View {
     private let bridge: EmulatorBridge
     @State private var loadError: Error?
     private let abButtonSize: CGFloat = 75
+    private let impactGenerator = UIImpactFeedbackGenerator(style: .light)
     
     init(romFilename: String) {
         self.romFilename = romFilename
@@ -31,6 +32,7 @@ struct EmulatorView: View {
                         .simultaneousGesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { _ in
+                                    impactGenerator.impactOccurred()
                                     bridge.buttonB = true;
                                 }
                                 .onEnded { _ in
@@ -46,6 +48,7 @@ struct EmulatorView: View {
                         .simultaneousGesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { _ in
+                                    impactGenerator.impactOccurred()
                                     bridge.buttonA = true;
                                 }
                                 .onEnded { _ in
@@ -66,6 +69,7 @@ struct EmulatorView: View {
                     .simultaneousGesture(
                         DragGesture(minimumDistance: 0)
                             .onChanged { _ in
+                                impactGenerator.impactOccurred()
                                 bridge.buttonSelect = true;
                             }
                             .onEnded { _ in
@@ -81,6 +85,7 @@ struct EmulatorView: View {
                     .simultaneousGesture(
                         DragGesture(minimumDistance: 0)
                             .onChanged { _ in
+                                impactGenerator.impactOccurred()
                                 bridge.buttonStart = true;
                             }
                             .onEnded { _ in

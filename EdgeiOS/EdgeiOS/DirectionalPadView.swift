@@ -3,6 +3,8 @@ import SwiftUI
 struct DirectionalPadView: View {
     let minimumDrag: CGFloat = 20
     let viewSize: CGFloat = 175
+    private let impactGenerator = UIImpactFeedbackGenerator(style: .light)
+
     var body: some View {
         ZStack {
             Circle()
@@ -24,14 +26,26 @@ struct DirectionalPadView: View {
                     let y = drag.location.y + drag.translation.height - viewSize / 2.0
                     
                     if x > minimumDrag {
+                        if !EmulatorBridge.sharedInstance().dpadRight {
+                            impactGenerator.impactOccurred()
+                        }
                         EmulatorBridge.sharedInstance().dpadRight = true
                     } else if abs(x) > minimumDrag {
+                        if !EmulatorBridge.sharedInstance().dpadLeft {
+                            impactGenerator.impactOccurred()
+                        }
                         EmulatorBridge.sharedInstance().dpadLeft = true
                     }
 
                     if y > minimumDrag {
+                        if !EmulatorBridge.sharedInstance().dpadDown {
+                            impactGenerator.impactOccurred()
+                        }
                         EmulatorBridge.sharedInstance().dpadDown = true
                     } else if abs(y) > minimumDrag {
+                        if !EmulatorBridge.sharedInstance().dpadUp {
+                            impactGenerator.impactOccurred()
+                        }
                         EmulatorBridge.sharedInstance().dpadUp = true
                     }
                 }
