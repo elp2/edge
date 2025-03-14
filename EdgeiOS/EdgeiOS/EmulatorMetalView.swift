@@ -65,9 +65,11 @@ struct EmulatorMetalView: UIViewRepresentable {
             let bridge = EmulatorBridge.sharedInstance()
             bridge.advanceOneFrame()
             let pixels = bridge.pixels()
-            
+            let pixelsCopy = UnsafeMutablePointer<UInt32>.allocate(capacity: 160 * 144)
+            memcpy(pixelsCopy, pixels, 160 * 144 * 4)
+
             texture.replace(region: MTLRegionMake2D(0, 0, 160, 144),
-                          mipmapLevel: 0, withBytes: pixels, bytesPerRow: 160 * 4)
+                          mipmapLevel: 0, withBytes: pixelsCopy, bytesPerRow: 160 * 4)
 
             guard let commandBuffer = commandQueue.makeCommandBuffer(),
                   let renderPass = view.currentRenderPassDescriptor,

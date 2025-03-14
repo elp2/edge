@@ -70,11 +70,11 @@ void PPU::SkipBootROM() {
   SetIORAM(0xFF4B, 0x00);
 }
 
-void PPU::Advance(int machine_cycles) {
+bool PPU::Advance(int machine_cycles) {
   advance_cycles_ = machine_cycles;
 
   // Naive version - immediately do all the things for that particular cycle
-  // once.
+  // once. Ends early if we finishd the frame.
   while (advance_cycles_) {
     if (frame_cycles_ < VISIBLE_CYCLES) {
       int cycles_until_invis = VISIBLE_CYCLES - frame_cycles_;
@@ -89,9 +89,12 @@ void PPU::Advance(int machine_cycles) {
     if (frame_cycles_ == TOTAL_FRAME_CYCLES) {
       frame_cycles_ = 0;
       EndVBlank();
+      // This leaves a few frames "on the table" but it's on the order of 0-10 out of 69K.
+      return true;
     }
     assert(frame_cycles_ < TOTAL_FRAME_CYCLES);
   }
+  return false;
 }
 
 void PPU::AdvanceFrame(int frame_cycles) {
@@ -141,7 +144,6 @@ void PPU::VisibleCycle(int remaining_cycles) {
 
   if (max_cycles > 0 && row_cycles == OAM_SEARCH_CYCLES) {
     state_ = Pixel_Transfer;
-    fifo_->Advance(screen_);
   }
 
   while (max_cycles > 0 && state_ != HBlank) {
@@ -178,14 +180,21 @@ uint8_t PPU::GetIORAM(uint16_t address) {
 
 uint8_t PPU::scx() { return GetIORAM(SCX_ADDRESS); }
 
-void PPU::set_scx(uint8_t value) { SetIORAM(SCX_ADDRESS, value); }
+void PPU::set_scx(uint8_t value) { 
+  // std::cout << "setscx: " << std::hex << (int)value << std::endl;
+  if (!CanAccessVRAM() && value != GetIORAM(SCX_ADDRESS)) {
+    cout << "SCX should not be updated: " << hex << int(scx()) << " -> "
+         << hex << int(value) << endl;
+  }
+  SetIORAM(SCX_ADDRESS, value);
+}
 
 uint8_t PPU::scy() { return scy_; }
 
 void PPU::set_scy(uint8_t value) {
   if (!CanAccessVRAM() && value != scy_) {
-    cout << "Updating SCY during VRAM: " << hex << unsigned(scy_) << " -> "
-         << hex << unsigned(value) << endl;
+    cout << "SCY should not be updated: " << hex << int(scy_) << " -> "
+         << hex << int(value) << endl;
   }
   scy_ = value;
 }
@@ -381,14 +390,15 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
 }
 
 void PPU::BeginHBlank() {
-  screen_->NewLine();
   state_ = HBlank;
   if (bit_set(stat(), 3)) {
     interrupt_handler_->RequestInterrupt(Interrupt_LCDC);
   }
+  screen_->NewLine();
 }
 
-void PPU::EndHBlank() {}
+void PPU::EndHBlank() {
+}
 
 void PPU::BeginVBlank() {
   state_ = VBlank;
@@ -448,8 +458,6 @@ uint16_t PPU::BackgroundTile(int x, int y) {
     return 0x0000;
   }
   assert(x % 8 == 0);
-  // cout << "Getting bg tile: 0x" << hex << unsigned(tile_x) << " x 0x" << hex
-  // << unsigned(tile_y) << endl;
   int tile_map_x = (x / 8) % TILES_PER_ROW;
   int tile_map_y = (y / 8) % TILES_PER_ROW;
 

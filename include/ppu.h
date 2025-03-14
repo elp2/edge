@@ -27,7 +27,7 @@ class PPU {
   PPU(Screen *screen);
   ~PPU() = default;
 
-  void Advance(int cycles);
+  bool Advance(int cycles);
 
   PPUState State() { return state_; };
 

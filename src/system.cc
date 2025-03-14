@@ -69,32 +69,28 @@ MMU *System::GetMMU(string rom_filename, bool skip_boot_rom) {
   return mmu;
 }
 
-int System::Advance() {
-  int stepped = cpu_->Step();
-  input_controller_->PollAndApplyEvents();
-  ppu_->Advance(stepped);
-  timer_controller_->Advance(stepped);
-
-  sound_controller_->Advance(stepped);
-
-  interrupt_controller_->Advance(stepped);
-  int interrupt_steps = interrupt_controller_->HandleInterruptRequest();
-  // TODO: Refactor advancing if we advance for interrupts.
-  // At the very least, we'd have to advance the other stuff, but not the
-  // interrupt controller. Advancing the IC is how we turn the flags on/off.
-  // Have a separate "CPU Stepped" version?
-  assert(interrupt_steps == 0);
-  return stepped;
-}
-
 void System::SetButtons(bool dpadUp, bool dpadDown, bool dpadLeft, bool dpadRight, bool buttonA, bool buttonB, bool buttonSelect, bool buttonStart) {
   input_controller_->SetButtons(dpadUp, dpadDown, dpadLeft, dpadRight, buttonA, buttonB, buttonSelect, buttonStart);
 }
 
 void System::AdvanceOneFrame() {
-  while (frame_cycles_ < CYCLES_PER_FRAME) {
-    frame_cycles_ += Advance();
+  bool entered_vsync = false;
+  while (!entered_vsync) {
+    int stepped = cpu_->Step();
+    input_controller_->PollAndApplyEvents();
+    entered_vsync = ppu_->Advance(stepped);
+    timer_controller_->Advance(stepped);
+
+    sound_controller_->Advance(stepped);
+
+    interrupt_controller_->Advance(stepped);
+    int interrupt_steps = interrupt_controller_->HandleInterruptRequest();
+    // TODO: Interrupt handling should avance everything except CPU 20 cycles. #39.
+    assert(interrupt_steps == 0);
+
+    frame_cycles_ += stepped;
   }
+  // std::cout << "Frame cycles: " << dec << frame_cycles_ << std::endl;
 
   frame_cycles_ = 0;
   frame_count_++;

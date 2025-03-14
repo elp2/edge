@@ -11,7 +11,16 @@ const uint8_t DEFAULT_PALETTE = 0xE4;  // 11100100.
 const int PIXEL_SCALE = 4;
 #endif
 
-Screen::Screen() { InitSDL(); }
+Screen::Screen() { 
+  InitSDL(); 
+
+  pixels_front_ = new uint32_t[SCREEN_WIDTH * SCREEN_HEIGHT];
+  pixels_back_ = new uint32_t[SCREEN_WIDTH * SCREEN_HEIGHT];
+  palettes_ = new uint32_t[3];
+  palettes_[0] = palettes_[1] = palettes_[2] = DEFAULT_PALETTE;
+  frame_start_ms_ = SDL_GetTicks();
+  frames_ = 0;
+}
 
 void Screen::InitSDL() {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
@@ -37,18 +46,12 @@ void Screen::InitSDL() {
 
     SDL_RenderClear(renderer_);
     SDL_RenderPresent(renderer_);
-
-    pixels_ = new uint32_t[SCREEN_WIDTH * SCREEN_HEIGHT];
-    palettes_ = new uint32_t[3];
-    palettes_[0] = palettes_[1] = palettes_[2] = DEFAULT_PALETTE;
-    frame_start_ms_ = SDL_GetTicks();
-    frames_ = 0;
 }
 
 void Screen::DrawPixel(Pixel pixel) {
   int pixel_index = x_ + y_ * SCREEN_WIDTH;
   assert(pixel_index < SCREEN_PIXELS);
-  pixels_[pixel_index] = GetScreenColor(pixel);;
+  pixels_back_[pixel_index] = GetScreenColor(pixel);
   x_++;
 }
 
@@ -95,8 +98,10 @@ void Screen::NewLine() {
 void Screen::VBlankBegan() { y_ = 0; }
 
 void Screen::VBlankEnded() {
-  // SDL_UpdateTexture signature is slightly different in SDL3 but compatible
-  SDL_UpdateTexture(texture_, nullptr, pixels_, SCREEN_WIDTH * sizeof(uint32_t));
+  std::lock_guard<std::mutex> lock(pixels_mutex_);
+  std::swap(pixels_front_, pixels_back_);
+
+  SDL_UpdateTexture(texture_, nullptr, pixels_front_, SCREEN_WIDTH * sizeof(uint32_t));
   SDL_RenderClear(renderer_);
   SDL_RenderTexture(renderer_, texture_, nullptr, nullptr);
   SDL_RenderPresent(renderer_);
@@ -128,12 +133,11 @@ void Screen::SaveScreenshot(const string& base_name) {
         }
     } while (SDL_IOFromFile(filename.c_str(), "r") != NULL);
 
-    // (int width, int height, SDL_PixelFormat format, void *pixels, int pitch);
     SDL_Surface* surface = SDL_CreateSurfaceFrom(
                                                  SCREEN_WIDTH,
                                                  SCREEN_HEIGHT,
                                                  SDL_PIXELFORMAT_ARGB8888,
-            pixels_,
+            pixels_front_,
             SCREEN_WIDTH * 4
         );
 

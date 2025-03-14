@@ -47,12 +47,14 @@ void PixelFIFO::NewRow(int pixely, Sprite *row_sprites, int row_sprites_count) {
   pixels_outputted_ = 0;
   pixely_ = pixely;
 
+  fetch_->cycles_remaining_ = -1;
+
   sprite_fetch_x = -7;
   row_sprites_ = row_sprites;
   row_sprites_count_ = row_sprites_count;
 
   scx_shift_ = ppu_->scx() % 8;
-  bgx_ = ppu_->scx() - scx_shift_;
+  bgx_ = int(ppu_->scx()) - scx_shift_;
   assert(pixely_ < 144);
 }
 
@@ -90,7 +92,7 @@ bool PixelFIFO::Advance(Screen *screen) {
     window_triggered_ = new_window_triggered;
     ClearFifo();
     // Kill any outstanding fetch. We will request sprites again if necessary.
-    fetch_->cycles_remaining_ = 0;
+    fetch_->cycles_remaining_ = -1;
 
     // Fetch sprites that might be spanning the window / background.
     sprite_fetch_x = pixelx_ - 7;
@@ -126,7 +128,9 @@ bool PixelFIFO::Advance(Screen *screen) {
     sprite_fetch_x = max(sprite_fetch_x, pixelx_ - 7);
     int sprite_i = FirstSpriteIndexForX(sprite_fetch_x);
     if (sprite_i != -1) {
-      bool apply_immediately = 0 == (pixelx_ - sprite_fetch_x);
+      // If the sprite was left of where we are (off screen left, or window appeared), it would have been cleared
+      // from the FIFO so refetch.
+      bool apply_immediately = 0 >= (pixelx_ - sprite_fetch_x);
       StartSpriteFetch(row_sprites_[sprite_i], apply_immediately, pixelx_ - sprite_fetch_x);
     }
     sprite_fetch_x++;
@@ -237,7 +241,7 @@ void PixelFIFO::StartBackgroundFetch() {
     return;
   }
   fetch_->cycles_remaining_ = FETCH_CYCLES;
-  // TODO: Sometimes chooses the next row's tile for first tile. #18.
+
   bgx_ += fifo_length_;
   uint16_t background_tile = ppu_->BackgroundTile(bgx_, pixely_ + ppu_->scy());
   PixelList(background_tile, BackgroundWindowPalette, fetch_->pixels_, false);

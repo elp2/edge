@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <mutex>
 #include <string>
+
 
 #include "palette.h"
 #include "pixel.h"
@@ -25,7 +27,9 @@ class Screen {
  private:
   bool on_ = false;
   bool debugger_ = false;
-  uint32_t *pixels_;
+  uint32_t *pixels_front_;
+  uint32_t *pixels_back_;
+  std::mutex pixels_mutex_;
   uint32_t *palettes_;
   int x_ = 0;
   int y_ = 0;
@@ -55,5 +59,5 @@ class Screen {
 
   void SaveScreenshot(const string& base_name);
 
-  const uint32_t* pixels() { return pixels_; }
+  const uint32_t* pixels() { return pixels_front_; }
 };

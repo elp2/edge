@@ -2,8 +2,7 @@
 // CPU Cycles per second (4 MHZ clock).
 const int CYCLES_PER_SECOND = 4194304;
 
-const int CYCLES_PER_FRAME = CYCLES_PER_SECOND / 60;
-
+const int CYCLES_PER_FRAME = 70224;
 
 // Audio Sample Rate.
 const int SAMPLE_RATE = 44000;
