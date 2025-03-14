@@ -2,7 +2,7 @@ import SwiftUI
 
 struct DirectionalPadView: View {
     let minimumDrag: CGFloat = 20
-    let viewSize: CGFloat = 150
+    let viewSize: CGFloat = 175
     var body: some View {
         ZStack {
             Circle()

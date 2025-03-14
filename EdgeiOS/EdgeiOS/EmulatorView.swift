@@ -4,6 +4,7 @@ struct EmulatorView: View {
     let romFilename: String
     private let bridge: EmulatorBridge
     @State private var loadError: Error?
+    private let abButtonSize: CGFloat = 75
     
     init(romFilename: String) {
         self.romFilename = romFilename
@@ -11,87 +12,83 @@ struct EmulatorView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 0) {
             GeometryReader { geometry in
                 EmulatorMetalView()
                     .frame(width: geometry.size.width)
-                    .frame(height: geometry.size.width * (144.0 / 160.0))
+                    .frame(height: geometry.size.width * (144.0/160.0))
             }
-            HStack(spacing: 40) {
+            
+            HStack(spacing: 50) {
                 DirectionalPadView()
-                VStack(spacing: 30) {
-                    // Action buttons
-                    HStack(spacing: 20) {
-                        // B and A buttons
-                        HStack(spacing: 30) {
-                            Button("A") { }
-                                .frame(width: 50, height: 50)
-                                .background(Color.red)
-                                .foregroundColor(.white)
-                                .clipShape(Circle())
-                                .simultaneousGesture(
-                                    DragGesture(minimumDistance: 0)
-                                        .onChanged { _ in
-                                            bridge.buttonA = true;
-                                        }
-                                        .onEnded { _ in
-                                            bridge.buttonA = false;
-                                        }
-                                )
-                            Button("B") { }
-                                .frame(width: 50, height: 50)
-                                .background(Color.red)
-                                .foregroundColor(.white)
-                                .clipShape(Circle())
-                                .simultaneousGesture(
-                                    DragGesture(minimumDistance: 0)
-                                        .onChanged { _ in
-                                            bridge.buttonB = true;
-                                        }
-                                        .onEnded { _ in
-                                            bridge.buttonB = false;
-                                        }
-                                )
-                        }
-                    }
-                    
-                    // Start and Select buttons
-                    HStack(spacing: 30) {
-                        Button("Select") { }
-                            .frame(width: 60, height: 30)
-                            .background(Color.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(15)
-                            .simultaneousGesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onChanged { _ in
-                                        bridge.buttonSelect = true;
-                                    }
-                                    .onEnded { _ in
-                                        bridge.buttonSelect = false;
-                                    }
-                            )
-
-                        Button(action: {}) {
-                            Text("Start")
-                                .frame(width: 60, height: 30)
-                                .background(Color.gray)
-                                .foregroundColor(.white)
-                                .cornerRadius(15)
-                        }
+                
+                HStack(spacing: 30) {                    
+                    Button("B") { }
+                        .frame(width: abButtonSize, height: abButtonSize)
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .clipShape(Circle())
                         .simultaneousGesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { _ in
-                                    bridge.buttonStart = true;
+                                    bridge.buttonB = true;
                                 }
                                 .onEnded { _ in
-                                    bridge.buttonStart = false;
+                                    bridge.buttonB = false;
                                 }
                         )
-                    }
+                    Button("A") { }
+                        .frame(width: abButtonSize, height: abButtonSize)
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .clipShape(Circle())
+                        .offset(y: -30)
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { _ in
+                                    bridge.buttonA = true;
+                                }
+                                .onEnded { _ in
+                                    bridge.buttonA = false;
+                                }
+                        )
                 }
-                .padding()
             }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 50)
+            
+            HStack(spacing: 30) {
+                Button("Select") { }
+                    .frame(width: 60, height: 30)
+                    .background(Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(15)
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                bridge.buttonSelect = true;
+                            }
+                            .onEnded { _ in
+                                bridge.buttonSelect = false;
+                            }
+                    )
+                
+                Button("Start") { }
+                    .frame(width: 60, height: 30)
+                    .background(Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(15)
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                bridge.buttonStart = true;
+                            }
+                            .onEnded { _ in
+                                bridge.buttonStart = false;
+                            }
+                    )
+            }
+            .padding(.bottom, 30)
         }
         .onAppear {
             bridge.loadROM(romFilename)
