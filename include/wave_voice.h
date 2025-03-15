@@ -1,5 +1,7 @@
 #pragma once
 
+#include "constants.h"
+
 #include <cstdint>
 
 union SDL_Event;
@@ -12,10 +14,10 @@ class WaveVoice {
   int16_t GetSample();
   void AddSamplesToBuffer(int16_t* buffer, int samples);
 
-  void SetNR30(uint8_t byte) { nr30_ = byte; };
+  void SetNR30(uint8_t byte);
   uint8_t GetNR30() { return 0x7F | nr30_; };
 
-  void SetNR31(uint8_t byte) { nr31_ = byte; };
+  void SetNR31(uint8_t byte);
   uint8_t GetNR31() { return 0xFF | nr31_; };
 
   void SetNR32(uint8_t byte) { nr32_ = byte; };
@@ -35,6 +37,8 @@ class WaveVoice {
   uint8_t GetWavePatternByte(uint16_t address);
 
  private:
+  static const int WAVE_MAX_LENGTH = 256;
+
   bool DACEnabled();
   bool enabled_ = false;
 
@@ -46,10 +50,9 @@ class WaveVoice {
 
   uint8_t wave_pattern_[16];
 
-  int cycles_ = 0;
-  int next_timer_cycle_ = 0;
+  int timer_cycles_ = CYCLES_PER_SOUND_TIMER_TICK;
   int cycles_per_sample_ = 0;
-  int next_sample_cycle_ = 0;
+  int next_sample_cycles_ = 0;
   int sample_index_ = 0;
 
   int length_ = 0; // Must be able to count up to 256.

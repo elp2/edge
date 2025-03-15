@@ -16,34 +16,31 @@ WaveVoice::WaveVoice() {}
 WaveVoice::~WaveVoice() {}
 
 int16_t WaveVoice::GetSample() {
+  timer_cycles_ -= CYCLES_PER_SAMPLE;
+  if (timer_cycles_ <= 0) {
+    timer_cycles_ += CYCLES_PER_SOUND_TIMER_TICK;
+    if (length_enable_) {
+      length_ = std::max(length_ - 1, 0);
+      if (length_ == 0) {
+        enabled_ = false;
+        return 0;
+      }
+    }
+  }
+
   if (!enabled_) {
     return 0;
   }
-  if (cycles_ >= next_timer_cycle_) {
-    if (length_enable_) {
-      length_ += 1;
-    }
-    if (length_ >= 256) {
-      enabled_ = false;
-      return 0;
-    }
-    next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK; 
-  }
 
-  if (cycles_ >= next_sample_cycle_) {
+  if (next_sample_cycles_ <= 0) {
     sample_index_ += 1;
     if (sample_index_ >= 32) {
       sample_index_ = 0;
     }
-    next_sample_cycle_ += cycles_per_sample_;
+    next_sample_cycles_ += cycles_per_sample_;
   }
 
-  if (!enabled_) {
-    return 0;
-  }
   int16_t sample = CenteredSample() * VOICE_MAX_VOLUME;
-
-  cycles_ += CYCLES_PER_SAMPLE;
 
   return sample;
 }
@@ -89,24 +86,40 @@ bool WaveVoice::DACEnabled() {
   return bit_set(nr30_, 7);
 }
 
+void WaveVoice::SetNR30(uint8_t byte) {
+  nr30_ = byte;
+  if (!bit_set(nr30_, 7)) {
+    enabled_ = false;
+  }
+}
+
+void WaveVoice::SetNR31(uint8_t byte) {
+  nr31_ = byte;
+  length_ = WAVE_MAX_LENGTH - nr31_;
+}
+
 void WaveVoice::SetNR34(uint8_t byte) {
   nr34_ = byte;
 
-  if (bit_set(byte, 7)) {
-    enabled_ = true;
+  length_enable_ = bit_set(byte, 6);
 
-    length_ = nr31_;
-    cycles_ = 0;
-    next_timer_cycle_ = CYCLES_PER_SOUND_TIMER_TICK;
+  bool trigger = bit_set(byte, 7);
+  if (trigger) {
+    enabled_ = DACEnabled();
+
+    if (length_ == 0 || !length_enable_) {
+      // "Trigger should treat 0 length as maximum"
+      // "Trigger with disabled length should convert ","0 length to maximum".
+      length_ = WAVE_MAX_LENGTH;
+    }
+
     cycles_per_sample_ = CYCLES_PER_SECOND / FrequencyHz();
     output_level_ = (nr32_ & 0x60) >> 5;
 
     sample_index_ = 0;
-    next_sample_cycle_ = cycles_per_sample_;
-  } else {
-    enabled_ = false;
+    // Do not adjust timer_cycles_. It is independent of trigger.
+    next_sample_cycles_ = cycles_per_sample_;
   }
-  length_enable_ = bit_set(byte, 6);
 
   // PrintDebug();
 }
@@ -115,13 +128,10 @@ void WaveVoice::PrintDebug() {
   std::cout << "WaveVoice::PrintDebug" << std::endl;
   std::cout << "enabled_: " << enabled_ << std::endl;
   std::cout << "length_: " << length_ << std::endl;
-  std::cout << "cycles_: " << cycles_ << std::endl;
   std::cout << "sample_index_: " << (int)sample_index_ << std::endl;
   std::cout << "Frequency: " << FrequencyHz() << std::endl;
   std::cout << "Period value: " << PeriodValue() << std::endl;
-  std::cout << "next_timer_cycle_: " << next_timer_cycle_ << std::endl;
   std::cout << "cycles_per_sample_: " << cycles_per_sample_ << std::endl;
-  std::cout << "next_sample_cycle_: " << next_sample_cycle_ << std::endl;
   std::cout << "output_level_: " << output_level_ << std::endl;
 }
 
