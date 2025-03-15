@@ -14,10 +14,21 @@ NoiseVoice::NoiseVoice() {
 
 void NoiseVoice::SetFF20(uint8_t value) { 
     ff20_ = value;
+    length_ = NOISE_MAX_LENGTH - (ff20_ & 0x3F);
 }
 
 void NoiseVoice::SetFF21(uint8_t value) { 
     ff21_ = value;
+    if (DACEnabled()) {
+      volume_ = (ff21_ & 0xF0) >> 4;
+    } else {
+      enabled_ = false;
+      volume_ = 0;
+    }
+}
+
+bool NoiseVoice::DACEnabled() {
+    return ff21_ & 0xF8;
 }
 
 void NoiseVoice::SetFF22(uint8_t value) { 
@@ -27,27 +38,22 @@ void NoiseVoice::SetFF22(uint8_t value) {
 void NoiseVoice::SetFF23(uint8_t value) { 
     ff23_ = value;
 
+    length_enable_ = bit_set(ff23_, 6);
     if (bit_set(ff23_, 7)) {
-        // Trigger.
-        cycles_ = 0; // TODO: Should the clock reset each time?
-        enabled_ = true;
-        length_ = ff20_ & 0x3F;
+        if (length_ == 0 || !length_enable_) {
+            // "Trigger should treat 0 length as maximum"
+            // "Trigger with disabled length should convert ","0 length to maximum".
+            length_ = NOISE_MAX_LENGTH;
+        }
+        enabled_ = DACEnabled();
         lfsr_ = 0x7FFF;
 
-        volume_ = (ff21_ & 0xF0) >> 4;
 
-        next_timer_cycle_ = CYCLES_PER_SOUND_TIMER_TICK;
-
+        // timer_ updated in the advance.
         cycles_per_lfsr_ = CYCLES_PER_SECOND / FrequencyHz();
-        next_lfsr_cycle_ = cycles_per_lfsr_;
-
-        next_envelope_cycle_ = CYCLES_PER_ENVELOPE_TICK * SweepPace();
-    } else {
-        enabled_ = false;
+        lsfr_cycles_ = cycles_per_lfsr_;
+        envelope_cycles_ = CYCLES_PER_ENVELOPE_TICK * SweepPace();
     }
-
-    length_enable_ = bit_set(ff23_, 6);
-
     // PrintDebug();
 }
 
@@ -74,52 +80,45 @@ bool NoiseVoice::TickLFSR() {
 }
 
 int16_t NoiseVoice::GetSample() {
-    if (!enabled_) {
+  timer_cycles_ -= CYCLES_PER_SAMPLE;
+  if (timer_cycles_ <= 0) {
+    timer_cycles_ += CYCLES_PER_SOUND_TIMER_TICK;
+    if (length_enable_) {
+      length_ = std::max(length_ - 1, 0);
+      if (length_ == 0) {
+        enabled_ = false;
         return 0;
+      }
     }
+  }
 
-    bool current_lfsr = 0x1 & lfsr_;
+  if (!enabled_) {
+    return 0;
+  }
 
-    if (cycles_ >= next_timer_cycle_) {
-        if (length_enable_) {
-            length_ += 1;
-            if (length_ >= 64) {
-                enabled_ = false;
-                return 0;
-            }
-        }
-        next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
+  bool current_lfsr = 0x1 & lfsr_;
+  if (lsfr_cycles_ <= 0) {
+    current_lfsr = TickLFSR();
+    lsfr_cycles_ += cycles_per_lfsr_;
+  }
+
+  if (SweepPace() > 0) {
+    envelope_cycles_ -= CYCLES_PER_SAMPLE;
+    if (envelope_cycles_ <= 0) {
+      volume_ += SweepUp() ? 1 : -1;
+      if (volume_ > 15) {
+        volume_ = 15;
+      } else if (volume_ < 0) {
+        volume_ = 0;
+      }
+      envelope_cycles_ += CYCLES_PER_ENVELOPE_TICK * SweepPace();
     }
+  }
 
-    if (!enabled_) {
-        return 0;
-    }
+  int sample_volume = (VOICE_MAX_VOLUME * volume_) / 15;
+  int16_t sample = current_lfsr ? sample_volume : -sample_volume;
 
-    if (cycles_ >= next_lfsr_cycle_) {
-        current_lfsr = TickLFSR();
-        next_lfsr_cycle_ += cycles_per_lfsr_;
-    }
-
-    if (SweepPace() > 0 && cycles_ >= next_envelope_cycle_) {
-        if (SweepUp()) {
-            volume_ += 1;
-        } else {
-            volume_ -= 1;
-        }
-        if (volume_ > 15) {
-            volume_ = 15;
-        } else if (volume_ < 0) {
-            // Volume 0 is still considered enabled.
-            volume_ = 0;
-        }
-        next_envelope_cycle_ += CYCLES_PER_ENVELOPE_TICK * SweepPace();
-    }
-
-    int sample_volume = (VOICE_MAX_VOLUME * volume_) / 15;
-    int16_t sample = current_lfsr ? sample_volume : -sample_volume;
-
-    cycles_ += CYCLES_PER_SAMPLE;
-    return sample;
+  return sample;
 }
 
 void NoiseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {

@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "constants.h"
+
 union SDL_Event;
 
 class NoiseVoice {
@@ -29,6 +31,8 @@ class NoiseVoice {
   bool TickLFSR();
 
  private:
+  static const int NOISE_MAX_LENGTH = 64;
+  bool DACEnabled();
   void PrintDebug();
 
   bool LFSRShort();
@@ -48,9 +52,8 @@ class NoiseVoice {
   int volume_;
   bool length_enable_ = false;
   
-  int cycles_ = 0;
-  int next_timer_cycle_ = 0;
-  int next_lfsr_cycle_ = 0;
+  int timer_cycles_ = CYCLES_PER_SOUND_TIMER_TICK;
+  int lsfr_cycles_ = 0;
   int cycles_per_lfsr_ = 0;
-  int next_envelope_cycle_ = 0;
+  int envelope_cycles_ = 0;
 };

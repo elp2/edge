@@ -116,7 +116,6 @@ void PulseVoice::PrintDebug() {
 void PulseVoice::SetNRX1(uint8_t byte) { 
     nrx1_ = byte;
     length_ = PULSE_MAX_LENGTH - (nrx1_ & 0x3F);
-    std::cout << "** Pulse voice " << voice_number_ << " length_ now 0x" << std::hex << int(length_) << std::endl;
 };
 
 void PulseVoice::SetNRX2(uint8_t byte) { 
@@ -138,8 +137,9 @@ void PulseVoice::SetNRX4(uint8_t byte) {
   if (trigger) {
     enabled_ = DACEnabled();
 
-    if (length_ == 0) {
+    if (length_ == 0 || !length_enable_) {
       // "Trigger should treat 0 length as maximum"
+      // "Trigger with disabled length should convert ","0 length to maximum".
       length_ = PULSE_MAX_LENGTH;
     }
 
@@ -152,12 +152,7 @@ void PulseVoice::SetNRX4(uint8_t byte) {
     waveform_position_ = 0;
     duty_cycle_timer_cycles_ = CyclesPerDutyCycle();
   }
-  PrintDebug();
-  
-  if (trigger && !length_enable_) {
-    // "Trigger with disabled length should convert ","0 length to maximum".
-    length_ = PULSE_MAX_LENGTH;
-  }
+  // PrintDebug();
 }
 
 uint16_t PulseVoice::PeriodValue() {
