@@ -88,18 +88,24 @@ int16_t SoundController::GetSample() {
     return 0;
   }
 
+  // We may not use the samples, but we need to ensure that they're advanced.
+  int16_t sample1 = voice1_->GetSample();
+  int16_t sample2 = voice2_->GetSample();
+  int16_t sample3 = voice3_->GetSample();
+  int16_t sample4 = voice4_->GetSample();
+
   int16_t sample = 0;
   if (ChannelLeftEnabled(0) || ChannelRightEnabled(0)) {
-    sample += voice1_->GetSample();
+    sample += sample1;
   }
   if (ChannelLeftEnabled(1) || ChannelRightEnabled(1)) {
-    sample += voice2_->GetSample();
+    sample += sample2;
   }
   if (ChannelLeftEnabled(2) || ChannelRightEnabled(2)) {
-    sample += voice3_->GetSample();
+    sample += sample3;
   }
   if (ChannelLeftEnabled(3) || ChannelRightEnabled(3)) {
-    sample += voice4_->GetSample();
+    sample += sample4;
   }
 
   return sample;

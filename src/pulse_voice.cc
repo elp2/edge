@@ -23,45 +23,47 @@ PulseVoice::PulseVoice(int voice_number) {
 PulseVoice::~PulseVoice() {}
 
 int16_t PulseVoice::GetSample() {
-  if (!enabled_) {
-    return 0;
-  }
-  if (cycles_ >= next_timer_cycle_) {
-    // std::cout << "Length tick now: 0x" << std::hex << length_ + 1 << " cycles: " << cycles_ << " NTC: " << next_timer_cycle_ << std::endl;
+  timer_cycles_ -= CYCLES_PER_SAMPLE;
+  if (timer_cycles_ <= 0) {
+    timer_cycles_ += CYCLES_PER_SOUND_TIMER_TICK;
     if (length_enable_) {
-      length_ += 1;
+      length_ = std::max(length_ - 1, 0);
+      if (length_ == 0) {
+        enabled_ = false;
+        return 0;
+      }
     }
-    if (length_ >= 64) {
-      enabled_ = false;
-      return 0;
-    }
-    next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
   }
 
   if (!enabled_) {
     return 0;
   }
 
-  if (VolumeSweepPace() > 0 && cycles_ >= next_envelope_cycle_) {
-    volume_ += VolumeSweepUp() ? 1 : -1;
-    volume_ = std::max(0, std::min((int)volume_, 15));
-    next_envelope_cycle_ += CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
+  if (VolumeSweepPace() > 0) {
+    envelope_cycles_ -= CYCLES_PER_SAMPLE;
+    if (envelope_cycles_ <= 0) {
+      volume_ += VolumeSweepUp() ? 1 : -1;
+      volume_ = std::max(0, std::min((int)volume_, 15));
+      envelope_cycles_ += CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
+    }
   }
 
-  if (cycles_ >= next_duty_cycle_cycle_) {
+  duty_cycle_timer_cycles_ -= CYCLES_PER_SAMPLE;
+  if (duty_cycle_timer_cycles_ <= 0) {
     waveform_position_ = (waveform_position_ + 1) & 15;
-    next_duty_cycle_cycle_ += CyclesPerDutyCycle();
+    duty_cycle_timer_cycles_ += CyclesPerDutyCycle();
   }
 
-  if (PeriodSweepPace() > 0 && cycles_ >= next_period_sweep_cycle_) {
-    DoPeriodSweep();
-    next_period_sweep_cycle_ += CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
+  if (PeriodSweepPace() > 0) {
+    period_sweep_cycles_ -= CYCLES_PER_SAMPLE;
+    if (period_sweep_cycles_ <= 0) {
+      DoPeriodSweep();
+      period_sweep_cycles_ += CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
+    }
   }
 
   int sample_volume = (VOICE_MAX_VOLUME * volume_) / 15;
   int16_t sample = waveform_[DutyCycle()][waveform_position_] ? sample_volume : -sample_volume;
-
-  cycles_ += CYCLES_PER_SAMPLE;
 
   return sample;
 }
@@ -101,7 +103,7 @@ void PulseVoice::DoPeriodSweep() {
 void PulseVoice::PrintDebug() {
   std::cout << "** Pulse voice " << voice_number_ << " enabled: " << enabled_ << std::endl;
   std::cout << "NRX0: " << std::hex << int(nrx0_) << " 1: " << std::hex << int(nrx1_) << " 2: " << std::hex << int(nrx2_) << " 3: " << std::hex << int(nrx3_) << " 4: " << std::hex << int(nrx4_) << std::endl;
-  std::cout << "Length: " << (int)length_ << std::endl;
+  std::cout << "Length: " << length_ << std::endl;
   std::cout << "Length enable: " << (int)length_enable_ << std::endl;
   std::cout << "Volume: " << (int)volume_ << std::endl;
   std::cout << "Volume Sweep pace: " << (int)VolumeSweepPace() << std::endl;
@@ -111,28 +113,51 @@ void PulseVoice::PrintDebug() {
   std::cout << "Cycles per duty cycle: " << CyclesPerDutyCycle() << std::endl;
 }
 
+void PulseVoice::SetNRX1(uint8_t byte) { 
+    nrx1_ = byte;
+    length_ = PULSE_MAX_LENGTH - (nrx1_ & 0x3F);
+    std::cout << "** Pulse voice " << voice_number_ << " length_ now 0x" << std::hex << int(length_) << std::endl;
+};
+
+void PulseVoice::SetNRX2(uint8_t byte) { 
+    nrx2_ = byte;
+    if (DACEnabled()) {
+      volume_ = nrx2_ & 0xF0;
+    } else {
+      enabled_ = false;
+      volume_ = 0;
+    }
+};
+
 void PulseVoice::SetNRX4(uint8_t byte) { 
   nrx4_ = byte;
-  if (bit_set(nrx4_, 7)) {
-    enabled_ = true;
 
-    cycles_ = 0;
-    length_ = nrx1_ & 0x3F;
-    next_timer_cycle_ = CYCLES_PER_SOUND_TIMER_TICK;
-    next_envelope_cycle_ = CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
-    next_period_sweep_cycle_ = CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
+  length_enable_ = bit_set(nrx4_, 6);
+
+  bool trigger = bit_set(nrx4_, 7);
+  if (trigger) {
+    enabled_ = DACEnabled();
+
+    if (length_ == 0) {
+      // "Trigger should treat 0 length as maximum"
+      length_ = PULSE_MAX_LENGTH;
+    }
+
+    // Do not update timer_cycles_ bc Triggering does not affect the timer cycling.
+    envelope_cycles_ = CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
+    period_sweep_cycles_ = CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
 
     volume_ = (nrx2_ & 0xF0) >> 4;
 
     waveform_position_ = 0;
-    next_duty_cycle_cycle_ = CyclesPerDutyCycle();
-  } else {
-    enabled_ = false;
+    duty_cycle_timer_cycles_ = CyclesPerDutyCycle();
   }
-  std::cout << "**** Setting NRX4: " << std::hex << int(byte) << std::endl;
   PrintDebug();
-   
-  length_enable_ = bit_set(nrx4_, 6);
+  
+  if (trigger && !length_enable_) {
+    // "Trigger with disabled length should convert ","0 length to maximum".
+    length_ = PULSE_MAX_LENGTH;
+  }
 }
 
 uint16_t PulseVoice::PeriodValue() {

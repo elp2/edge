@@ -19,10 +19,10 @@ class PulseVoice {
   void SetNRX0(uint8_t byte) { nrx0_ = byte; };
   uint8_t GetNRX0() { return 0x80 | nrx0_; };
 
-  void SetNRX1(uint8_t byte) { nrx1_ = byte; };
+  void SetNRX1(uint8_t byte);
   uint8_t GetNRX1() { return 0x3F | nrx1_; };
 
-  void SetNRX2(uint8_t byte) { nrx2_ = byte; };
+  void SetNRX2(uint8_t byte);
   uint8_t GetNRX2() { return nrx2_; };
 
   void SetNRX3(uint8_t byte) { nrx3_ = byte; };
@@ -35,7 +35,7 @@ class PulseVoice {
   void PrintDebug();
 
  private:
-
+  static const int PULSE_MAX_LENGTH = 64;
   bool VolumeSweepUp() { return (nrx2_ & 0b1000) >> 3; }
   uint8_t VolumeSweepPace() { return nrx2_ & 0b111; }
 
@@ -48,6 +48,8 @@ class PulseVoice {
 
   uint8_t DutyCycle() { return (nrx1_ & 0xC0) >> 6; }
 
+  bool DACEnabled() { return nrx2_ & 0xF8; }
+
   uint16_t PeriodValue();
   float FrequencyHz();
   uint8_t nrx0_ = 0;
@@ -56,13 +58,12 @@ class PulseVoice {
   uint8_t nrx3_ = 0;
   uint8_t nrx4_ = 0;
 
-  int cycles_ = 0;
-  int next_duty_cycle_cycle_ = 0;
-  int next_timer_cycle_ = 0;
-  int next_envelope_cycle_ = 0;
-  int next_period_sweep_cycle_ = 0;
+  int duty_cycle_timer_cycles_ = CYCLES_PER_SOUND_TIMER_TICK;
+  int timer_cycles_ = 0;
+  int envelope_cycles_ = 0;
+  int period_sweep_cycles_ = 0;
   bool enabled_ = false;
-  uint8_t length_ = 0;
+  int length_ = 0;
   uint8_t length_enable_ = false;
   int volume_ = 0;
 

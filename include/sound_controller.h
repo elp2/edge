@@ -21,7 +21,7 @@ class SoundController {
   void MixSamplesToBuffer(int16_t* buffer, int samples);
 
  private:
-  static const int SAMPLE_BUFFER_SIZE = 32;
+  static const int SAMPLE_BUFFER_SIZE = 8;
   int16_t sample_buffer_[SAMPLE_BUFFER_SIZE];
   int buffer_pos_ = 0;
 
