@@ -39,20 +39,18 @@ SoundController::SoundController() {
     spec.format = SDL_AUDIO_S16;
     spec.channels = 1;
 
-    SDL_AudioStream* audio_stream = SDL_OpenAudioDeviceStream(
-                                                              SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,
+    audio_stream_ = SDL_OpenAudioDeviceStream(
+        SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,
         &spec,
-        audioCallback,
-        this
+        NULL,
+        NULL
     );
 
-    if (!audio_stream) {
+    if (!audio_stream_) {
         std::cerr << "Failed to open audio stream: " << SDL_GetError() << std::endl;
         return;
     }
-
-    audio_stream_ = audio_stream;
-    SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(audio_stream));
+    SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(audio_stream_));
 }
 
 // Add destructor to clean up the audio stream
@@ -85,7 +83,43 @@ void SoundController::MixSamplesToBuffer(int16_t* buffer, int samples) {
     }
 }
 
+int16_t SoundController::GetSample() {
+  if (!global_sound_on_) {
+    return 0;
+  }
+
+  int16_t sample = 0;
+  if (ChannelLeftEnabled(0) || ChannelRightEnabled(0)) {
+    sample += voice1_->GetSample();
+  }
+  if (ChannelLeftEnabled(1) || ChannelRightEnabled(1)) {
+    sample += voice2_->GetSample();
+  }
+  if (ChannelLeftEnabled(2) || ChannelRightEnabled(2)) {
+    sample += voice3_->GetSample();
+  }
+  if (ChannelLeftEnabled(3) || ChannelRightEnabled(3)) {
+    sample += voice4_->GetSample();
+  }
+
+  return sample;
+}
+
 bool SoundController::Advance(int cycles) {
+  cycles_ += cycles;
+  if (cycles_ > CYCLES_PER_SAMPLE) {
+    int16_t sample = GetSample();
+
+    sample_buffer_[buffer_pos_++] = sample;
+    if (buffer_pos_ >= SAMPLE_BUFFER_SIZE) {
+      if (!SDL_PutAudioStreamData(audio_stream_, sample_buffer_, SAMPLE_BUFFER_SIZE * sizeof(int16_t))) {
+          std::cerr << "Failed to queue audio sample: " << SDL_GetError() << std::endl;
+      }
+      buffer_pos_ = 0;
+    }
+
+    cycles_ -= CYCLES_PER_SAMPLE;
+  }
   return true;
 }
 
