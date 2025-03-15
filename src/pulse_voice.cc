@@ -29,11 +29,13 @@ void PulseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
 
   for (int i = 0; i < samples; i++) {
     if (cycles_ >= next_timer_cycle_) {
+      // std::cout << "Length tick now: 0x" << std::hex << length_ + 1 << " cycles: " << cycles_ << " NTC: " << next_timer_cycle_ << std::endl;
       if (length_enable_) {
         length_ += 1;
       }
       if (length_ >= 64) {
         enabled_ = false;
+        return;
       }
       next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
     }
@@ -88,7 +90,8 @@ void PulseVoice::DoPeriodSweep() {
 }
 
 void PulseVoice::PrintDebug() {
-  std::cout << "Pulse voice " << voice_number_ << " enabled: " << enabled_ << std::endl;
+  std::cout << "** Pulse voice " << voice_number_ << " enabled: " << enabled_ << std::endl;
+  std::cout << "NRX0: " << std::hex << int(nrx0_) << " 1: " << std::hex << int(nrx1_) << " 2: " << std::hex << int(nrx2_) << " 3: " << std::hex << int(nrx3_) << " 4: " << std::hex << int(nrx4_) << std::endl;
   std::cout << "Length: " << (int)length_ << std::endl;
   std::cout << "Length enable: " << (int)length_enable_ << std::endl;
   std::cout << "Volume: " << (int)volume_ << std::endl;
@@ -105,7 +108,7 @@ void PulseVoice::SetNRX4(uint8_t byte) {
     enabled_ = true;
 
     cycles_ = 0;
-    length_ = nrx0_ & 0x3F;
+    length_ = nrx1_ & 0x3F;
     next_timer_cycle_ = CYCLES_PER_SOUND_TIMER_TICK;
     next_envelope_cycle_ = CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
     next_period_sweep_cycle_ = CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
@@ -117,6 +120,8 @@ void PulseVoice::SetNRX4(uint8_t byte) {
   } else {
     enabled_ = false;
   }
+  std::cout << "**** Setting NRX4: " << std::hex << int(byte) << std::endl;
+  PrintDebug();
    
   length_enable_ = bit_set(nrx4_, 6);
 }
