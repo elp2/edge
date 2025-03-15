@@ -97,6 +97,7 @@ int16_t NoiseVoice::GetSample() {
   }
 
   bool current_lfsr = 0x1 & lfsr_;
+  lsfr_cycles_ -= CYCLES_PER_SAMPLE;
   if (lsfr_cycles_ <= 0) {
     current_lfsr = TickLFSR();
     lsfr_cycles_ += cycles_per_lfsr_;

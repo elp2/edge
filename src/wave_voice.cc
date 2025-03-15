@@ -32,6 +32,7 @@ int16_t WaveVoice::GetSample() {
     return 0;
   }
 
+  next_sample_cycles_ -= CYCLES_PER_SAMPLE;
   if (next_sample_cycles_ <= 0) {
     sample_index_ += 1;
     if (sample_index_ >= 32) {
