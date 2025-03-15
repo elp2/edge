@@ -19,6 +19,7 @@ class NoiseVoice {
   uint8_t GetFF22() { return ff22_; };
   uint8_t GetFF23() { return 0xBF | ff23_; };
 
+  int16_t GetSample();
   // Adds this voice's samples to the buffer.
   void AddSamplesToBuffer(int16_t* buffer, int samples);
 

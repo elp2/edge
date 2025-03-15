@@ -13,6 +13,7 @@ class PulseVoice {
 
   // Adds this voice's samples to the buffer.
   void AddSamplesToBuffer(int16_t* buffer, int samples);
+  int16_t GetSample();
 
   // Pulse voice 2 will never have this set by the controller.
   void SetNRX0(uint8_t byte) { nrx0_ = byte; };

@@ -15,34 +15,42 @@ WaveVoice::WaveVoice() {}
 
 WaveVoice::~WaveVoice() {}
 
+int16_t WaveVoice::GetSample() {
+  if (!enabled_) {
+    return 0;
+  }
+  if (cycles_ >= next_timer_cycle_) {
+    if (length_enable_) {
+      length_ += 1;
+    }
+    if (length_ >= 256) {
+      enabled_ = false;
+      return 0;
+    }
+    next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK; 
+  }
+
+  if (cycles_ >= next_sample_cycle_) {
+    sample_index_ += 1;
+    if (sample_index_ >= 32) {
+      sample_index_ = 0;
+    }
+    next_sample_cycle_ += cycles_per_sample_;
+  }
+
+  if (!enabled_) {
+    return 0;
+  }
+  int16_t sample = CenteredSample() * VOICE_MAX_VOLUME;
+
+  cycles_ += CYCLES_PER_SAMPLE;
+
+  return sample;
+}
+
 void WaveVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
-  
   for (int i = 0; i < samples; i++) {
-    if (cycles_ >= next_timer_cycle_) {
-      if (length_enable_) {
-        length_ += 1;
-      }
-      if (length_ >= 256) {
-        enabled_ = false;
-      }
-      next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK; 
-    }
-
-    if (cycles_ >= next_sample_cycle_) {
-      sample_index_ += 1;
-      if (sample_index_ >= 32) {
-        sample_index_ = 0;
-      }
-      next_sample_cycle_ += cycles_per_sample_;
-    }
-
-    if (!enabled_) {
-      return;
-    }
-
-    buffer[i] += CenteredSample() * VOICE_MAX_VOLUME;
-
-    cycles_ += CYCLES_PER_SAMPLE;
+    buffer[i] += GetSample();
   }
 }
 

@@ -22,48 +22,57 @@ PulseVoice::PulseVoice(int voice_number) {
 
 PulseVoice::~PulseVoice() {}
 
+int16_t PulseVoice::GetSample() {
+  if (!enabled_) {
+    return 0;
+  }
+  if (cycles_ >= next_timer_cycle_) {
+    // std::cout << "Length tick now: 0x" << std::hex << length_ + 1 << " cycles: " << cycles_ << " NTC: " << next_timer_cycle_ << std::endl;
+    if (length_enable_) {
+      length_ += 1;
+    }
+    if (length_ >= 64) {
+      enabled_ = false;
+      return 0;
+    }
+    next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
+  }
+
+  if (!enabled_) {
+    return 0;
+  }
+
+  if (VolumeSweepPace() > 0 && cycles_ >= next_envelope_cycle_) {
+    volume_ += VolumeSweepUp() ? 1 : -1;
+    volume_ = std::max(0, std::min((int)volume_, 15));
+    next_envelope_cycle_ += CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
+  }
+
+  if (cycles_ >= next_duty_cycle_cycle_) {
+    waveform_position_ = (waveform_position_ + 1) & 15;
+    next_duty_cycle_cycle_ += CyclesPerDutyCycle();
+  }
+
+  if (PeriodSweepPace() > 0 && cycles_ >= next_period_sweep_cycle_) {
+    DoPeriodSweep();
+    next_period_sweep_cycle_ += CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
+  }
+
+  int sample_volume = (VOICE_MAX_VOLUME * volume_) / 15;
+  int16_t sample = waveform_[DutyCycle()][waveform_position_] ? sample_volume : -sample_volume;
+
+  cycles_ += CYCLES_PER_SAMPLE;
+
+  return sample;
+}
+
 void PulseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
   if (!enabled_) {
     return;
   }
 
   for (int i = 0; i < samples; i++) {
-    if (cycles_ >= next_timer_cycle_) {
-      // std::cout << "Length tick now: 0x" << std::hex << length_ + 1 << " cycles: " << cycles_ << " NTC: " << next_timer_cycle_ << std::endl;
-      if (length_enable_) {
-        length_ += 1;
-      }
-      if (length_ >= 64) {
-        enabled_ = false;
-        return;
-      }
-      next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
-    }
-    
-    if (!enabled_) {
-      return;
-    }
-
-    if (VolumeSweepPace() > 0 && cycles_ >= next_envelope_cycle_) {
-      volume_ += VolumeSweepUp() ? 1 : -1;
-      volume_ = std::max(0, std::min((int)volume_, 15));
-      next_envelope_cycle_ += CYCLES_PER_ENVELOPE_TICK * VolumeSweepPace();
-    }
-
-    if (cycles_ >= next_duty_cycle_cycle_) {
-      waveform_position_ = (waveform_position_ + 1) & 15;
-      next_duty_cycle_cycle_ += CyclesPerDutyCycle();
-    }
-
-    if (PeriodSweepPace() > 0 && cycles_ >= next_period_sweep_cycle_) {
-      DoPeriodSweep();
-      next_period_sweep_cycle_ += CYCLES_PER_PERIOD_SWEEP_TICK * PeriodSweepPace();
-    }
-
-    int sample_volume = (VOICE_MAX_VOLUME * volume_) / 15;
-    buffer[i] += waveform_[DutyCycle()][waveform_position_] ? sample_volume : -sample_volume;
-
-    cycles_ += CYCLES_PER_SAMPLE;
+    buffer[i] += GetSample();
   }
 }
 

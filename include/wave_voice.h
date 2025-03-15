@@ -9,6 +9,7 @@ class WaveVoice {
   WaveVoice();
   ~WaveVoice();
 
+  int16_t GetSample();
   void AddSamplesToBuffer(int16_t* buffer, int samples);
 
   void SetNR30(uint8_t byte) { nr30_ = byte; };

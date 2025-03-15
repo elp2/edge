@@ -73,51 +73,62 @@ bool NoiseVoice::TickLFSR() {
     return 0x1 & lfsr_;
 }
 
+int16_t NoiseVoice::GetSample() {
+    if (!enabled_) {
+        return 0;
+    }
+
+    bool current_lfsr = 0x1 & lfsr_;
+
+    if (cycles_ >= next_timer_cycle_) {
+        if (length_enable_) {
+            length_ += 1;
+            if (length_ >= 64) {
+                enabled_ = false;
+                return 0;
+            }
+        }
+        next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
+    }
+
+    if (!enabled_) {
+        return 0;
+    }
+
+    if (cycles_ >= next_lfsr_cycle_) {
+        current_lfsr = TickLFSR();
+        next_lfsr_cycle_ += cycles_per_lfsr_;
+    }
+
+    if (SweepPace() > 0 && cycles_ >= next_envelope_cycle_) {
+        if (SweepUp()) {
+            volume_ += 1;
+        } else {
+            volume_ -= 1;
+        }
+        if (volume_ > 15) {
+            volume_ = 15;
+        } else if (volume_ < 0) {
+            // Volume 0 is still considered enabled.
+            volume_ = 0;
+        }
+        next_envelope_cycle_ += CYCLES_PER_ENVELOPE_TICK * SweepPace();
+    }
+
+    int sample_volume = (VOICE_MAX_VOLUME * volume_) / 15;
+    int16_t sample = current_lfsr ? sample_volume : -sample_volume;
+
+    cycles_ += CYCLES_PER_SAMPLE;
+    return sample;
+}
+
 void NoiseVoice::AddSamplesToBuffer(int16_t* buffer, int samples) {
     if (!enabled_) {
         return;
     }
 
-    bool current_lfsr = 0x1 & lfsr_;
     for (int i = 0; i < samples; i++) {
-        if (cycles_ >= next_timer_cycle_) {
-            if (length_enable_) {
-                length_ += 1;
-                if (length_ >= 64) {
-                    enabled_ = false;
-                }
-            }
-            next_timer_cycle_ += CYCLES_PER_SOUND_TIMER_TICK;
-        }
-
-        if (!enabled_) {
-            return;
-        }
-
-        if (cycles_ >= next_lfsr_cycle_) {
-            current_lfsr = TickLFSR();
-            next_lfsr_cycle_ += cycles_per_lfsr_;
-        }
-
-        if (SweepPace() > 0 && cycles_ >= next_envelope_cycle_) {
-            if (SweepUp()) {
-                volume_ += 1;
-            } else {
-                volume_ -= 1;
-            }
-            if (volume_ > 15) {
-                volume_ = 15;
-            } else if (volume_ < 0) {
-                // Volume 0 is still considered enabled.
-                volume_ = 0;
-            }
-            next_envelope_cycle_ += CYCLES_PER_ENVELOPE_TICK * SweepPace();
-        }
-
-        int sample_volume = VOICE_MAX_VOLUME * volume_ / 15;
-        buffer[i] += current_lfsr ? sample_volume : -sample_volume;
-
-        cycles_ += CYCLES_PER_SAMPLE;
+        buffer[i] += GetSample();
     }
 }
 
