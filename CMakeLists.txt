@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 if (APPLE)
-set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_CXX_FLAGS "-std=c++17")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
