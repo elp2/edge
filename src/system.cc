@@ -3,6 +3,7 @@
 #include <cassert>
 #include <chrono>
 #include <iostream>
+#include <filesystem>
 #include <thread>
 
 #include "address_router.h"
@@ -23,6 +24,18 @@
 System::System(string rom_filename) {
   bool skip_boot_rom = true;
   mmu_ = GetMMU(rom_filename, skip_boot_rom);
+
+  // TODO: Move all state finding, creating into their own file.
+  string state_dir = rom_filename + ".state";
+  std::error_code ec;
+  if (!std::filesystem::create_directory(state_dir, ec) && ec) {
+    std::cerr << "Failed to create state directory: " << ec.message() << std::endl;
+    state_dir = "";
+  }
+
+  cartridge_ = new Cartridge(rom_filename, state_dir);
+  cartridge_->PrintDebugInfo();
+  mmu_->SetCartridge(cartridge_);
 
   screen_ = new Screen();
   ppu_ = new PPU(screen_);
@@ -63,8 +76,6 @@ MMU *System::GetMMU(string rom_filename, bool skip_boot_rom) {
   if (!skip_boot_rom) {
     mmu->SetBootROM(UnsignedCartridgeBytes("../roms/boot.gb"));
   }
-  cartridge_ = new Cartridge(rom_filename);
-  mmu->SetCartridge(cartridge_);
 
   return mmu;
 }

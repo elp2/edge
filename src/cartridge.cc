@@ -1,8 +1,12 @@
 #include "cartridge.h"
-
 #include <cassert>
-#include <fstream>
 #include <iostream>
+#include <fcntl.h>
+#include <fstream>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <filesystem>
+#include <system_error>
 
 #include "constants.h"
 
@@ -34,14 +38,14 @@ uint8_t *UnsignedCartridgeBytes(string filename) {
   return rom;
 }
 
-Cartridge::Cartridge(string filename) {
+Cartridge::Cartridge(string filename, const string& state_dir) {
    rom_ = UnsignedCartridgeBytes(filename);
    ram_ = new uint8_t[RAMSize()];
    // TODO: MBC1 uses a special addressing for large ROMS.
    assert(ROMSize() <= 524288 || GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT);
 
- if (SUPER_DEBUG) {
-    PrintDebugInfo();
+  if (HasBattery() && state_dir.size() != 0) {
+    InitializeRAMFile(state_dir);
   }
 }
 
@@ -54,9 +58,20 @@ void Cartridge::PrintDebugInfo() {
    std::cout << "RAMSizeType: 0x" << hex << GetRAMSizeType() << std::endl;
    std::cout << "RAM Size: 0x" << hex << RAMSize() << std::endl;
    std::cout << "HasRTC: " << HasRTC() << std::endl;
+   std::cout << "HasBattery: " << HasBattery() << std::endl;
 }
 
-Cartridge::~Cartridge() {}
+Cartridge::~Cartridge() {
+  if (ram_ != nullptr && ram_ != MAP_FAILED) {
+    SyncRAM();
+    munmap(ram_, RAMSize());
+    free(ram_);
+  }
+  if (ram_fd_ != -1) {
+    close(ram_fd_);
+  }
+  free(rom_);
+}
 
 uint8_t Cartridge::GetROMByteAt(int address) {
   assert(rom_);
@@ -306,4 +321,53 @@ bool Cartridge::IsMBC3() {
   return GetCartridgeType() == CartridgeType_ROM_MBC3 ||
          GetCartridgeType() == CartridgeType_ROM_MBC3_RAM || 
          GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT;
+}
+
+std::string Cartridge::GetRAMPath() const {
+  return state_dir_ + "/cartridge_ram.bin";
+}
+
+void Cartridge::InitializeRAMFile(const std::string& state_dir) {
+  if (!HasBattery() || RAMSize() == 0) {
+    return;
+  }
+
+  state_dir_ = state_dir;
+  std::string ram_path = GetRAMPath();
+  std::cout << "Using RAM: " << ram_path << std::endl;
+
+  ram_fd_ = open(ram_path.c_str(), O_RDWR | O_CREAT, 0644);
+  if (ram_fd_ == -1) {
+    throw std::runtime_error("Failed to open RAM file: " + ram_path);
+  }
+
+  if (ftruncate(ram_fd_, RAMSize()) == -1) {
+    close(ram_fd_);
+    throw std::runtime_error("Failed to resize RAM file");
+  }
+
+  // Map the file into memory
+  ram_ = static_cast<uint8_t*>(mmap(
+    nullptr, RAMSize(),
+    PROT_READ | PROT_WRITE,
+    MAP_SHARED,  // Changes are written back to file
+    ram_fd_, 0
+  ));
+
+  if (ram_ == MAP_FAILED) {
+    close(ram_fd_);
+    throw std::runtime_error("Failed to mmap RAM file");
+  }
+}
+
+void Cartridge::SyncRAM() {
+  if (ram_ != nullptr && ram_ != MAP_FAILED) {
+    msync(ram_, RAMSize(), MS_SYNC);
+  }
+}
+
+bool Cartridge::HasBattery() {
+  return GetCartridgeType() == CartridgeType_ROM_MBC1_RAM_BATT ||
+      GetCartridgeType() == CartridgeType_ROM_MBC2_BATT ||
+      GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT;
 }

@@ -43,11 +43,12 @@ uint8_t *UnsignedCartridgeBytes(string filename);
 
 class Cartridge {
  public:
-  Cartridge(string filename);
+  Cartridge(string filename, const string& state_dir);
   ~Cartridge();
 
   bool LoadFile(string filename);
   void PrintDebugInfo();
+  void SyncRAM();
 
   uint8_t GetROMByteAt(int address);
 
@@ -65,7 +66,6 @@ class Cartridge {
 
   string GameTitle();
 
-
   void SetRAMRTCEnable(uint8_t byte);
   void SetRAMBankRTC(uint8_t byte);
   void LatchRTC(uint8_t byte);
@@ -73,6 +73,7 @@ class Cartridge {
  private:
   uint8_t *rom_;
   bool HasRTC();
+  bool HasBattery();
 
   uint8_t ram_rtc_enable_;
   uint8_t ram_bank_rtc_;
@@ -80,6 +81,11 @@ class Cartridge {
   uint8_t rtc_latch_register_;
   bool rtc_latched_;
   uint8_t rtc_latched_value_;
+
+  string state_dir_;
+  int ram_fd_;
+  void InitializeRAMFile(const std::string& state_dir);
+  string GetRAMPath() const;
 
   uint8_t *ram_;
   uint8_t GetRAM(int address);
