@@ -6,6 +6,11 @@ class InterruptHandler;
 struct SDL_KeyboardEvent;
 union SDL_Event;
 
+class ScreenshotTaker {
+ public:
+  virtual void TakeScreenshot() = 0;
+};
+
 class InputController {
  public:
   InputController();
@@ -15,12 +20,14 @@ class InputController {
 
   void SetButtons(bool dpadUp, bool dpadDown, bool dpadLeft, bool dpadRight, bool buttonA, bool buttonB, bool buttonSelect, bool buttonStart);
 
-  bool HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool pressed);
+  void HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool pressed);
   void HandleEvent(const SDL_Event& e);
   void PollAndApplyEvents();
 
   void SetByteAt(uint16_t address, uint8_t byte);
   uint8_t GetByteAt(uint16_t);
+
+  void SetScreenshotTaker(ScreenshotTaker *screenshot_taker) { screenshot_taker_ = screenshot_taker; }
 
  private:
   InterruptHandler* interrupt_handler_;
@@ -30,4 +37,6 @@ class InputController {
   int cycles_since_poll_ = 0;
 
   uint8_t FourBitTriggering(int i);
+
+  ScreenshotTaker* screenshot_taker_;
 };

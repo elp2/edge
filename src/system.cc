@@ -44,6 +44,9 @@ System::System(string rom_filename) {
   interrupt_controller_ = new InterruptController();
   input_controller_ = new InputController();
   input_controller_->SetInterruptHandler(interrupt_controller_);
+#ifndef BUILD_IOS
+  input_controller_->SetScreenshotTaker(this);
+#endif  
   timer_controller_ = new TimerController();
   timer_controller_->SetInterruptHandler(interrupt_controller_);
   sound_controller_ = new SoundController();
@@ -118,9 +121,13 @@ void System::AdvanceOneFrame() {
   last_frame_start_time_ = std::chrono::high_resolution_clock::now();
 
   if (frame_count_ % 1000 == 0) {
-    screen_->SaveScreenshot(cartridge_->GameTitle());
+    TakeScreenshot();
   }
 #endif
+}
+
+void System::TakeScreenshot() {
+    screen_->SaveScreenshot(cartridge_->GameTitle());
 }
 
 const uint32_t* System::pixels() { return screen_->pixels(); }

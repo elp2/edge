@@ -146,10 +146,10 @@ void Screen::SaveScreenshot(const string& base_name) {
         return;
     }
 
-    if (SDL_SaveBMP(surface, filename.c_str()) != 0) {
-        cout << "Failed to save screenshot: " << SDL_GetError() << endl;
-    } else {
+    if (SDL_SaveBMP(surface, filename.c_str())) {
         cout << "Screenshot saved as: " << filename << endl;
+    } else {
+        cout << "Failed to save screenshot: " << SDL_GetError() << endl;
     }
 
     SDL_DestroySurface(surface);

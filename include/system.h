@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <string>
 
+#include "input_controller.h"
+
 class AddressRouter;
 class Cartridge;
 class CPU;
@@ -17,7 +19,7 @@ class TimerController;
 
 using namespace std;
 
-class System {
+class System : public ScreenshotTaker {
  public:
   System(string rom_filename);
   ~System() = default;
@@ -28,6 +30,9 @@ class System {
   void AdvanceOneFrame();
 
   const uint32_t* pixels();
+
+  // ScreenshotTaker abstract class functions.
+  void TakeScreenshot();
 
  private:
   Cartridge *cartridge_;

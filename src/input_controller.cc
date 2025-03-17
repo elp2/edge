@@ -100,10 +100,15 @@ void InputController::SetButtons(bool dpadUp, bool dpadDown, bool dpadLeft, bool
   button_nibble_ = new_button;
 }
 
-bool InputController::HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool pressed) {
+void InputController::HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool pressed) {
+    if (event.scancode == SDL_SCANCODE_0) {
+      screenshot_taker_->TakeScreenshot();
+      return;
+    }
+
     int nibble = KeyNibble(event.scancode);
     if (nibble == -1) {
-        return false;
+        return;
     }
 
     if (nibble == 0) {
@@ -124,7 +129,7 @@ bool InputController::HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool p
         interrupt_handler_->RequestInterrupt(Interrupt_Input);
     }
 
-    return true;
+    return;
 }
 
 void InputController::HandleEvent(const SDL_Event& e) {
