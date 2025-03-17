@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <time.h>
 
 using namespace std;
 
@@ -68,7 +69,20 @@ class Cartridge {
 
   void SetRAMRTCEnable(uint8_t byte);
   void SetRAMBankRTC(uint8_t byte);
+
+  time_t ElapsedRTCTime() const;
   void LatchRTC(uint8_t byte);
+  void SetRTCPreviousSessionDuration(time_t duration) { rtc_previous_session_duration_ = duration; }
+  void SetRTCSessionStartTime(time_t start) { rtc_session_start_time_ = start; }
+  void SetRTCTimeOverride(time_t override_time) {
+    rtc_current_time_override_ = override_time;
+    rtc_has_override_ = true;
+  }
+  void ClearRTCTimeOverride() { rtc_has_override_ = false; }
+
+  time_t GetRTCPreviousSessionDuration() const { return rtc_previous_session_duration_; }
+  time_t GetRTCSessionStartTime() const { return rtc_session_start_time_; }
+  time_t GetRTCTimeOverride() const { return rtc_current_time_override_; }
 
  private:
   uint8_t *rom_;
@@ -80,7 +94,7 @@ class Cartridge {
 
   uint8_t rtc_latch_register_;
   bool rtc_latched_;
-  uint8_t rtc_latched_value_;
+  time_t rtc_latched_time_;
 
   string state_dir_;
   int ram_fd_;
@@ -97,4 +111,18 @@ class Cartridge {
 
   bool IsMBC2();
   bool IsMBC3();
+
+  time_t rtc_previous_session_duration_;
+  time_t rtc_session_start_time_;
+  time_t rtc_current_time_override_;
+  bool rtc_has_override_;
+
+  uint8_t GetRTCSeconds() const;
+  uint8_t GetRTCMinutes() const;
+  uint8_t GetRTCHours() const;
+  uint16_t GetRTCDays() const;
+  bool GetRTCHalt() const;
+  bool GetRTCDayCarry() const;
+
+  time_t GetCurrentRTCTime() const;
 };

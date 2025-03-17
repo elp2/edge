@@ -117,6 +117,7 @@ add_executable(tests
     tests/address_router_test.cc
     tests/bit_commands_test.cc
     tests/call_command_test.cc
+    tests/cartridge_test.cc
     tests/cb_command_test.cc
     tests/cpu_registers_test.cc
     tests/input_controller_test.cc

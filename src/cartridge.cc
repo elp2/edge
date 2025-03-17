@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <filesystem>
 #include <system_error>
+#include <time.h>
 
 #include "constants.h"
 
@@ -38,11 +39,15 @@ uint8_t *UnsignedCartridgeBytes(string filename) {
   return rom;
 }
 
-Cartridge::Cartridge(string filename, const string& state_dir) {
-   rom_ = UnsignedCartridgeBytes(filename);
-   ram_ = new uint8_t[RAMSize()];
-   // TODO: MBC1 uses a special addressing for large ROMS.
-   assert(ROMSize() <= 524288 || GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT);
+Cartridge::Cartridge(string filename, const string& state_dir)
+  : rtc_previous_session_duration_(0),
+    rtc_session_start_time_(time(nullptr)),
+    rtc_current_time_override_(0),
+    rtc_has_override_(false) {
+  rom_ = UnsignedCartridgeBytes(filename);
+  ram_ = new uint8_t[RAMSize()];
+  // TODO: MBC1 uses a special addressing for large ROMS.
+  assert(ROMSize() <= 524288 || GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT);
 
   if (HasBattery() && state_dir.size() != 0) {
     InitializeRAMFile(state_dir);
@@ -210,15 +215,25 @@ void Cartridge::SetRAMorRTC(uint16_t address, uint8_t byte) {
 }
 
 uint8_t Cartridge::GetRTC() {
-  (void)RTC_MINUTES_REGISTER;
-  (void)RTC_HOURS_REGISTER;
-  (void)RTC_DAYS_LOW8_REGISTER;
   assert(HasRTC());
-  if (rtc_latched_) {
-    return rtc_latched_value_;
+  switch (ram_bank_rtc_) {
+    case RTC_SECONDS_REGISTER:
+      return GetRTCSeconds();
+    case RTC_MINUTES_REGISTER:
+      return GetRTCMinutes();
+    case RTC_HOURS_REGISTER:
+      return GetRTCHours();
+    case RTC_DAYS_LOW8_REGISTER:
+      return GetRTCDays() & 0xFF;
+    case RTC_DAYS_HIGH_CARRY_HALT_REGISTER:
+      return ((GetRTCDays() >> 8) & 0x1) |
+             (GetRTCHalt() ? 0x40 : 0) |
+             (GetRTCDayCarry() ? 0x80 : 0);
+    default:
+      std::cout << "Unknown RTC Register: " << std::hex << int(ram_bank_rtc_) << std::endl;
+      assert(false);
+      return 0;
   }
-  std::cout << "TODO: GetRTC. Temporary return 7." << std::endl;
-  return 7;
 }
 
 void Cartridge::SetRTC(uint8_t byte) {
@@ -301,9 +316,12 @@ void Cartridge::SetRAMBankRTC(uint8_t byte) {
 
 void Cartridge::LatchRTC(uint8_t byte) {
   assert(HasRTC());
-  rtc_latched_ = (byte == 0x01 && rtc_latch_register_ == 0x00);
+  bool will_latch = (byte == 0x01 && rtc_latch_register_ == 0x00);
+  if (will_latch) {
+    rtc_latched_time_ = GetCurrentRTCTime();
+  }
   rtc_latch_register_ = byte;
-  rtc_latched_value_ = GetRTC();
+  rtc_latched_ = will_latch;
 }
 
 bool Cartridge::HasRTC() {
@@ -370,4 +388,43 @@ bool Cartridge::HasBattery() {
   return GetCartridgeType() == CartridgeType_ROM_MBC1_RAM_BATT ||
       GetCartridgeType() == CartridgeType_ROM_MBC2_BATT ||
       GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT;
+}
+
+time_t Cartridge::GetCurrentRTCTime() const {
+  if (rtc_latched_) {
+    return rtc_latched_time_;
+  } else if (rtc_has_override_) {
+    return rtc_current_time_override_;
+  } else {
+    return time(nullptr);
+  }
+}
+
+time_t Cartridge::ElapsedRTCTime() const {
+  return rtc_previous_session_duration_ + (GetCurrentRTCTime() - rtc_session_start_time_);
+}
+
+uint8_t Cartridge::GetRTCSeconds() const {
+  return ElapsedRTCTime() % 60;
+}
+
+uint8_t Cartridge::GetRTCMinutes() const {
+  return (ElapsedRTCTime() / 60) % 60;
+}
+
+uint8_t Cartridge::GetRTCHours() const {
+  return (ElapsedRTCTime() / 3600) % 24;
+}
+
+uint16_t Cartridge::GetRTCDays() const {
+  return (ElapsedRTCTime() / 86400) % 512;
+}
+
+bool Cartridge::GetRTCHalt() const {
+  // TODO: Handle Halt.
+  return false;
+}
+
+bool Cartridge::GetRTCDayCarry() const {
+  return (ElapsedRTCTime() / 86400) >= 512;
 }
