@@ -1,4 +1,5 @@
 #include "cartridge.h"
+
 #include <cassert>
 #include <iostream>
 #include <fcntl.h>
@@ -10,6 +11,7 @@
 #include <time.h>
 
 #include "constants.h"
+#include "utils.h"
 
 const int RTC_SECONDS_REGISTER = 0x08;
 const int RTC_MINUTES_REGISTER = 0x09;
@@ -227,7 +229,7 @@ uint8_t Cartridge::GetRTC() {
       return GetRTCDays() & 0xFF;
     case RTC_DAYS_HIGH_CARRY_HALT_REGISTER:
       return ((GetRTCDays() >> 8) & 0x1) |
-             (GetRTCHalt() ? 0x40 : 0) |
+             (GetRTCHalted() ? 0x40 : 0) |
              (GetRTCDayCarry() ? 0x80 : 0);
     default:
       std::cout << "Unknown RTC Register: " << std::hex << int(ram_bank_rtc_) << std::endl;
@@ -237,7 +239,50 @@ uint8_t Cartridge::GetRTC() {
 }
 
 void Cartridge::SetRTC(uint8_t byte) {
-  assert(false);
+  if (ram_bank_rtc_ == RTC_DAYS_HIGH_CARRY_HALT_REGISTER) {
+    bool was_halted = GetRTCHalted();
+    rtc_halted_ = (byte & 0x40) != 0;
+    if (!was_halted && GetRTCHalted()) {
+      // Collapse all time into the previous session.
+      rtc_previous_session_duration_ = ElapsedRTCTime();
+      rtc_session_start_time_ = 0;
+      rtc_current_time_override_ = 0;
+      rtc_has_override_ = true;
+    } else if (was_halted && !GetRTCHalted()) {
+      rtc_session_start_time_ = time(nullptr);
+      rtc_has_override_ = false;
+    }
+  }
+
+  // std::cout << "PSD : " << int(rtc_previous_session_duration_) << " byte: " << std::dec << int(byte) << std::endl;
+  std::cout << int(GetRTCSeconds()) << ":" << int(GetRTCMinutes()) << ":" << int(GetRTCHours()) << ": " << int(GetRTCDays()) << std::endl;
+  std::cout << std::dec << int(byte) << std::endl;  
+
+
+  switch (ram_bank_rtc_) {
+    case RTC_SECONDS_REGISTER:
+      rtc_previous_session_duration_ += std::min(byte & 0x3F, 60) - GetRTCSeconds();
+      break;
+    case RTC_MINUTES_REGISTER:
+      rtc_previous_session_duration_ += 60 * (std::min(byte & 0x3F, 60) - GetRTCMinutes());
+      break;
+    case RTC_HOURS_REGISTER:
+      rtc_previous_session_duration_ += 3600 * (std::min(byte & 0x1F, 24) - GetRTCHours());
+      break;
+    case RTC_DAYS_LOW8_REGISTER:
+      rtc_previous_session_duration_ += 86400 * (byte - GetRTCDays() % 256);
+      break;
+    case RTC_DAYS_HIGH_CARRY_HALT_REGISTER:
+      rtc_previous_session_duration_ += 86400 * (bit_set(byte, 0) ? 256 : 0 - (GetRTCDays() & 0x100));
+      break;
+  }
+  std::cout << " After " << int(rtc_previous_session_duration_) << std::endl;
+  std::cout << int(GetRTCSeconds()) << ":" << int(GetRTCMinutes()) << ":" << int(GetRTCHours()) << ": " << int(GetRTCDays()) << std::endl;
+
+  if (!GetRTCHalted()) {
+    // There is a race condition here, but it's OK since they should have set the halting.
+    rtc_session_start_time_ = time(nullptr);
+  }
 }
 
 uint8_t Cartridge::GetRAM(int address) {
@@ -420,9 +465,8 @@ uint16_t Cartridge::GetRTCDays() const {
   return (ElapsedRTCTime() / 86400) % 512;
 }
 
-bool Cartridge::GetRTCHalt() const {
-  // TODO: Handle Halt.
-  return false;
+bool Cartridge::GetRTCHalted() const {
+  return rtc_halted_;
 }
 
 bool Cartridge::GetRTCDayCarry() const {

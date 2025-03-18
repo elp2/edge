@@ -116,12 +116,13 @@ class Cartridge {
   time_t rtc_session_start_time_;
   time_t rtc_current_time_override_;
   bool rtc_has_override_;
+  bool rtc_halted_;
 
   uint8_t GetRTCSeconds() const;
   uint8_t GetRTCMinutes() const;
   uint8_t GetRTCHours() const;
   uint16_t GetRTCDays() const;
-  bool GetRTCHalt() const;
+  bool GetRTCHalted() const;
   bool GetRTCDayCarry() const;
 
   time_t GetCurrentRTCTime() const;

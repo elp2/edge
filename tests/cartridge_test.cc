@@ -117,3 +117,45 @@ TEST_F(CartridgeTest, LatchUnlatch) {
   UnlatchCartridge(cartridge_);
   EXPECT_EQ(GetRTCSeconds(cartridge_), 9);
 }
+
+TEST_F(CartridgeTest, RTCHaltCollapses) {
+  cartridge_->SetRTCPreviousSessionDuration(DHMS(1, 2, 3, 4));
+  cartridge_->SetRTCSessionStartTime(DHMS(1, 2, 3, 4));
+  cartridge_->SetRTCTimeOverride(DHMS(2, 4, 6, 8));
+  
+  cartridge_->SetRAMBankRTC(RTC_DAYS_HIGH_CARRY_HALT_REGISTER);
+  cartridge_->SetRAMorRTC(0, 0x40);
+  
+  EXPECT_EQ(GetRTCSeconds(cartridge_), 8);
+  EXPECT_EQ(GetRTCMinutes(cartridge_), 6);
+  EXPECT_EQ(GetRTCHours(cartridge_), 4);
+  EXPECT_EQ(GetRTCDaysLow(cartridge_), 2);
+  EXPECT_EQ(GetRTCDaysHighAndFlags(cartridge_), 0x40);
+}
+
+TEST_F(CartridgeTest, RTCHaltSets) {
+  cartridge_->SetRTCPreviousSessionDuration(DHMS(2, 3, 6, 8));
+  cartridge_->SetRTCTimeOverride(0);
+  cartridge_->SetRTCSessionStartTime(0);
+  
+  cartridge_->SetRAMBankRTC(RTC_DAYS_HIGH_CARRY_HALT_REGISTER);
+  cartridge_->SetRAMorRTC(0, 0x40);
+
+  cartridge_->SetRAMBankRTC(RTC_SECONDS_REGISTER);
+  cartridge_->SetRAMorRTC(0, 9);
+
+  cartridge_->SetRAMBankRTC(RTC_MINUTES_REGISTER);
+  cartridge_->SetRAMorRTC(0, 15);
+
+  cartridge_->SetRAMBankRTC(RTC_HOURS_REGISTER);
+  cartridge_->SetRAMorRTC(0, 23);
+
+  cartridge_->SetRAMBankRTC(RTC_DAYS_LOW8_REGISTER);
+  cartridge_->SetRAMorRTC(0, 245);
+
+
+  EXPECT_EQ(GetRTCSeconds(cartridge_), 9);
+  EXPECT_EQ(GetRTCMinutes(cartridge_), 15);
+  EXPECT_EQ(GetRTCHours(cartridge_), 23);
+  EXPECT_EQ(GetRTCDaysLow(cartridge_), 245);
+}
