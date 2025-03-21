@@ -87,4 +87,6 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+xcuserdata/
+
 EdgeiOS/SDL3.xcframework/*
