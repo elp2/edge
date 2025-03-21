@@ -21,16 +21,15 @@
 #include "timer_controller.h"
 #include "utils.h"
 
-System::System(string rom_filename) {
+System::System(string rom_filename, string state_dir) {
   bool skip_boot_rom = true;
   mmu_ = GetMMU(rom_filename, skip_boot_rom);
 
-  // TODO: Move all state finding, creating into their own file.
-  string state_dir = rom_filename + ".state";
   std::error_code ec;
-  if (!std::filesystem::create_directory(state_dir, ec) && ec) {
-    std::cerr << "Failed to create state directory: " << ec.message() << std::endl;
+  if (state_dir != "" && !std::filesystem::create_directory(state_dir, ec) && ec) {
+    std::cerr << "Failed to create state directory[" << state_dir << "]: " << ec.message() << std::endl;
     state_dir = "";
+    assert(false);
   }
 
   cartridge_ = new Cartridge(rom_filename, state_dir);

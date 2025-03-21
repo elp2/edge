@@ -61,16 +61,10 @@
 
 - (void)loadROM:(NSString *)romName {
     NSAssert(_sdlInitialized, @"SDL Must be initialized.");
-    NSBundle* bundle = [NSBundle mainBundle];
-
-    NSString* romPath = [[EmulatorBridge romsDirectory] stringByAppendingPathComponent:romName];
-    const char* cPath = [romPath UTF8String];
-    if (cPath) {
-        std::string cppPath(cPath);
-        system_ = std::make_unique<System>(cppPath);
-        _isRunning = true;
-    } else {
-    }
+    std::string romPath([[[[self class] romsDirectory] stringByAppendingPathComponent:romName] UTF8String]);
+    std::string statesPath([[[[self class] statesDirectory] stringByAppendingPathComponent:romName] UTF8String]);
+    system_ = std::make_unique<System>(romPath, statesPath);
+    _isRunning = true;
 }
 
 #pragma mark - Emulator Control
@@ -115,7 +109,6 @@
 }
 
 #pragma mark - Directories
-
 
 + (void)createDirectories {
     NSFileManager *fileManager = [NSFileManager defaultManager];

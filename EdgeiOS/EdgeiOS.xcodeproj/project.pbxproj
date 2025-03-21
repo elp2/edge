@@ -160,10 +160,10 @@
 			path = EDGEiOSUITests;
 			sourceTree = "<group>";
 		};
-		FA61BCCA2D7BACAA00B0DD28 /* roms */ = {
+		FAEBEE5D2D8DDAA400E8DAD9 /* ROMs */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			name = roms;
-			path = ../roms;
+			name = ROMs;
+			path = ../build/ROMs;
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -198,13 +198,13 @@
 			isa = PBXGroup;
 			children = (
 				FABDA4982D7CC47E004AE9ED /* SDL3.xcframework */,
-				FA61BCCA2D7BACAA00B0DD28 /* roms */,
 				FA61BC502D7AADD800B0DD28 /* src */,
 				FA61BC302D7AADBE00B0DD28 /* include */,
 				FA12E91F2D7A965600620FD7 /* EDGEiOS */,
 				FA12E9312D7A965800620FD7 /* EDGEiOSTests */,
 				FA12E93B2D7A965800620FD7 /* EDGEiOSUITests */,
 				FA12E91E2D7A965600620FD7 /* Products */,
+				FAEBEE5D2D8DDAA400E8DAD9 /* ROMs */,
 			);
 			sourceTree = "<group>";
 		};
@@ -317,7 +317,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				FA12E91F2D7A965600620FD7 /* EDGEiOS */,
-				FA61BCCA2D7BACAA00B0DD28 /* roms */,
+				FAEBEE5D2D8DDAA400E8DAD9 /* ROMs */,
 			);
 			name = EDGEiOS;
 			packageProductDependencies = (

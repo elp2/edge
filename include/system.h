@@ -21,7 +21,7 @@ using namespace std;
 
 class System : public ScreenshotTaker {
  public:
-  System(string rom_filename);
+  System(string rom_filename, string state_dir);
   ~System() = default;
 
   void Main();

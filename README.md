@@ -32,8 +32,7 @@
   * MacOS: brew install sdl3 cmake rgbds
 * mkdir build
 * cd build
+* mkdir ROMS # Put your roms here
+* mkdir States # Use states
 * cmake -DCMAKE_BUILD_TYPE=[Debug|Release] ..
-* Build from IDE: 
-  * Open this folder in VSCode
-  * MacOS: Choose Clang
-  * Click the run button.
+* ./edge ROMS/rom.gb States/rom.gb.state
