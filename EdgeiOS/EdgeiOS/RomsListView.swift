@@ -2,10 +2,10 @@ import SwiftUI
 
 class RomManager: ObservableObject {
     func getRoms() -> [String] {
-        guard let resourcePath = Bundle.main.resourcePath else { return [] }
+        let romsPath = EmulatorBridge.romsDirectory()
         
         do {
-            let files = try FileManager.default.contentsOfDirectory(atPath: resourcePath)
+            let files = try FileManager.default.contentsOfDirectory(atPath: romsPath)
             return files.filter { 
                 let filename = $0.lowercased()
                 return filename.hasSuffix(".gb") && filename != "boot.gb"

@@ -63,7 +63,7 @@
     NSAssert(_sdlInitialized, @"SDL Must be initialized.");
     NSBundle* bundle = [NSBundle mainBundle];
 
-    NSString* romPath = [[bundle bundlePath] stringByAppendingPathComponent:romName];
+    NSString* romPath = [[EmulatorBridge romsDirectory] stringByAppendingPathComponent:romName];
     const char* cPath = [romPath UTF8String];
     if (cPath) {
         std::string cppPath(cPath);
@@ -112,6 +112,52 @@
     if (![self.audioSession setActive:NO error:&error]) {
         NSLog(@"Failed to deactivate audio session: %@", error);
     }
+}
+
+#pragma mark - Directories
+
+
++ (void)createDirectories {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error;
+    
+    NSString *romsPath = [self romsDirectory];
+    NSString *statesPath = [self statesDirectory];
+    
+    [fileManager createDirectoryAtPath:romsPath withIntermediateDirectories:YES attributes:nil error:&error];
+    [fileManager createDirectoryAtPath:statesPath withIntermediateDirectories:YES attributes:nil error:&error];
+    
+    NSURL *romsURL = [NSURL fileURLWithPath:romsPath];
+    [romsURL setResourceValue:@YES forKey:NSURLIsExcludedFromBackupKey error:&error];
+}
+
++ (NSString *)romsDirectory {
+  NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+  return [documentsPath stringByAppendingPathComponent:@"ROMs"];
+}
+
++ (NSString *)statesDirectory {
+  NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+  return [documentsPath stringByAppendingPathComponent:@"States"];
+}
+
++ (void)copyBundledROMs {
+  NSFileManager *fileManager = [NSFileManager defaultManager];
+  NSString *bundlePath = [[NSBundle mainBundle] resourcePath];
+  NSError *error;
+  
+  NSArray *bundleContents = [fileManager contentsOfDirectoryAtPath:bundlePath error:&error];
+  NSArray *ROMs = [bundleContents filteredArrayUsingPredicate:
+        [NSPredicate predicateWithFormat:@"self ENDSWITH[c] '.gb'"]];
+
+  for (NSString *rom in ROMs) {
+    NSString *sourcePath = [bundlePath stringByAppendingPathComponent:rom];
+    NSString *destPath = [[self romsDirectory] stringByAppendingPathComponent:rom];
+    
+    if (![fileManager fileExistsAtPath:destPath]) {
+      [fileManager copyItemAtPath:sourcePath toPath:destPath error:&error];
+    }
+  }
 }
 
 @end 

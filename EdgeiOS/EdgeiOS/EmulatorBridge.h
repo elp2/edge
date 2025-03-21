@@ -35,6 +35,12 @@ NS_ASSUME_NONNULL_BEGIN
 // Display.
 - (const uint32_t *)pixels;
 
++ (void)copyBundledROMs;
+
++ (void)createDirectories;
++ (NSString *)romsDirectory;
++ (NSString *)savesDirectory;
+
 @end
 
 NS_ASSUME_NONNULL_END 
