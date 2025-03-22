@@ -15,6 +15,7 @@ class PPU;
 class Screen;
 class SerialController;
 class SoundController;
+class State;
 class TimerController;
 
 using namespace std;
@@ -31,6 +32,8 @@ class System : public ScreenshotTaker {
 
   const uint32_t* pixels();
 
+  void SaveState();
+
   // ScreenshotTaker abstract class functions.
   void TakeScreenshot();
 
@@ -46,6 +49,7 @@ class System : public ScreenshotTaker {
   SoundController *sound_controller_;
   TimerController *timer_controller_;
   Screen *screen_;
+  State *state_;
 
   int frame_count_;
   int frame_cycles_;

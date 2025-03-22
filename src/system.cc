@@ -18,23 +18,28 @@
 #include "screen.h"
 #include "serial_controller.h"
 #include "sound_controller.h"
+#include "state.h"
 #include "timer_controller.h"
 #include "utils.h"
 
-System::System(string rom_filename, string state_dir) {
+System::System(string rom_filename, string state_root_dir) {
   bool skip_boot_rom = true;
-  mmu_ = GetMMU(rom_filename, skip_boot_rom);
+  string cartridge_ram_dir = "";
 
-  std::error_code ec;
-  if (state_dir != "" && !std::filesystem::create_directory(state_dir, ec) && ec) {
-    std::cerr << "Failed to create state directory[" << state_dir << "]: " << ec.message() << std::endl;
-    state_dir = "";
-    assert(false);
+  if (state_root_dir != "") {
+    string rom_name = std::filesystem::path(rom_filename).filename().string();
+    std::error_code ec;
+    string game_state_dir = state_root_dir + "/" + rom_name;
+    state_ = new State(game_state_dir, -1);
+    cartridge_ram_dir = state_->GetStateDir();
   }
 
-  cartridge_ = new Cartridge(rom_filename, state_dir);
+  mmu_ = GetMMU(rom_filename, skip_boot_rom);
+
+  cartridge_ = new Cartridge(rom_filename, cartridge_ram_dir);
   cartridge_->PrintDebugInfo();
   mmu_->SetCartridge(cartridge_);
+  SaveState();
 
   screen_ = new Screen();
   ppu_ = new PPU(screen_);
@@ -123,6 +128,20 @@ void System::AdvanceOneFrame() {
     TakeScreenshot();
   }
 #endif
+}
+
+void System::SaveState() {
+  struct SaveState ss = {};
+  ss.cpu.a = 10;
+  ss.ppu.lcdc = 0x91;
+  ss.timer.div = 0xED;
+
+  struct SaveState ss2 = {};
+  state_->SaveState(ss);
+  state_->LoadState(0, ss2);
+  assert(ss2.cpu.a == ss.cpu.a);
+  assert(ss2.ppu.lcdc == ss.ppu.lcdc);
+  assert(ss2.timer.div = ss.timer.div);
 }
 
 void System::TakeScreenshot() {

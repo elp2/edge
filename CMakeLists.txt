@@ -55,6 +55,7 @@ add_library (edge_lib
     src/serial_controller.cc
     src/sound_controller.cc
     src/stack_command.cc
+    src/state.cc
     src/sprite.cc
     src/timer_controller.cc
     src/unimplemented_command.cc
