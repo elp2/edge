@@ -131,17 +131,6 @@ void System::AdvanceOneFrame() {
 }
 
 void System::SaveState() {
-  struct SaveState ss = {};
-  ss.cpu.a = 10;
-  ss.ppu.lcdc = 0x91;
-  ss.timer.div = 0xED;
-
-  struct SaveState ss2 = {};
-  state_->SaveState(ss);
-  state_->LoadState(0, ss2);
-  assert(ss2.cpu.a == ss.cpu.a);
-  assert(ss2.ppu.lcdc == ss.ppu.lcdc);
-  assert(ss2.timer.div = ss.timer.div);
 }
 
 void System::TakeScreenshot() {

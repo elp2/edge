@@ -8,6 +8,7 @@
 #include "command_factory.h"
 #include "destination.h"
 #include "interrupt_controller.h"
+#include "state.h"
 
 using namespace std;
 
@@ -92,6 +93,8 @@ class CPU : public InterruptExecutor {
   void DisableInterrupts();
   void EnableInterrupts();
 
+  void SetState(const struct CPUSaveState &state);
+  void GetState(struct CPUSaveState& state);
   void SkipBootROM();
 
   void SetDebugPrint(bool debugPrint) { debugPrint_ = debugPrint; };

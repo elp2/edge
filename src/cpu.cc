@@ -462,19 +462,64 @@ void CPU::Debugger() {
   cout << endl;
 }
 
+void CPU::SetState(const struct CPUSaveState &state) {
+  flags.z = state.flag_z;
+  flags.h = state.flag_h;
+  flags.n = state.flag_n;
+  flags.c = state.flag_c;
+
+  Set16Bit(Register_PC, state.pc);
+  Set16Bit(Register_SP, state.sp);
+
+  Set8Bit(Register_A, state.a);
+  Set8Bit(Register_B, state.b);
+  Set8Bit(Register_C, state.c);
+  Set8Bit(Register_D, state.d);
+  Set8Bit(Register_E, state.e);
+  Set8Bit(Register_F, state.f);
+  Set8Bit(Register_H, state.h);
+  Set8Bit(Register_L, state.l);
+}
+
+void CPU::GetState(struct CPUSaveState& state) {
+  state.flag_z = flags.z;
+  state.flag_h = flags.h;
+  state.flag_n = flags.n;
+  state.flag_c = flags.c;
+
+  state.a = Get8Bit(Register_A);
+  state.b = Get8Bit(Register_B);
+  state.c = Get8Bit(Register_C);
+  state.d = Get8Bit(Register_D);
+  state.e = Get8Bit(Register_E);
+  state.f = Get8Bit(Register_F);
+  state.h = Get8Bit(Register_H);
+  state.l = Get8Bit(Register_L);
+
+  state.pc = Get16Bit(Register_PC);
+  state.sp = Get16Bit(Register_SP);
+}
+
 void CPU::SkipBootROM() {
   // Initialize all states as if the boot ROM successfully ran.
-  Set16Bit(Register_PC, 0x0100);
-  Set16Bit(Register_SP, 0xFFFE);
-  Set16Bit(Register_AF, 0x01B0);
-  Set16Bit(Register_BC, 0x0013);
-  Set16Bit(Register_DE, 0x00D8);
-  Set16Bit(Register_HL, 0x014D);
+  struct CPUSaveState ss = {};
+  ss.a = 0x01;
+  ss.f = 0xB0;
+  ss.b = 0x00;
+  ss.c = 0x13;
+  ss.d = 0x00;
+  ss.e = 0xD8;
+  ss.h = 0x01;
+  ss.l = 0x4D;
 
-  flags.z = true;
-  flags.h = false;
-  flags.n = false;
-  flags.c = false; 
+  ss.flag_z = true;
+  ss.flag_h = false;
+  ss.flag_n = false;
+  ss.flag_c = false; 
+
+  ss.pc = 0x0100;
+  ss.sp = 0xFFFE;
+  SetState(ss);
 
   address_router_->SetByteAt(0xFF00, 0xCF);
   address_router_->SetByteAt(0xFF01, 0x00);

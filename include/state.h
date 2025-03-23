@@ -15,7 +15,10 @@ struct CPUSaveState {
   uint8_t l;
   uint16_t sp;
   uint16_t pc;
-  bool ime;
+  bool flag_z;
+  bool flag_h;
+  bool flag_n;
+  bool flag_c;
 };
 
 struct PPUSaveState {
