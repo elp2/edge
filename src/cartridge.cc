@@ -217,7 +217,9 @@ void Cartridge::SetRAMorRTC(uint16_t address, uint8_t byte) {
 }
 
 uint8_t Cartridge::GetRTC() {
-  assert(HasRTC());
+  if (!HasRTC()) {
+    return 0xFF;
+  }
   switch (ram_bank_rtc_) {
     case RTC_SECONDS_REGISTER:
       return GetRTCSeconds();
@@ -360,7 +362,9 @@ void Cartridge::SetRAMBankRTC(uint8_t byte) {
 }
 
 void Cartridge::LatchRTC(uint8_t byte) {
-  assert(HasRTC());
+  if (!HasRTC()) {
+    return;
+  }
   bool will_latch = (byte == 0x01 && rtc_latch_register_ == 0x00);
   if (will_latch) {
     rtc_latched_time_ = GetCurrentRTCTime();

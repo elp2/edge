@@ -47,8 +47,6 @@ class PPU {
     interrupt_handler_ = handler;
   };
 
-  void SkipBootROM();
-
   bool WindowEnabledAt(int x, int y);
 
  private:

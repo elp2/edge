@@ -9,6 +9,7 @@
 #include "ppu.h"
 #include "serial_controller.h"
 #include "sound_controller.h"
+#include "state.h"
 #include "timer_controller.h"
 #include "utils.h"
 
@@ -131,8 +132,7 @@ AddressOwner ownerForIOAddress(uint16_t address) {
       // Interrupt Enable.
       return AddressOwner_Interrupt;
     default:
-      cout << "Unknown i/o address: 0x" << hex << unsigned(address) << endl;
-      assert(false);
+      // Unknown IO, but we should just ignore since we encounter this when saving all bytes.
       return AddressOwner_MMU;
   }
 }
@@ -268,4 +268,74 @@ void AddressRouter::PerformDMA(uint8_t dma_base) {
   for (int i = 0; i < NUM_OAM_SPRITES * OAM_SPRITE_BYTES; i++) {
     SetByteAt(OAM_RAM_ADDRESS + i, GetByteAt(dma_address + i));
   }
+}
+
+void AddressRouter::SaveState(struct MemorySaveState &state) {
+  for (int i = 0; i <= 0xFFFF; i++) {
+    AddressOwner owner = ownerForAddress(i);
+    if (owner != AdressOwner_Unknown) {
+      state.ram[i] = GetByteAtAddressFromOwner(owner, i);
+    }
+  }
+}
+
+void AddressRouter::LoadState(const struct MemorySaveState &state) {
+  for (int i = 0; i <= 0xFFFF; i++) {
+    AddressOwner owner = ownerForAddress(i);
+    if (owner != AdressOwner_Unknown) {
+      SetByteAtAddressInOwner(owner, i, state.ram[i]);
+    }
+  }
+}
+
+void AddressRouter::SkipBootROM() {
+  struct MemorySaveState ss = {};
+
+  ss.ram[0xFF00] = 0xCF;
+  ss.ram[0xFF01] = 0x00;
+  ss.ram[0xFF02] = 0x7E;
+  ss.ram[0xFF04] = 0xAB;
+  ss.ram[0xFF05] = 0x00;
+  ss.ram[0xFF06] = 0x00;
+  ss.ram[0xFF07] = 0xF8;
+  ss.ram[0xFF0F] = 0xE1;
+  ss.ram[0xFF10] = 0x80;
+  /* 
+  Do not play any sounds from the boot ROM.
+  ss.ram[0xFF11] = 0xBF;
+  ss.ram[0xFF12] = 0xF3;
+  ss.ram[0xFF13] = 0xFF;
+  ss.ram[0xFF14] = 0xBF;
+  ss.ram[0xFF16] = 0x3F;
+  ss.ram[0xFF17] = 0x00;
+  ss.ram[0xFF18] = 0xFF;
+  ss.ram[0xFF19] = 0xBF;
+  ss.ram[0xFF1A] = 0x7F;
+  ss.ram[0xFF1B] = 0xFF;
+  ss.ram[0xFF1C] = 0x9F;
+  ss.ram[0xFF1D] = 0xFF;
+  ss.ram[0xFF1E] = 0xBF;
+  ss.ram[0xFF20] = 0xFF;
+  ss.ram[0xFF21] = 0x00;
+  ss.ram[0xFF22] = 0x00;
+  */
+  ss.ram[0xFF23] = 0xBF;
+  ss.ram[0xFF24] = 0x77;
+  ss.ram[0xFF25] = 0xF3;
+  ss.ram[0xFF26] = 0xF1;
+  ss.ram[0xFFFF] = 0x00;
+
+
+  ss.ram[0xFF40] = 0x91;
+  ss.ram[0xFF41] = 0x85;
+  ss.ram[0xFF42] = 0x00;
+  ss.ram[0xFF43] = 0x00;
+  ss.ram[0xFF44] = 0x00;
+  ss.ram[0xFF45] = 0x00;
+  ss.ram[0xFF46] = 0xFF;
+  ss.ram[0xFF47] = 0xFC;
+  ss.ram[0xFF4A] = 0x00;
+  ss.ram[0xFF4B] = 0x00;
+
+  LoadState(ss);
 }

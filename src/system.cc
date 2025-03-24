@@ -71,7 +71,7 @@ System::System(string rom_filename, string state_root_dir) {
 
   if (skip_boot_rom) {
     cpu_->SkipBootROM();
-    ppu_->SkipBootROM();
+    router_->SkipBootROM();
   }
 
   frame_count_ = 0;

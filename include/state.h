@@ -33,8 +33,6 @@ struct PPUSaveState {
   uint8_t obp1;
   uint8_t wy;
   uint8_t wx;
-  uint8_t vram[8192];
-  uint8_t oam[160];
 };
 
 struct TimerSaveState {
@@ -49,6 +47,10 @@ struct CartridgeSaveState {
   time_t rtc_session_start_time;
   bool rtc_has_override;
   time_t rtc_override_time;
+};
+
+struct MemorySaveState {
+  uint8_t ram[0x10000];
 };
 
 struct SaveState {
