@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA52DF362D90FD8800F64CC5 /* state.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA52DF352D90FD8800F64CC5 /* state.cc */; };
 		FA61BC512D7AADD800B0DD28 /* utils.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA61BC4E2D7AADD800B0DD28 /* utils.cc */; };
 		FA61BC522D7AADD800B0DD28 /* address_router.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA61BC312D7AADD800B0DD28 /* address_router.cc */; };
 		FA61BC532D7AADD800B0DD28 /* system.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA61BC4B2D7AADD800B0DD28 /* system.cc */; };
@@ -76,6 +77,8 @@
 		FA12E91D2D7A965600620FD7 /* EDGEiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EDGEiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA12E92E2D7A965800620FD7 /* EDGEiOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EDGEiOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA12E9382D7A965800620FD7 /* EDGEiOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EDGEiOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA52DF342D90FD3700F64CC5 /* state.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = state.h; sourceTree = "<group>"; };
+		FA52DF352D90FD8800F64CC5 /* state.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = state.cc; sourceTree = "<group>"; };
 		FA61BC0D2D7AADBE00B0DD28 /* address_router.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = address_router.h; sourceTree = "<group>"; };
 		FA61BC0E2D7AADBE00B0DD28 /* bit_command.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bit_command.h; sourceTree = "<group>"; };
 		FA61BC0F2D7AADBE00B0DD28 /* call_command.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = call_command.h; sourceTree = "<group>"; };
@@ -251,6 +254,7 @@
 				FA61BC282D7AADBE00B0DD28 /* sound_controller.h */,
 				FA61BC292D7AADBE00B0DD28 /* sprite.h */,
 				FA61BC2A2D7AADBE00B0DD28 /* stack_command.h */,
+				FA52DF342D90FD3700F64CC5 /* state.h */,
 				FA61BC2B2D7AADBE00B0DD28 /* system.h */,
 				FA61BC2C2D7AADBE00B0DD28 /* timer_controller.h */,
 				FA61BC2D2D7AADBE00B0DD28 /* unimplemented_command.h */,
@@ -290,6 +294,7 @@
 				FA61BC492D7AADD800B0DD28 /* sprite.cc */,
 				FA61BC4A2D7AADD800B0DD28 /* stack_command.cc */,
 				FA61BC4B2D7AADD800B0DD28 /* system.cc */,
+				FA52DF352D90FD8800F64CC5 /* state.cc */,
 				FA61BC4C2D7AADD800B0DD28 /* timer_controller.cc */,
 				FA61BC4D2D7AADD800B0DD28 /* unimplemented_command.cc */,
 				FA61BC4E2D7AADD800B0DD28 /* utils.cc */,
@@ -463,6 +468,7 @@
 				FA61BC612D7AADD800B0DD28 /* timer_controller.cc in Sources */,
 				FA61BC622D7AADD800B0DD28 /* command_factory.cc in Sources */,
 				FA61BC632D7AADD800B0DD28 /* nop_command.cc in Sources */,
+				FA52DF362D90FD8800F64CC5 /* state.cc in Sources */,
 				FA61BC642D7AADD800B0DD28 /* sound_controller.cc in Sources */,
 				FA61BC652D7AADD800B0DD28 /* return_command.cc in Sources */,
 				FA61BC662D7AADD800B0DD28 /* serial_controller.cc in Sources */,
