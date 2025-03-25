@@ -89,8 +89,6 @@ void InterruptController::SetByteAt(uint16_t address, uint8_t byte) {
   switch (address) {
     case IF_ADDRESS:
       set_interrupt_request(byte);
-      std::cout << "Write IF" << std::hex << unsigned(interrupt_request())
-                << std::endl;
       break;
     case IE_ADDRESS:
       set_interrupt_enabled_flags(byte);

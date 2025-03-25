@@ -290,8 +290,8 @@ void Cartridge::SetRTC(uint8_t byte) {
 uint8_t Cartridge::GetRAM(int address) {
   int banked_address = GetBankedRAMAddress(address);
   if (banked_address >= RAMSize()) {
-    std::cout << "GetRAM out of bounds: " << std::hex << address << " past size: " << std::hex << RAMSize() << std::endl;
-    assert(false);
+    // Ignore reads from out of bounds RAM (restoring, cartridge errors).
+    return 0xFF;
   }
   uint8_t byte = ram_[banked_address];
   if (IsMBC2()) {
@@ -308,8 +308,8 @@ void Cartridge::SetRAM(int address, uint8_t byte) {
   }
   int banked_address = GetBankedRAMAddress(address);
   if (banked_address >= RAMSize()) {
-    std::cout << "SetRAM out of bounds: " << std::hex << address << " past size: " << std::hex << RAMSize() << std::endl;
-    assert(false);
+    // Ignore writes to out of bounds RAM (restoring, cartridge errors).
+    return;
   }
 
   ram_[banked_address] = byte;
@@ -344,7 +344,7 @@ int Cartridge::ROMBankCount() {
 
 void Cartridge::SetRAMRTCEnable(uint8_t byte) {
   if (byte > 0x0A) {
-    std::cout << "Unexpected too high value for SetRAMRTCEnable - will treat as disable: " << std::hex << (int)byte << std::endl;
+    // Zelda sets 0xFF when it wants to disable.
     byte = 0;
   }
   ram_rtc_enable_ = byte;

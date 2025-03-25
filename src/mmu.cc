@@ -194,7 +194,7 @@ void MMU::UpdateROMBank() {
   uint8_t rom_bank = register_2000_3fff_;
   rom_bank_ = rom_bank;
   if (rom_bank == 0) {
-    cout << "ROM bank 0 is not allowed. Switching to bank 1." << endl;
+    // ROM bank 0 can not be set normally since it's always available.
     rom_bank_ = 1;
   }
 

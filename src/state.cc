@@ -76,6 +76,8 @@ std::vector<int> State::GetSaveSlots() const {
 }
 
 void State::WriteState(const std::string& path, const struct SaveState& state) {
+  std::cout << "START: Saving state to " << path << std::endl;
+
   std::ofstream file(path, std::ios::binary);
 
   file.write(reinterpret_cast<const char*>(&SaveState::MAGIC), sizeof(state.magic));
@@ -84,12 +86,16 @@ void State::WriteState(const std::string& path, const struct SaveState& state) {
   file.write(reinterpret_cast<const char*>(&state.ppu), sizeof(state.ppu));
   file.write(reinterpret_cast<const char*>(&state.timer), sizeof(state.timer));
   file.write(reinterpret_cast<const char*>(&state.cartridge), sizeof(state.cartridge));
+
+  std::cout << "END: Saved state to " << path << std::endl;
 }
 
 bool State::ReadState(const std::string& path, struct SaveState& state) {
   std::ifstream file(path, std::ios::binary);
   if (!file) return false;
-  
+
+  std::cout << "START: Loading state from " << path << std::endl;
+
   file.read(reinterpret_cast<char*>(&state.magic), sizeof(state.magic));
   if (state.magic != SaveState::MAGIC) return false;
   
@@ -101,5 +107,7 @@ bool State::ReadState(const std::string& path, struct SaveState& state) {
   file.read(reinterpret_cast<char*>(&state.timer), sizeof(state.timer));
   file.read(reinterpret_cast<char*>(&state.cartridge), sizeof(state.cartridge));
   
+  std::cout << "END: Loaded state from " << path << std::endl;
+
   return true;
 }
