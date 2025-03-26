@@ -123,7 +123,8 @@ bool PixelFIFO::Advance(Screen *screen) {
   }
 
   // Now that BG/Window are ready, Overlay sprites.
-  while (sprite_fetch_x <= pixelx_) {
+  // Immediately apply sprites to the fifo that might have been lost when we applied window.
+  while (sprite_fetch_x < pixelx_) {
     // Only consider sprites that could affect us.
     sprite_fetch_x = max(sprite_fetch_x, pixelx_ - 7);
     int sprite_i = FirstSpriteIndexForX(sprite_fetch_x);
@@ -131,7 +132,15 @@ bool PixelFIFO::Advance(Screen *screen) {
       // If the sprite was left of where we are (off screen left, or window appeared), it would have been cleared
       // from the FIFO so refetch.
       bool apply_immediately = 0 >= (pixelx_ - sprite_fetch_x);
-      StartSpriteFetch(row_sprites_[sprite_i], apply_immediately, pixelx_ - sprite_fetch_x);
+      StartSpriteFetch(row_sprites_[sprite_i], true, pixelx_ - sprite_fetch_x);
+    }
+    sprite_fetch_x++;
+  }
+  // Fetch sprites normally.
+  if (sprite_fetch_x == pixelx_) {
+    int sprite_i = FirstSpriteIndexForX(sprite_fetch_x);
+    if (sprite_i != -1) {
+      StartSpriteFetch(row_sprites_[sprite_i], false, pixelx_ - sprite_fetch_x);
     }
     sprite_fetch_x++;
   }
