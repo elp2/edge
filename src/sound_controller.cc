@@ -11,21 +11,6 @@
 #include "utils.h"
 #include "wave_voice.h"
 
-
-static void audioCallback(void* userdata, SDL_AudioStream* stream, int min_len, int max_len) {
-    // We'll use min_len to ensure we provide at least the minimum requested samples
-    int samples = min_len / sizeof(int16_t);
-    int16_t* buffer = new int16_t[samples];
-    
-    for (int i = 0; i < samples; i++) {
-        buffer[i] = 0;
-    }
-
-    static_cast<SoundController*>(userdata)->MixSamplesToBuffer(buffer, samples);
-    SDL_PutAudioStreamData(stream, buffer, min_len); // Use min_len for the byte size
-    delete[] buffer;
-}
-
 SoundController::SoundController() {
     voice1_ = new PulseVoice(1);
     voice2_ = new PulseVoice(2);

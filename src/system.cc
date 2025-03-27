@@ -81,7 +81,7 @@ MMU *System::GetMMU(string rom_filename, bool skip_boot_rom) {
   MMU *mmu = new MMU();
 
   if (!skip_boot_rom) {
-    mmu->SetBootROM(UnsignedCartridgeBytes("../roms/boot.gb"));
+    mmu->SetBootROM(UnsignedCartridgeBytes("Roms/boot.gb"));
   }
 
   return mmu;

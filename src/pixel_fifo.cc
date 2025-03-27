@@ -131,7 +131,6 @@ bool PixelFIFO::Advance(Screen *screen) {
     if (sprite_i != -1) {
       // If the sprite was left of where we are (off screen left, or window appeared), it would have been cleared
       // from the FIFO so refetch.
-      bool apply_immediately = 0 >= (pixelx_ - sprite_fetch_x);
       StartSpriteFetch(row_sprites_[sprite_i], true, pixelx_ - sprite_fetch_x);
     }
     sprite_fetch_x++;

@@ -39,7 +39,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void)createDirectories;
 + (NSString *)romsDirectory;
-+ (NSString *)savesDirectory;
 
 @end
 
