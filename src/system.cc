@@ -50,6 +50,7 @@ System::System(string rom_filename, string state_root_dir) {
   input_controller_->SetInterruptHandler(interrupt_controller_);
 #ifndef BUILD_IOS
   input_controller_->SetScreenshotTaker(this);
+  input_controller_->SetStateNavigator(this);
 #endif  
   timer_controller_ = new TimerController();
   timer_controller_->SetInterruptHandler(interrupt_controller_);
@@ -131,6 +132,15 @@ void System::AdvanceOneFrame() {
 }
 
 void System::SaveState() {
+  std::cout << "Saving state..." << std::endl;
+}
+
+void System::LoadPreviouslySavedState() {
+  std::cout << "Loading previously saved state..." << std::endl;
+}
+
+void System::RewindState() {
+  std::cout << "Rewinding state..." << std::endl;
 }
 
 void System::TakeScreenshot() {

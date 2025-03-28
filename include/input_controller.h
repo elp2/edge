@@ -11,6 +11,13 @@ class ScreenshotTaker {
   virtual void TakeScreenshot() = 0;
 };
 
+class StateNavigator {
+ public:
+  virtual void SaveState() = 0;
+  virtual void LoadPreviouslySavedState() = 0;
+  virtual void RewindState() = 0;
+};
+
 class InputController {
  public:
   InputController();
@@ -28,7 +35,7 @@ class InputController {
   uint8_t GetByteAt(uint16_t);
 
   void SetScreenshotTaker(ScreenshotTaker *screenshot_taker) { screenshot_taker_ = screenshot_taker; }
-
+  void SetStateNavigator(StateNavigator *state_navigator) { state_navigator_ = state_navigator; }
  private:
   InterruptHandler* interrupt_handler_;
   uint8_t p0_select_ = 0x00;
@@ -39,4 +46,5 @@ class InputController {
   uint8_t FourBitTriggering(int i);
 
   ScreenshotTaker* screenshot_taker_;
+  StateNavigator* state_navigator_;
 };

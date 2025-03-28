@@ -20,7 +20,7 @@ class TimerController;
 
 using namespace std;
 
-class System : public ScreenshotTaker {
+class System : public ScreenshotTaker, public StateNavigator {
  public:
   System(string rom_filename, string state_dir);
   ~System() = default;
@@ -32,10 +32,13 @@ class System : public ScreenshotTaker {
 
   const uint32_t* pixels();
 
-  void SaveState();
-
   // ScreenshotTaker abstract class functions.
   void TakeScreenshot();
+
+  // StateNavigator abstract class functions.
+  void SaveState();
+  void LoadPreviouslySavedState();
+  void RewindState();
 
  private:
   Cartridge *cartridge_;

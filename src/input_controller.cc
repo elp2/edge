@@ -101,8 +101,23 @@ void InputController::SetButtons(bool dpadUp, bool dpadDown, bool dpadLeft, bool
 }
 
 void InputController::HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool pressed) {
-    if (event.scancode == SDL_SCANCODE_0) {
+    if (event.scancode == SDL_SCANCODE_0 && pressed) {
       screenshot_taker_->TakeScreenshot();
+      return;
+    }
+
+    if (event.scancode == SDL_SCANCODE_5 && pressed) {
+      state_navigator_->SaveState();
+      return;
+    }
+
+    if (event.scancode == SDL_SCANCODE_7 && pressed) {
+      state_navigator_->LoadPreviouslySavedState();
+      return;
+    }
+
+    if (event.scancode == SDL_SCANCODE_BACKSPACE && pressed) {
+      state_navigator_->RewindState();
       return;
     }
 
