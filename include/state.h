@@ -53,6 +53,15 @@ struct MemorySaveState {
   uint8_t ram[0x10000];
 };
 
+struct MMUSaveState {
+  bool overlay_boot_rom;
+  uint8_t rom_bank;
+  uint8_t ram_bank;
+  uint8_t switchable_ram_bank_active;
+  bool switchable_ram_bank_enabled;
+  uint8_t register_2000_3fff;
+};
+
 struct SaveState {
   static constexpr uint32_t MAGIC = 0x45444745;  // "EDGE"
   static constexpr uint32_t VERSION = 1;
@@ -63,6 +72,7 @@ struct SaveState {
   struct PPUSaveState ppu;
   struct TimerSaveState timer;
   struct CartridgeSaveState cartridge;
+  struct MMUSaveState mmu;
 };
 
 class State {

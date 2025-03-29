@@ -211,3 +211,19 @@ void MMU::SetWordAt(uint16_t address, uint16_t word) {
 }
 
 MMU::~MMU() {}
+
+void MMU::SetState(const struct MMUSaveState &state) {
+  overlay_boot_rom_ = state.overlay_boot_rom;
+  rom_bank_ = state.rom_bank;
+  switchable_ram_bank_active_ = state.switchable_ram_bank_active;
+  switchable_ram_bank_enabled_ = state.switchable_ram_bank_enabled;
+  register_2000_3fff_ = state.register_2000_3fff; 
+}
+
+void MMU::GetState(struct MMUSaveState& state) {
+  state.overlay_boot_rom = overlay_boot_rom_;
+  state.rom_bank = rom_bank_;
+  state.switchable_ram_bank_active = switchable_ram_bank_active_;
+  state.switchable_ram_bank_enabled = switchable_ram_bank_enabled_;
+  state.register_2000_3fff = register_2000_3fff_;
+}

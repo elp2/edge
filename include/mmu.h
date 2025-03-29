@@ -3,6 +3,7 @@
 #include <string>
 
 #include "cartridge.h"
+#include "state.h"
 
 using namespace std;
 
@@ -29,6 +30,9 @@ class MMU {
   };
 
   uint8_t rom_bank() { return rom_bank_; };
+
+  void SetState(const struct MMUSaveState &state);
+  void GetState(struct MMUSaveState& state);
 
  private:
   bool UseBootROMForAddress(uint16_t address);
