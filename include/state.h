@@ -50,7 +50,7 @@ struct CartridgeSaveState {
 };
 
 struct MemorySaveState {
-  uint8_t ram[0x10000];
+  uint8_t ram[0x8000];
 };
 
 struct MMUSaveState {
@@ -68,11 +68,11 @@ struct SaveState {
   
   uint32_t magic;
   uint32_t version;
-  struct CPUSaveState cpu;
-  struct PPUSaveState ppu;
-  struct TimerSaveState timer;
-  struct CartridgeSaveState cartridge;
-  struct MMUSaveState mmu;
+
+  CPUSaveState cpu;
+  CartridgeSaveState cartridge;
+  MemorySaveState memory;
+  MMUSaveState mmu;
 };
 
 class State {
@@ -81,22 +81,25 @@ class State {
   ~State();
 
   void SaveState(const struct SaveState& state);
-  bool LoadState(int slot, struct SaveState& state);
+  bool LoadState(struct SaveState& state);
 
   void DeleteState(int slot);
   std::vector<int> GetSaveSlots() const;
   std::string GetStateDir() const;
+  void AdvanceSlot();
+  int GetLatestSlot() const;
 
  private:
   std::string game_state_dir_;
   int slot_;
   static constexpr int MAX_SLOTS = 10;
 
-  void SaveState(int slot, const struct SaveState& state);
   bool HasState(int slot) const;
 
   std::string GetStateDir(int slot) const;
   std::string GetStateFile(int slot) const;
   void WriteState(const std::string& path, const struct SaveState& state);
   bool ReadState(const std::string& path, struct SaveState& state);
+
+  void CreateNewSlot();
 };

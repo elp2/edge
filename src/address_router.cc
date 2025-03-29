@@ -271,19 +271,19 @@ void AddressRouter::PerformDMA(uint8_t dma_base) {
 }
 
 void AddressRouter::SaveState(struct MemorySaveState &state) {
-  for (int i = 0; i <= 0xFFFF; i++) {
+  for (int i = 0x8000; i <= 0xFFFF; i++) {
     AddressOwner owner = ownerForAddress(i);
     if (owner != AdressOwner_Unknown) {
-      state.ram[i] = GetByteAtAddressFromOwner(owner, i);
+      state.ram[i - 0x8000] = GetByteAtAddressFromOwner(owner, i);
     }
   }
 }
 
 void AddressRouter::LoadState(const struct MemorySaveState &state) {
-  for (int i = 0; i <= 0xFFFF; i++) {
+  for (int i = 0x8000; i <= 0xFFFF; i++) {
     AddressOwner owner = ownerForAddress(i);
     if (owner != AdressOwner_Unknown) {
-      SetByteAtAddressInOwner(owner, i, state.ram[i]);
+      SetByteAtAddressInOwner(owner, i, state.ram[i - 0x8000]);
     }
   }
 }

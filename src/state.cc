@@ -8,15 +8,12 @@
 
 
 State::State(const std::string& game_state_dir, int slot) : game_state_dir_(game_state_dir) {
-  slot_ = -1;
-  if (slot < 0) {
-    for (int i = 0; i < MAX_SLOTS; i++) {
-      std::cout << i << std::endl;
-      if (!HasState(i)) {
-        slot_ = i;
-        std::filesystem::create_directories(GetStateDir(slot_));
-        break;
-      }
+  assert(slot >= -1 && slot < MAX_SLOTS);
+
+  if (slot == -1) {
+    slot_ = GetLatestSlot();
+    if (slot_ == -1) {
+      CreateNewSlot();
     }
   } else {
     assert(HasState(slot));
@@ -25,7 +22,40 @@ State::State(const std::string& game_state_dir, int slot) : game_state_dir_(game
   assert(slot_ != -1);
 }
 
-State::~State() {}
+void State::CreateNewSlot() {
+  bool created = false;
+  for (int i = 0; i < MAX_SLOTS; i++) {
+    if (!HasState(i)) {
+      slot_ = i;
+      std::filesystem::create_directories(GetStateDir(slot_));
+      created = true;
+      break;
+    }
+  }
+  if (!created) {
+    std::cout << "No free slots found. Please delete an existing state." << std::endl;
+    assert(false);
+  }
+}
+
+int State::GetLatestSlot() const {
+  int latest_slot = -1;
+  std::filesystem::file_time_type latest_time;
+  
+  for (int i = 0; i < MAX_SLOTS; i++) {
+    if (HasState(i)) {
+      auto state_path = GetStateFile(i);
+      auto mod_time = std::filesystem::last_write_time(state_path);
+      
+      if (latest_slot == -1 || mod_time > latest_time) {
+        latest_time = mod_time;
+        latest_slot = i;
+      }
+    }
+  }
+  
+  return latest_slot;
+}
 
 std::string State::GetStateDir() const {
   assert(slot_ >= 0);
@@ -41,18 +71,11 @@ std::string State::GetStateFile(int slot) const {
 }
 
 void State::SaveState(const struct SaveState& state) {
-  SaveState(slot_, state);
+  WriteState(GetStateFile(slot_), state);
 }
 
-void State::SaveState(int slot, const struct SaveState& state) {
-  if (slot < 0 || slot >= MAX_SLOTS) return;
-  WriteState(GetStateFile(slot), state);
-}
-
-bool State::LoadState(int slot, struct SaveState& state) {
-  if (slot < 0 || slot >= MAX_SLOTS) return false;
-  if (!HasState(slot)) return false;
-  return ReadState(GetStateFile(slot), state);
+bool State::LoadState(struct SaveState& state) {
+  return ReadState(GetStateFile(slot_), state);
 }
 
 bool State::HasState(int slot) const {
@@ -75,6 +98,16 @@ std::vector<int> State::GetSaveSlots() const {
   return slots;
 }
 
+void State::AdvanceSlot() {
+  slot_ += 1;
+  if (slot_ >= MAX_SLOTS) {
+    slot_ = 0;
+  }
+  if (!HasState(slot_)) {
+    CreateNewSlot();
+  }
+}
+
 void State::WriteState(const std::string& path, const struct SaveState& state) {
   std::cout << "START: Saving state to " << path << std::endl;
 
@@ -83,8 +116,7 @@ void State::WriteState(const std::string& path, const struct SaveState& state) {
   file.write(reinterpret_cast<const char*>(&SaveState::MAGIC), sizeof(state.magic));
   file.write(reinterpret_cast<const char*>(&SaveState::VERSION), sizeof(state.version));
   file.write(reinterpret_cast<const char*>(&state.cpu), sizeof(state.cpu));
-  file.write(reinterpret_cast<const char*>(&state.ppu), sizeof(state.ppu));
-  file.write(reinterpret_cast<const char*>(&state.timer), sizeof(state.timer));
+  file.write(reinterpret_cast<const char*>(&state.memory), sizeof(state.memory));
   file.write(reinterpret_cast<const char*>(&state.cartridge), sizeof(state.cartridge));
 
   std::cout << "END: Saved state to " << path << std::endl;
@@ -103,8 +135,7 @@ bool State::ReadState(const std::string& path, struct SaveState& state) {
   if (state.version != SaveState::VERSION) return false;
   
   file.read(reinterpret_cast<char*>(&state.cpu), sizeof(state.cpu));
-  file.read(reinterpret_cast<char*>(&state.ppu), sizeof(state.ppu));
-  file.read(reinterpret_cast<char*>(&state.timer), sizeof(state.timer));
+  file.read(reinterpret_cast<char*>(&state.memory), sizeof(state.memory));
   file.read(reinterpret_cast<char*>(&state.cartridge), sizeof(state.cartridge));
   
   std::cout << "END: Loaded state from " << path << std::endl;

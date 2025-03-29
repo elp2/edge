@@ -100,7 +100,7 @@ uint8_t MMU::GetByteAt(uint16_t address) {
     // PPU should handle this.
     assert(false);
   } else if (address >= FORBIDDEN_RAM_START && address <= FORBIDDEN_RAM_END) {
-    assert(false);
+    return 0xFF;
   } else if (address >= IO_RAM_START && address <= IO_RAM_END) {
     std::cout << "Unexpected IO RAM Get: 0x" << hex << unsigned(address) << endl;
     return 0x00;
@@ -198,7 +198,10 @@ void MMU::UpdateROMBank() {
     rom_bank_ = 1;
   }
 
-  assert(rom_bank_ < cartridge_->ROMBankCount());
+  if (rom_bank_ >= cartridge_->ROMBankCount()) {
+    std::cout << "ROM bank out of bounds: " << std::hex << int(rom_bank_) << std::endl;
+    assert(false);
+  }
 }
 
 void MMU::SetWordAt(uint16_t address, uint16_t word) {

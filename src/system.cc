@@ -39,7 +39,6 @@ System::System(string rom_filename, string state_root_dir) {
   cartridge_ = new Cartridge(rom_filename, cartridge_ram_dir);
   cartridge_->PrintDebugInfo();
   mmu_->SetCartridge(cartridge_);
-  SaveState();
 
   screen_ = new Screen();
   ppu_ = new PPU(screen_);
@@ -133,10 +132,28 @@ void System::AdvanceOneFrame() {
 
 void System::SaveState() {
   std::cout << "Saving state..." << std::endl;
+  state_->AdvanceSlot();
+
+  struct SaveState save_state = {};
+  cpu_->GetState(save_state.cpu);
+  router_->SaveState(save_state.memory);
+  mmu_->GetState(save_state.mmu);
+
+  state_->SaveState(save_state);
+  std::cout << "Saved state" << std::endl;
 }
 
 void System::LoadPreviouslySavedState() {
   std::cout << "Loading previously saved state..." << std::endl;
+
+  struct SaveState save_state = {};
+  state_->LoadState(save_state);
+
+  cpu_->SetState(save_state.cpu);
+  router_->LoadState(save_state.memory);
+  mmu_->SetState(save_state.mmu);
+
+  std::cout << "Loaded state" << std::endl;
 }
 
 void System::RewindState() {

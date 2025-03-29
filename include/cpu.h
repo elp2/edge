@@ -49,7 +49,7 @@ class CPU : public InterruptExecutor {
   uint16_t SP();
 
  public:
-  flags_t flags;
+  flags_t flags = {false, false, false, false};
 
   CPU(AddressRouter *address_router);
   ~CPU();
@@ -94,7 +94,7 @@ class CPU : public InterruptExecutor {
   void EnableInterrupts();
 
   void SetState(const struct CPUSaveState &state);
-  void GetState(struct CPUSaveState& state);
+  void GetState(CPUSaveState& state);
   void SkipBootROM();
 
   void SetDebugPrint(bool debugPrint) { debugPrint_ = debugPrint; };

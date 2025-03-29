@@ -481,7 +481,7 @@ void CPU::SetState(const struct CPUSaveState &state) {
   Set8Bit(Register_L, state.l);
 }
 
-void CPU::GetState(struct CPUSaveState& state) {
+void CPU::GetState(CPUSaveState& state) {
   state.flag_z = flags.z;
   state.flag_h = flags.h;
   state.flag_n = flags.n;
