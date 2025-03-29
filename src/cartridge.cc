@@ -476,3 +476,17 @@ bool Cartridge::GetRTCHalted() const {
 bool Cartridge::GetRTCDayCarry() const {
   return (ElapsedRTCTime() / 86400) >= 512;
 }
+
+void Cartridge::SetState(const struct CartridgeSaveState &state) {
+  rtc_previous_session_duration_ = state.rtc_previous_session_duration;
+  rtc_session_start_time_ = state.rtc_session_start_time;
+  rtc_current_time_override_ = state.rtc_current_time_override;
+  rtc_has_override_ = state.rtc_has_override;
+}
+
+void Cartridge::GetState(struct CartridgeSaveState& state) {
+  state.rtc_previous_session_duration = rtc_previous_session_duration_;
+  state.rtc_session_start_time = rtc_session_start_time_;
+  state.rtc_current_time_override = rtc_current_time_override_;
+  state.rtc_has_override = rtc_has_override_;
+} 

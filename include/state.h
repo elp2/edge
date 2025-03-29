@@ -46,7 +46,7 @@ struct CartridgeSaveState {
   time_t rtc_previous_session_duration;
   time_t rtc_session_start_time;
   bool rtc_has_override;
-  time_t rtc_override_time;
+  time_t rtc_current_time_override;
 };
 
 struct MemorySaveState {

@@ -131,6 +131,7 @@ void System::AdvanceOneFrame() {
 }
 
 void System::SaveState() {
+  assert(state_ != nullptr);
   std::cout << "Saving state..." << std::endl;
   state_->AdvanceSlot();
 
@@ -138,12 +139,15 @@ void System::SaveState() {
   cpu_->GetState(save_state.cpu);
   router_->SaveState(save_state.memory);
   mmu_->GetState(save_state.mmu);
+  cartridge_->GetState(save_state.cartridge);
 
   state_->SaveState(save_state);
   std::cout << "Saved state" << std::endl;
 }
 
 void System::LoadPreviouslySavedState() {
+  assert(state_ != nullptr);
+
   std::cout << "Loading previously saved state..." << std::endl;
 
   struct SaveState save_state = {};
@@ -152,11 +156,14 @@ void System::LoadPreviouslySavedState() {
   cpu_->SetState(save_state.cpu);
   router_->LoadState(save_state.memory);
   mmu_->SetState(save_state.mmu);
+  cartridge_->SetState(save_state.cartridge);
 
   std::cout << "Loaded state" << std::endl;
 }
 
 void System::RewindState() {
+  assert(state_ != nullptr);
+
   std::cout << "Rewinding state..." << std::endl;
 }
 

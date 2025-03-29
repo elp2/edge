@@ -4,6 +4,8 @@
 #include <string>
 #include <time.h>
 
+#include "state.h"
+
 using namespace std;
 
 enum CartridgeType {
@@ -83,6 +85,9 @@ class Cartridge {
   time_t GetRTCPreviousSessionDuration() const { return rtc_previous_session_duration_; }
   time_t GetRTCSessionStartTime() const { return rtc_session_start_time_; }
   time_t GetRTCTimeOverride() const { return rtc_current_time_override_; }
+
+  void SetState(const struct CartridgeSaveState &state);
+  void GetState(struct CartridgeSaveState& state);
 
  private:
   uint8_t *rom_;
