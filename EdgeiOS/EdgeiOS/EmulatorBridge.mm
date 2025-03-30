@@ -153,4 +153,18 @@
   }
 }
 
+#pragma mark - State
+
+- (void)saveState {
+    system_->SaveState();
+}
+
+- (void)loadPreviouslySavedState {
+    system_->LoadPreviouslySavedState();
+}
+
+- (void)rewindState {
+    system_->RewindState();
+}
+
 @end 

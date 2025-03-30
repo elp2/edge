@@ -1,5 +1,6 @@
 import SwiftUI
 import MetalKit
+import UIKit
 
 struct EmulatorMetalView: UIViewRepresentable {
     func makeUIView(context: Context) -> MTKView {
@@ -11,6 +12,15 @@ struct EmulatorMetalView: UIViewRepresentable {
         mtkView.preferredFramesPerSecond = 60
         context.coordinator.setupMetal(mtkView: mtkView)
         mtkView.preferredFramesPerSecond = 60
+
+        // Add a UIKit double tap recognizer so we can get coordinates of the tap.
+        let doubleTapRecognizer = UITapGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleDoubleTap(_:))
+        )
+        doubleTapRecognizer.numberOfTapsRequired = 2
+        mtkView.addGestureRecognizer(doubleTapRecognizer)
+        
         return mtkView
     }
 
@@ -84,6 +94,19 @@ struct EmulatorMetalView: UIViewRepresentable {
             encoder.endEncoding()
             commandBuffer.present(drawable)
             commandBuffer.commit()
+        }
+
+        @objc func handleDoubleTap(_ recognizer: UITapGestureRecognizer) {
+            guard recognizer.state == .ended else { return }
+            guard let view = recognizer.view else { return }
+
+            let location = recognizer.location(in: view)
+            let midpoint = view.bounds.width / 2.0
+            if location.x > midpoint {
+                EmulatorBridge.sharedInstance().saveState()
+            } else {
+                EmulatorBridge.sharedInstance().loadPreviouslySavedState()
+            }
         }
 
         deinit {
