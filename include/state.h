@@ -56,7 +56,6 @@ struct MemorySaveState {
 struct MMUSaveState {
   bool overlay_boot_rom;
   uint8_t rom_bank;
-  uint8_t ram_bank;
   uint8_t switchable_ram_bank_active;
   bool switchable_ram_bank_enabled;
   uint8_t register_2000_3fff;

@@ -95,7 +95,6 @@ void System::AdvanceOneFrame() {
   bool entered_vsync = false;
   while (!entered_vsync) {
     int stepped = cpu_->Step();
-    input_controller_->PollAndApplyEvents();
     entered_vsync = ppu_->Advance(stepped);
     timer_controller_->Advance(stepped);
 
@@ -108,6 +107,8 @@ void System::AdvanceOneFrame() {
 
     frame_cycles_ += stepped;
   }
+
+  input_controller_->PollAndApplyEvents();
   // std::cout << "Frame cycles: " << dec << frame_cycles_ << std::endl;
 
   frame_cycles_ = 0;
@@ -137,11 +138,13 @@ void System::SaveState() {
 
   struct SaveState save_state = {};
   cpu_->GetState(save_state.cpu);
-  router_->SaveState(save_state.memory);
   mmu_->GetState(save_state.mmu);
   cartridge_->GetState(save_state.cartridge);
+  router_->SaveState(save_state.memory);
 
   state_->SaveState(save_state);
+
+  LoadPreviouslySavedState();
   std::cout << "Saved state" << std::endl;
 }
 
