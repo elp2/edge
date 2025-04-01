@@ -64,4 +64,5 @@ class AddressRouter {
   void SetByteAtAddressInOwner(AddressOwner owner, uint16_t address,
                                uint8_t byte);
   void PerformDMA(uint8_t dma_base);
+  bool ShouldSaveLoadAddress(uint16_t address);
 };

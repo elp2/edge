@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 
+#include "constants.h"
 #include "input_controller.h"
 #include "interrupt_controller.h"
 #include "mmu.h"
@@ -272,20 +273,25 @@ void AddressRouter::PerformDMA(uint8_t dma_base) {
 
 void AddressRouter::SaveState(struct MemorySaveState &state) {
   for (int i = 0x8000; i <= 0xFFFF; i++) {
-    AddressOwner owner = ownerForAddress(i);
-    if (owner != AdressOwner_Unknown) {
-      state.ram[i - 0x8000] = GetByteAtAddressFromOwner(owner, i);
-    }
+    if (!ShouldSaveLoadAddress(i)) continue;
+    state.ram[i - 0x8000] = GetByteAtAddressFromOwner(ownerForAddress(i), i);
   }
 }
 
 void AddressRouter::LoadState(const struct MemorySaveState &state) {
   for (int i = 0x8000; i <= 0xFFFF; i++) {
-    AddressOwner owner = ownerForAddress(i);
-    if (owner != AdressOwner_Unknown) {
-      SetByteAtAddressInOwner(owner, i, state.ram[i - 0x8000]);
-    }
+    if (!ShouldSaveLoadAddress(i)) continue;
+    SetByteAtAddressInOwner(ownerForAddress(i), i, state.ram[i - 0x8000]);
   }
+}
+
+bool AddressRouter::ShouldSaveLoadAddress(uint16_t address) {
+  assert(address >= 0x8000);
+
+  AddressOwner owner = ownerForAddress(address);
+  if (owner == AdressOwner_Unknown) return false;
+  if (address >= FORBIDDEN_RAM_START && address <= FORBIDDEN_RAM_END) return false;
+  return true;
 }
 
 void AddressRouter::SkipBootROM() {
