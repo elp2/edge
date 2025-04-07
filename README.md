@@ -32,7 +32,7 @@
   * MacOS: brew install sdl3 cmake rgbds
 * mkdir build
 * cd build
-* mkdir ROMS # Put your roms here
-* mkdir States # Use states
+* mkdir ROMs # ROMs will go here
+* mkdir States # Saved States will go here
 * cmake -DCMAKE_BUILD_TYPE=[Debug|Release] ..
-* ./edge ROMS/rom.gb States/rom.gb.state
+* make && ./edge ROMs/rom.gb States
