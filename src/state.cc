@@ -71,10 +71,13 @@ std::string State::GetStateFile(int slot) const {
 }
 
 void State::SaveState(const struct SaveState& state) {
+  assert(HasState(slot_));
+  std::cout << "Saving state to " << GetStateFile(slot_) << std::endl;
   WriteState(GetStateFile(slot_), state);
 }
 
 bool State::LoadState(struct SaveState& state) {
+  std::cout << "Loading state from " << GetStateFile(slot_) << std::endl;
   return ReadState(GetStateFile(slot_), state);
 }
 
@@ -118,6 +121,7 @@ void State::WriteState(const std::string& path, const struct SaveState& state) {
   file.write(reinterpret_cast<const char*>(&state.cpu), sizeof(state.cpu));
   file.write(reinterpret_cast<const char*>(&state.memory), sizeof(state.memory));
   file.write(reinterpret_cast<const char*>(&state.cartridge), sizeof(state.cartridge));
+  file.write(reinterpret_cast<const char*>(&state.mmu), sizeof(state.mmu));
 
   std::cout << "END: Saved state to " << path << std::endl;
 }
@@ -137,7 +141,8 @@ bool State::ReadState(const std::string& path, struct SaveState& state) {
   file.read(reinterpret_cast<char*>(&state.cpu), sizeof(state.cpu));
   file.read(reinterpret_cast<char*>(&state.memory), sizeof(state.memory));
   file.read(reinterpret_cast<char*>(&state.cartridge), sizeof(state.cartridge));
-  
+  file.read(reinterpret_cast<char*>(&state.mmu), sizeof(state.mmu));
+
   std::cout << "END: Loaded state from " << path << std::endl;
 
   return true;
