@@ -34,7 +34,7 @@ System::System(string rom_filename, string state_root_dir) {
     cartridge_ram_dir = state_->GetStateDir();
   }
 
-  mmu_ = GetMMU(rom_filename, skip_boot_rom);
+  mmu_ = GetMMU(skip_boot_rom);
 
   cartridge_ = new Cartridge(rom_filename, cartridge_ram_dir);
   cartridge_->PrintDebugInfo();
@@ -77,7 +77,7 @@ System::System(string rom_filename, string state_root_dir) {
   frame_count_ = 0;
 }
 
-MMU *System::GetMMU(string rom_filename, bool skip_boot_rom) {
+MMU *System::GetMMU(bool skip_boot_rom) {
   MMU *mmu = new MMU();
 
   if (!skip_boot_rom) {
@@ -138,6 +138,7 @@ void System::SaveState() {
 
   struct SaveState save_state = {};
   cpu_->GetState(save_state.cpu);
+  std::cout << "CPU state saved at PC: " << std::hex << int(save_state.cpu.pc) << std::endl;
   mmu_->GetState(save_state.mmu);
   cartridge_->GetState(save_state.cartridge);
   router_->SaveState(save_state.memory);
