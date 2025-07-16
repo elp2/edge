@@ -43,6 +43,8 @@ class Screen {
   ScreenStyle style_ = ScreenStyle_White;
 
   uint32_t GetScreenColor(Pixel pixel);
+
+  int screenshot_ = 0;
  public:
   Screen();
   ~Screen() = default;

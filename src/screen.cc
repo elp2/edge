@@ -122,16 +122,10 @@ void Screen::SetPalette(Palette palette, uint8_t value) {
 }
 
 void Screen::SaveScreenshot(const string& base_name) {
-    int counter = 0;
-    string filename;
-    do {
-        filename = base_name + "_" + to_string(counter) + ".bmp";
-        counter++;
-        if (counter > 1000) {
-            cout << "Too many screenshots, aborting." << endl;
-            return;
-        }
-    } while (SDL_IOFromFile(filename.c_str(), "r") != NULL);
+    string filename = base_name + "_" + to_string(screenshot_++) + ".bmp";
+    if (screenshot_ >= 1000) {
+        screenshot_ = 0;
+    }
 
     SDL_Surface* surface = SDL_CreateSurfaceFrom(
                                                  SCREEN_WIDTH,
