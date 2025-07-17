@@ -21,6 +21,13 @@ struct EmulatorMetalView: UIViewRepresentable {
         doubleTapRecognizer.numberOfTapsRequired = 2
         mtkView.addGestureRecognizer(doubleTapRecognizer)
         
+        // Add pan gesture recognizer for custom swipe detection with distance threshold
+        let panRecognizer = UIPanGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handlePan(_:))
+        )
+        mtkView.addGestureRecognizer(panRecognizer)
+        
         return mtkView
     }
 
@@ -99,13 +106,42 @@ struct EmulatorMetalView: UIViewRepresentable {
         @objc func handleDoubleTap(_ recognizer: UITapGestureRecognizer) {
             guard recognizer.state == .ended else { return }
             guard let view = recognizer.view else { return }
+            // TODO: Implement double tap (options).
+        }
 
-            let location = recognizer.location(in: view)
-            let midpoint = view.bounds.width / 2.0
-            if location.x > midpoint {
-                EmulatorBridge.sharedInstance().saveState()
+        @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+            guard gesture.state == .ended else { return }
+            guard let view = gesture.view else { return }
+            
+            let translation = gesture.translation(in: view)
+            let velocity = gesture.velocity(in: view)
+            
+            let minDistance = min(view.bounds.width, view.bounds.height) / 3.0
+            
+            let distance = sqrt(translation.x * translation.x + translation.y * translation.y)
+            guard distance >= minDistance else { return }
+            
+            let absX = abs(translation.x)
+            let absY = abs(translation.y)
+            
+            if absY > absX {
+                // Vertical swipe
+                if translation.y > 0 {
+                    // Down swipe
+                    EmulatorBridge.sharedInstance().saveState()
+                } else {
+                    // Up swipe
+                    EmulatorBridge.sharedInstance().loadPreviouslySavedState()
+                }
             } else {
-                EmulatorBridge.sharedInstance().loadPreviouslySavedState()
+                // Horizontal swipe
+                if translation.x > 0 {
+                    // Right swipe
+                    print("TODO: Handle swipe right (load state screen)")
+                } else {
+                    // Left swipe
+                    print("TODO: Handle swipe left (rewind)")
+                }
             }
         }
 
