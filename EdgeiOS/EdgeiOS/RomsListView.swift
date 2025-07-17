@@ -25,7 +25,7 @@ struct RomsListView: View {
             List {
                 ForEach(romManager.getRoms(), id: \.self) { rom in
                     NavigationLink(destination: {
-                        EmulatorView(romFilename: rom)
+                        GameScreen(romFilename: rom)
                     }) {
                         VStack(alignment: .leading) {
                             Text(rom)
@@ -34,7 +34,7 @@ struct RomsListView: View {
                     }
                 }
             }
-            .navigationTitle("Installed ROMs")
+            .navigationTitle("ROMs")
         }
     }
 }
