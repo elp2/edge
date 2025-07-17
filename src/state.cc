@@ -45,11 +45,17 @@ int State::GetLatestSlot() const {
   for (int i = 0; i < MAX_SLOTS; i++) {
     if (HasState(i)) {
       auto state_path = GetStateFile(i);
-      auto mod_time = std::filesystem::last_write_time(state_path);
-      
-      if (latest_slot == -1 || mod_time > latest_time) {
-        latest_time = mod_time;
-        latest_slot = i;
+      try {
+        auto mod_time = std::filesystem::last_write_time(state_path);
+        
+        if (latest_slot == -1 || mod_time > latest_time) {
+          latest_time = mod_time;
+          latest_slot = i;
+        }
+      } catch (const std::filesystem::filesystem_error& e) {
+        // If we can't get the modification time, skip this slot
+        std::cout << "Warning: Could not get modification time for " << state_path << ": " << e.what() << std::endl;
+        continue;
       }
     }
   }
@@ -72,7 +78,7 @@ std::string State::GetStateDir(int slot) const {
 }
 
 std::string State::GetStateFile(int slot) const {
-  return GetStateDir() + "/state.bin";
+  return GetStateDir(slot) + "/state.bin";
 }
 
 void State::SaveState(const struct SaveState& state) {
@@ -88,7 +94,12 @@ bool State::LoadState(struct SaveState& state) {
 
 bool State::HasState(int slot) const {
   if (slot < 0 || slot >= MAX_SLOTS) return false;
-  return std::filesystem::exists(GetStateDir(slot));
+  try {
+    return std::filesystem::exists(GetStateDir(slot));
+  } catch (const std::filesystem::filesystem_error& e) {
+    std::cout << "Warning: Could not check existence of " << GetStateDir(slot) << ": " << e.what() << std::endl;
+    return false;
+  }
 }
 
 void State::DeleteState(int slot) {
