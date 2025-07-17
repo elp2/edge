@@ -60,6 +60,7 @@ class Screen {
   void SetStyle(ScreenStyle style) { style_ = style; }
 
   void SaveScreenshot(const string& base_name);
+  void SaveScreenshotToPath(const string& filepath);
 
   const uint32_t* pixels() { return pixels_front_; }
 };

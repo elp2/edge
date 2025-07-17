@@ -62,6 +62,11 @@ std::string State::GetStateDir() const {
   return GetStateDir(slot_);
 }
 
+std::string State::GetScreenshotPath() const {
+  assert(slot_ >= 0);
+  return GetStateDir(slot_) + "/screenshot.bmp";
+}
+
 std::string State::GetStateDir(int slot) const {
   return game_state_dir_ + "/" + std::to_string(slot);
 }
@@ -104,7 +109,7 @@ std::vector<int> State::GetSaveSlots() const {
 void State::AdvanceSlot() {
   slot_ += 1;
   if (slot_ >= MAX_SLOTS) {
-    slot_ = 0;
+    slot_ = 1;
   }
   if (!HasState(slot_)) {
     CreateNewSlot();

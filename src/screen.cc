@@ -127,6 +127,10 @@ void Screen::SaveScreenshot(const string& base_name) {
         screenshot_ = 0;
     }
 
+    SaveScreenshotToPath(filename);
+}
+
+void Screen::SaveScreenshotToPath(const string& filepath) {
     SDL_Surface* surface = SDL_CreateSurfaceFrom(
                                                  SCREEN_WIDTH,
                                                  SCREEN_HEIGHT,
@@ -140,8 +144,8 @@ void Screen::SaveScreenshot(const string& base_name) {
         return;
     }
 
-    if (SDL_SaveBMP(surface, filename.c_str())) {
-        cout << "Screenshot saved as: " << filename << endl;
+    if (SDL_SaveBMP(surface, filepath.c_str())) {
+        cout << "Screenshot saved as: " << filepath << endl;
     } else {
         cout << "Failed to save screenshot: " << SDL_GetError() << endl;
     }

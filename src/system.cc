@@ -144,8 +144,10 @@ void System::SaveState() {
   router_->SaveState(save_state.memory);
 
   state_->SaveState(save_state);
-
-  LoadPreviouslySavedState();
+  
+  std::cout << "Taking state screenshot..." << std::endl;
+  screen_->SaveScreenshotToPath(state_->GetScreenshotPath());
+  
   std::cout << "Saved state" << std::endl;
 }
 

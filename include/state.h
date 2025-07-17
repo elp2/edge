@@ -85,6 +85,7 @@ class State {
   void DeleteState(int slot);
   std::vector<int> GetSaveSlots() const;
   std::string GetStateDir() const;
+  std::string GetScreenshotPath() const;
   void AdvanceSlot();
   int GetLatestSlot() const;
 
