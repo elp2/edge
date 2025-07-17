@@ -4,6 +4,8 @@ struct EmulatorView: View {
     let romFilename: String
     private let bridge: EmulatorBridge
     @State private var loadError: Error?
+    @State private var showToast = false
+    @State private var toastMessage = ""
     private let abButtonSize: CGFloat = 75
     private let impactGenerator = UIImpactFeedbackGenerator(style: .light)
     @Environment(\.verticalSizeClass) var verticalSizeClass
@@ -44,7 +46,7 @@ struct EmulatorView: View {
         HStack {
             DirectionalPadView()
             GeometryReader { geometry in
-                EmulatorMetalView()
+                EmulatorMetalView(delegate: self)
                     .frame(width: geometry.size.height * (160.0/144.0))
                     .frame(height: geometry.size.height)
             }
@@ -54,6 +56,28 @@ struct EmulatorView: View {
                     .padding(.vertical, 50)
                 selectStartButtons
             }
+            .overlay(
+                // Toast positioned absolutely above the A/B buttons
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Text(toastMessage)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.7))
+                            .cornerRadius(20)
+                            .transition(.opacity)
+                            .opacity(showToast ? 1 : 0)
+                            .animation(.easeInOut(duration: 0.3), value: showToast)
+                        Spacer()
+                    }
+                    .padding(.bottom, 160) // Position higher, overlapping A button
+                    Spacer()
+                }
+                .allowsHitTesting(false) // Prevent interaction with toast
+            )
         }
     }
     
@@ -61,9 +85,28 @@ struct EmulatorView: View {
     private var portraitView: some View {
         VStack(spacing: 0) {
             GeometryReader { geometry in
-                EmulatorMetalView()
-                    .frame(width: geometry.size.width)
-                    .frame(height: geometry.size.width * (144.0/160.0))
+                VStack(spacing: 0) {
+                    EmulatorMetalView(delegate: self)
+                        .frame(width: geometry.size.width)
+                        .frame(height: geometry.size.width * (144.0/160.0))
+                    
+                    // Toast positioned below the MetalView
+                    HStack {
+                        Spacer()
+                        Text(toastMessage)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.7))
+                            .cornerRadius(20)
+                            .transition(.opacity)
+                            .opacity(showToast ? 1 : 0)
+                            .animation(.easeInOut(duration: 0.3), value: showToast)
+                        Spacer()
+                    }
+                    .frame(height: showToast ? 50 : 0) // Reserve space when toast is shown
+                    .clipped() // Hide overflow
+                }
             }
             VStack(spacing: 50) {
                 HStack(spacing: 40) {
@@ -151,9 +194,39 @@ struct EmulatorView: View {
                 )
         }
     }
+    
+    private func showToast(_ message: String) {
+        toastMessage = message
+        showToast = true
+        
+        // Hide toast after 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            showToast = false
+        }
+    }
 }
+
+// MARK: - EmulatorMetalViewDelegate
+extension EmulatorView: EmulatorMetalViewDelegate {
+    func didSaveState() {
+        bridge.saveState()
+        showToast("State Saved")
+    }
     
+    func didLoadState() {
+        bridge.loadPreviouslySavedState()
+        showToast("State Loaded")
+    }
     
+    func didRequestRewind() {
+        print("TODO: Handle rewind")
+    }
+    
+    func didRequestLoadStateScreen() {
+        print("TODO: Handle load state screen")
+    }
+}
+
 // Preview provider
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

@@ -2,7 +2,16 @@ import SwiftUI
 import MetalKit
 import UIKit
 
+protocol EmulatorMetalViewDelegate {
+    func didSaveState()
+    func didLoadState()
+    func didRequestRewind()
+    func didRequestLoadStateScreen()
+}
+
 struct EmulatorMetalView: UIViewRepresentable {
+    var delegate: EmulatorMetalViewDelegate?
+    
     func makeUIView(context: Context) -> MTKView {
         let mtkView = MTKView()
         mtkView.device = MTLCreateSystemDefaultDevice()
@@ -31,10 +40,12 @@ struct EmulatorMetalView: UIViewRepresentable {
         return mtkView
     }
 
-    func updateUIView(_ uiView: MTKView, context: Context) {}
+    func updateUIView(_ uiView: MTKView, context: Context) {
+        context.coordinator.delegate = delegate
+    }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(delegate: delegate)
     }
 
     class Coordinator: NSObject, MTKViewDelegate {
@@ -44,6 +55,12 @@ struct EmulatorMetalView: UIViewRepresentable {
         var pipelineState: MTLRenderPipelineState!
         var vertexBuffer: MTLBuffer!
         var frameCount: Int = 0
+        var delegate: EmulatorMetalViewDelegate?
+        
+        init(delegate: EmulatorMetalViewDelegate?) {
+            self.delegate = delegate
+            super.init()
+        }
 
         func setupMetal(mtkView: MTKView) {
             device = mtkView.device
@@ -128,19 +145,19 @@ struct EmulatorMetalView: UIViewRepresentable {
                 // Vertical swipe
                 if translation.y > 0 {
                     // Down swipe
-                    EmulatorBridge.sharedInstance().saveState()
+                    delegate?.didSaveState()
                 } else {
                     // Up swipe
-                    EmulatorBridge.sharedInstance().loadPreviouslySavedState()
+                    delegate?.didLoadState()
                 }
             } else {
                 // Horizontal swipe
                 if translation.x > 0 {
                     // Right swipe
-                    print("TODO: Handle swipe right (load state screen)")
+                    delegate?.didRequestLoadStateScreen()
                 } else {
                     // Left swipe
-                    print("TODO: Handle swipe left (rewind)")
+                    delegate?.didRequestRewind()
                 }
             }
         }
