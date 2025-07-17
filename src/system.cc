@@ -31,7 +31,7 @@ System::System(string rom_filename, string state_root_dir) {
     std::error_code ec;
     string game_state_dir = state_root_dir + "/" + rom_name;
     state_ = new State(game_state_dir, -1);
-    cartridge_ram_dir = state_->GetStateDir();
+    cartridge_ram_dir = game_state_dir;
   }
 
   mmu_ = GetMMU(skip_boot_rom);
@@ -136,6 +136,9 @@ void System::SaveState() {
   std::cout << "Saving state..." << std::endl;
   state_->AdvanceSlot();
 
+  // Save RAM snapshot to the current state slot
+  cartridge_->SaveRAMSnapshot(state_->GetStateDir());
+
   struct SaveState save_state = {};
   cpu_->GetState(save_state.cpu);
   std::cout << "CPU state saved at PC: " << std::hex << int(save_state.cpu.pc) << std::endl;
@@ -163,6 +166,7 @@ void System::LoadPreviouslySavedState() {
   router_->LoadState(save_state.memory);
   mmu_->SetState(save_state.mmu);
   cartridge_->SetState(save_state.cartridge);
+  cartridge_->LoadRAMSnapshot(state_->GetStateDir());
 
   std::cout << "Loaded state" << std::endl;
 }

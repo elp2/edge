@@ -18,6 +18,7 @@ const int RTC_MINUTES_REGISTER = 0x09;
 const int RTC_HOURS_REGISTER = 0x0A;
 const int RTC_DAYS_LOW8_REGISTER = 0x0B;
 const int RTC_DAYS_HIGH_CARRY_HALT_REGISTER = 0x0C;
+const std::string CARTRIDGE_RAM_FILENAME = "cartridge_ram.bin";
 
 uint8_t *UnsignedCartridgeBytes(string filename) {
   ifstream file(filename, ios::in | ios::binary);
@@ -391,7 +392,7 @@ bool Cartridge::IsMBC3() {
 }
 
 std::string Cartridge::GetRAMPath() const {
-  return state_dir_ + "/cartridge_ram.bin";
+  return state_dir_ + "/" + CARTRIDGE_RAM_FILENAME;
 }
 
 void Cartridge::InitializeRAMFile(const std::string& state_dir) {
@@ -489,4 +490,41 @@ void Cartridge::GetState(struct CartridgeSaveState& state) {
   state.rtc_session_start_time = rtc_session_start_time_;
   state.rtc_current_time_override = rtc_current_time_override_;
   state.rtc_has_override = rtc_has_override_;
+}
+
+void Cartridge::SaveRAMSnapshot(const std::string& target_dir) {
+  if (!HasBattery() || RAMSize() == 0) {
+    return;
+  }
+
+  SyncRAM();
+
+  std::filesystem::create_directories(target_dir);
+
+  std::string source_path = GetRAMPath();
+  std::string target_path = target_dir + "/" + CARTRIDGE_RAM_FILENAME;
+
+  std::filesystem::copy_file(source_path, target_path, std::filesystem::copy_options::overwrite_existing);
+  std::cout << "Saved RAM snapshot to: " << target_path << std::endl;
+}
+
+void Cartridge::LoadRAMSnapshot(const std::string& source_dir) {
+  if (!HasBattery() || RAMSize() == 0) {
+    return;
+  }
+
+  std::string source_path = source_dir + "/" + CARTRIDGE_RAM_FILENAME;
+  std::string target_path = GetRAMPath();
+
+  if (std::filesystem::exists(source_path)) {
+    std::filesystem::copy_file(source_path, target_path, std::filesystem::copy_options::overwrite_existing);
+    std::cout << "Loaded RAM snapshot from: " << source_path << std::endl;
+    
+    // Force the memory mapping to reload from the updated file.
+    if (ram_ != nullptr && ram_ != MAP_FAILED) {
+      msync(ram_, RAMSize(), MS_INVALIDATE);
+    }
+  } else {
+    std::cout << "No RAM snapshot found at: " << source_path << std::endl;
+  }
 } 
