@@ -1,4 +1,5 @@
 #import "SaveStateWrapper.h"
+#import <UIKit/UIKit.h>
 #include "state.h"
 #include <memory>
 
@@ -34,6 +35,12 @@
 - (NSString *)getScreenshotPath {
     std::string screenshotPath = cppState_->GetScreenshotPath();
     return [NSString stringWithUTF8String:screenshotPath.c_str()];
+}
+
+- (UIImage *)getScreenshotImage {
+    NSString *screenshotPath = [self getScreenshotPath];
+    UIImage *image = [UIImage imageWithContentsOfFile:screenshotPath];
+    return image;
 }
 
 @end 

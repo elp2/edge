@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -18,6 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Get the screenshot path
 - (NSString *)getScreenshotPath;
+
+// Get the screenshot as a UIImage
+- (UIImage * _Nullable)getScreenshotImage;
 
 @end
 

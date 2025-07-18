@@ -92,10 +92,36 @@ struct GameScreen: View {
     
     private func saveStateRow(_ state: SaveStateWrapper) -> some View {
         NavigationLink(destination: EmulatorView(romFilename: romFilename, loadSlot: Int(state.getSlot()))) {
-            HStack {
-                Text("State \(state.getSlot())")
-                    .font(.headline)
+            HStack(spacing: 12) {
+                // Screenshot
+                if let screenshot = state.getScreenshotImage() {
+                    Image(uiImage: screenshot)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 60, height: 40)
+                        .cornerRadius(4)
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 60, height: 40)
+                        .cornerRadius(4)
+                        .overlay(
+                            Image(systemName: "photo")
+                                .foregroundColor(.gray)
+                        )
+                }
+                
+                // State info
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("State \(state.getSlot())")
+                        .font(.headline)
+                    Text("Tap to load")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
                 Spacer()
+                
                 Image(systemName: "chevron.right")
                     .foregroundColor(.secondary)
             }
