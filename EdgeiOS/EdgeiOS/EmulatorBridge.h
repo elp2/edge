@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+#import "SaveStateWrapper.h"
 
 #include "constants.h"
 
@@ -27,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)saveState;
 - (void)loadPreviouslySavedState;
 - (void)rewindState;
-- (NSArray<NSNumber *> *)getSaveStates;
+- (NSArray<SaveStateWrapper *> *)getSaveStates;
 - (void)loadState:(int)slot;
 - (void)startEmulator;
 - (void)pauseEmulator;

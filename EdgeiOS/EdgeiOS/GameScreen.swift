@@ -2,74 +2,13 @@ import SwiftUI
 
 struct GameScreen: View {
     let romFilename: String
-    @State private var saveStates: [Int] = []
+    @State private var saveStates: [SaveStateWrapper] = []
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Title
-            Text(romFilename)
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding(.horizontal)
-                .padding(.top)
-            
-            // Start Game Button
-            NavigationLink(destination: EmulatorView(romFilename: romFilename)) {
-                HStack {
-                    Image(systemName: "play.fill")
-                    Text("Start Game")
-                }
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
-            }
-            .padding(.horizontal)
-            .buttonStyle(PlainButtonStyle())
-            
-            // Save States Section
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Save States")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal)
-                
-                // Save states list
-                if saveStates.isEmpty {
-                    VStack {
-                        Text("No save states found")
-                            .foregroundColor(.secondary)
-                            .padding()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(8)
-                    .padding(.horizontal)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 8) {
-                            ForEach(saveStates, id: \.self) { slot in
-                                NavigationLink(destination: EmulatorView(romFilename: romFilename, loadSlot: slot)) {
-                                    HStack {
-                                        Text("State \(slot)")
-                                            .font(.headline)
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .padding()
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(8)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-            }
+            titleView
+            startGameButton
+            saveStatesSection
             
             Spacer()
         }
@@ -82,14 +21,95 @@ struct GameScreen: View {
         }
     }
     
+    private var titleView: some View {
+        Text(romFilename)
+            .font(.largeTitle)
+            .fontWeight(.bold)
+            .padding(.horizontal)
+            .padding(.top)
+    }
+    
+    private var startGameButton: some View {
+        NavigationLink(destination: EmulatorView(romFilename: romFilename)) {
+            HStack {
+                Image(systemName: "play.fill")
+                Text("Start Game")
+            }
+            .font(.headline)
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .cornerRadius(10)
+        }
+        .padding(.horizontal)
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private var saveStatesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Save States")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .padding(.horizontal)
+            
+            saveStatesList
+        }
+    }
+    
+    private var saveStatesList: some View {
+        Group {
+            if saveStates.isEmpty {
+                emptyStateView
+            } else {
+                saveStatesListView
+            }
+        }
+    }
+    
+    private var emptyStateView: some View {
+        VStack {
+            Text("No save states found")
+                .foregroundColor(.secondary)
+                .padding()
+        }
+        .frame(maxWidth: .infinity)
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(8)
+        .padding(.horizontal)
+    }
+    
+    private var saveStatesListView: some View {
+        ScrollView {
+            LazyVStack(spacing: 8) {
+                ForEach(saveStates, id: \.slot) { state in
+                    saveStateRow(state)
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+    
+    private func saveStateRow(_ state: SaveStateWrapper) -> some View {
+        NavigationLink(destination: EmulatorView(romFilename: romFilename, loadSlot: Int(state.getSlot()))) {
+            HStack {
+                Text("State \(state.getSlot())")
+                    .font(.headline)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
     private func loadSaveStates() {
         let bridge = EmulatorBridge.sharedInstance()
         let states = bridge.getSaveStates()
-        print("GameScreen: Found \(states.count) save states for \(romFilename)")
-        for state in states {
-            print("GameScreen: Save state slot \(state.intValue)")
-        }
-        saveStates = states.map { $0.intValue }
+        saveStates = states
     }
 }
 

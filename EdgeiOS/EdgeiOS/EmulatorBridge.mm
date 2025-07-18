@@ -174,18 +174,17 @@
     system_->RewindState();
 }
 
-- (NSArray<NSNumber *> *)getSaveStates {    
-    std::vector<std::unique_ptr<State>> states = system_->GetSaveStates();
-    NSLog(@"C++ found %zu save states", states.size());
+- (NSArray<SaveStateWrapper *> *)getSaveStates {    
+    std::vector<std::unique_ptr<::State>> cppStates = system_->GetSaveStates();
+
     
-    NSMutableArray<NSNumber *> *result = [NSMutableArray array];
-    for (const auto& state : states) {
-        int slot = state->GetSlot();
-        NSLog(@"Found save state slot: %d", slot);
-        [result addObject:@(slot)];
+    NSMutableArray<SaveStateWrapper *> *result = [NSMutableArray array];
+    for (const auto& cppState : cppStates) {
+        SaveStateWrapper *state = [[SaveStateWrapper alloc] initWithCppState:cppState.get()];
+        [result addObject:state];
     }
     
-    return [result sortedArrayUsingSelector:@selector(compare:)];
+    return result;
 }
 
 - (void)loadState:(int)slot {
