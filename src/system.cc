@@ -25,29 +25,14 @@
 #include "timer_controller.h"
 #include "utils.h"
 
-System::System(string rom_filename, string state_root_dir) {
+System::System(string rom_filename, string game_state_dir) {
+  state_controller_ = new StateController(game_state_dir);
+  std::cout << "Saved state count: " << state_controller_->GetSaveStates().size() << std::endl;
+
   bool skip_boot_rom = true;
-  string cartridge_ram_dir = "";
-
-  if (state_root_dir != "") {
-    // Extract filename from path
-    size_t last_slash = rom_filename.find_last_of("/\\");
-    string rom_name = (last_slash != string::npos) ? rom_filename.substr(last_slash + 1) : rom_filename;
-    string game_state_dir = state_root_dir + "/" + rom_name;
-    std::cout << "System constructor: rom_filename = " << rom_filename << std::endl;
-    std::cout << "System constructor: rom_name = " << rom_name << std::endl;
-    std::cout << "System constructor: state_root_dir = " << state_root_dir << std::endl;
-    std::cout << "System constructor: game_state_dir = " << game_state_dir << std::endl;
-    
-    state_controller_ = new StateController(game_state_dir);
-    std::cout << "Saved state count: " << state_controller_->GetSaveStates().size() << std::endl;
-
-    cartridge_ram_dir = game_state_dir;
-  }
-
   mmu_ = GetMMU(skip_boot_rom);
 
-  cartridge_ = new Cartridge(rom_filename, cartridge_ram_dir);
+  cartridge_ = new Cartridge(rom_filename, game_state_dir);
   cartridge_->PrintDebugInfo();
   mmu_->SetCartridge(cartridge_);
 

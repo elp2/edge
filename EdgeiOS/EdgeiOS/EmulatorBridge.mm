@@ -64,10 +64,23 @@
 - (void)loadROM:(NSString *)romName {
     NSAssert(_sdlInitialized, @"SDL Must be initialized.");
     std::string romPath([[[[self class] romsDirectory] stringByAppendingPathComponent:romName] UTF8String]);
-    std::string statesPath([[[[self class] statesDirectory] stringByAppendingPathComponent:romName] UTF8String]);
     NSLog(@"loadROM: ROM path = %s", romPath.c_str());
-    NSLog(@"loadROM: States path = %s", statesPath.c_str());
-    system_ = std::make_unique<System>(romPath, statesPath);
+        // Create the game-specific state directory if it doesn't exist
+    NSString *gameStatePath = [[[self class] statesDirectory] stringByAppendingPathComponent:romName];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error;
+    
+    if (![fileManager fileExistsAtPath:gameStatePath]) {
+        NSLog(@"Creating game state directory: %@", gameStatePath);
+        if (![fileManager createDirectoryAtPath:gameStatePath withIntermediateDirectories:YES attributes:nil error:&error]) {
+            NSLog(@"Error creating game state directory: %@ - %@", gameStatePath, error);
+        }
+    } else {
+        NSLog(@"Game state directory exists: %@", gameStatePath);
+    }
+    
+    std::string gameStatePathCpp([gameStatePath UTF8String]);
+    system_ = std::make_unique<System>(romPath, gameStatePathCpp);
 }
 
 #pragma mark - Emulator Control
