@@ -4,6 +4,8 @@
 #include <chrono>
 #include <iostream>
 #include <filesystem>
+#include <fstream>
+#include <string>
 #include <thread>
 
 #include "address_router.h"
@@ -19,6 +21,7 @@
 #include "serial_controller.h"
 #include "sound_controller.h"
 #include "state.h"
+#include "state_controller.h"
 #include "timer_controller.h"
 #include "utils.h"
 
@@ -27,10 +30,18 @@ System::System(string rom_filename, string state_root_dir) {
   string cartridge_ram_dir = "";
 
   if (state_root_dir != "") {
-    string rom_name = std::filesystem::path(rom_filename).filename().string();
-    std::error_code ec;
+    // Extract filename from path
+    size_t last_slash = rom_filename.find_last_of("/\\");
+    string rom_name = (last_slash != string::npos) ? rom_filename.substr(last_slash + 1) : rom_filename;
     string game_state_dir = state_root_dir + "/" + rom_name;
-    state_ = new State(game_state_dir, -1);
+    std::cout << "System constructor: rom_filename = " << rom_filename << std::endl;
+    std::cout << "System constructor: rom_name = " << rom_name << std::endl;
+    std::cout << "System constructor: state_root_dir = " << state_root_dir << std::endl;
+    std::cout << "System constructor: game_state_dir = " << game_state_dir << std::endl;
+    
+    state_controller_ = new StateController(game_state_dir);
+    std::cout << "Saved state count: " << state_controller_->GetSaveStates().size() << std::endl;
+
     cartridge_ram_dir = game_state_dir;
   }
 
@@ -132,12 +143,14 @@ void System::AdvanceOneFrame() {
 }
 
 void System::SaveState() {
-  assert(state_ != nullptr);
+  assert(state_controller_ != nullptr);
   std::cout << "Saving state..." << std::endl;
-  state_->AdvanceSlot();
-
-  // Save RAM snapshot to the current state slot
-  cartridge_->SaveRAMSnapshot(state_->GetStateDir());
+  
+  // Create a new state in the next rotating slot
+  auto new_state = state_controller_->SaveRotatingSlot();
+  
+  // Save RAM snapshot to the new state slot
+  cartridge_->SaveRAMSnapshot(new_state->GetStateDir());
 
   struct SaveState save_state = {};
   cpu_->GetState(save_state.cpu);
@@ -146,35 +159,47 @@ void System::SaveState() {
   cartridge_->GetState(save_state.cartridge);
   router_->SaveState(save_state.memory);
 
-  state_->SaveState(save_state);
+  new_state->SaveState(save_state);
   
   std::cout << "Taking state screenshot..." << std::endl;
-  screen_->SaveScreenshotToPath(state_->GetScreenshotPath());
+  screen_->SaveScreenshotToPath(new_state->GetScreenshotPath());
   
-  std::cout << "Saved state" << std::endl;
+  std::cout << "Saved state to slot " << new_state->GetSlot() << std::endl;
 }
 
 void System::LoadPreviouslySavedState() {
-  assert(state_ != nullptr);
-
+  assert(state_controller_ != nullptr);
   std::cout << "Loading previously saved state..." << std::endl;
 
-  struct SaveState save_state = {};
-  state_->LoadState(save_state);
-
-  cpu_->SetState(save_state.cpu);
-  router_->LoadState(save_state.memory);
-  mmu_->SetState(save_state.mmu);
-  cartridge_->SetState(save_state.cartridge);
-  cartridge_->LoadRAMSnapshot(state_->GetStateDir());
-
-  std::cout << "Loaded state" << std::endl;
+  LoadStateSlot(state_controller_->GetRotatingSlot());
 }
 
 void System::RewindState() {
-  assert(state_ != nullptr);
+  assert(state_controller_ != nullptr);
 
   std::cout << "Rewinding state..." << std::endl;
+}
+
+void System::LoadStateSlot(int slot) {
+  assert(state_controller_ != nullptr);
+  
+  // Load the state for the specific slot
+  auto state = state_controller_->LoadState(slot);
+  
+  // Load RAM snapshot from the state slot
+  cartridge_->LoadRAMSnapshot(state->GetStateDir());
+  
+  struct SaveState save_state = {};
+  if (state->LoadState(save_state)) {
+    cpu_->SetState(save_state.cpu);
+    router_->LoadState(save_state.memory);
+    mmu_->SetState(save_state.mmu);
+    cartridge_->SetState(save_state.cartridge);
+    
+    std::cout << "Loaded state from slot " << slot << std::endl;
+  } else {
+    std::cout << "Failed to load state from slot " << slot << std::endl;
+  }
 }
 
 void System::TakeScreenshot() {
@@ -182,6 +207,10 @@ void System::TakeScreenshot() {
 }
 
 const uint32_t* System::pixels() { return screen_->pixels(); }
+
+std::vector<std::unique_ptr<State>> System::GetSaveStates() {
+  return state_controller_->GetSaveStates();
+}
 
 void System::Main() {
   if (SUPER_DEBUG) {

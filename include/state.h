@@ -87,7 +87,9 @@ class State {
   std::string GetStateDir() const;
   std::string GetScreenshotPath() const;
   void AdvanceSlot();
+  void SetSlot(int slot);
   int GetLatestSlot() const;
+  int GetSlot() const { return slot_; }
 
  private:
   std::string game_state_dir_;

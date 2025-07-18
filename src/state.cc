@@ -16,10 +16,19 @@ State::State(const std::string& game_state_dir, int slot) : game_state_dir_(game
       CreateNewSlot();
     }
   } else {
-    assert(HasState(slot));
-    slot_ = slot;
+    // If the slot doesn't exist, create it
+    if (!HasState(slot)) {
+      slot_ = slot;
+      std::filesystem::create_directories(GetStateDir(slot_));
+    } else {
+      slot_ = slot;
+    }
   }
   assert(slot_ != -1);
+}
+
+State::~State() {
+  // Nothing to clean up - all members are automatic
 }
 
 void State::CreateNewSlot() {
@@ -82,7 +91,6 @@ std::string State::GetStateFile(int slot) const {
 }
 
 void State::SaveState(const struct SaveState& state) {
-  assert(HasState(slot_));
   std::cout << "Saving state to " << GetStateFile(slot_) << std::endl;
   WriteState(GetStateFile(slot_), state);
 }
@@ -125,6 +133,12 @@ void State::AdvanceSlot() {
   if (!HasState(slot_)) {
     CreateNewSlot();
   }
+}
+
+void State::SetSlot(int slot) {
+  assert(slot >= 0 && slot < MAX_SLOTS);
+  assert(HasState(slot));
+  slot_ = slot;
 }
 
 void State::WriteState(const std::string& path, const struct SaveState& state) {

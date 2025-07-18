@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "input_controller.h"
 
@@ -16,6 +18,7 @@ class Screen;
 class SerialController;
 class SoundController;
 class State;
+class StateController;
 class TimerController;
 
 using namespace std;
@@ -39,6 +42,9 @@ class System : public ScreenshotTaker, public StateNavigator {
   void SaveState();
   void LoadPreviouslySavedState();
   void RewindState();
+  void LoadStateSlot(int slot);
+
+  std::vector<std::unique_ptr<State>> GetSaveStates();
 
  private:
   Cartridge *cartridge_;
@@ -52,7 +58,7 @@ class System : public ScreenshotTaker, public StateNavigator {
   SoundController *sound_controller_;
   TimerController *timer_controller_;
   Screen *screen_;
-  State *state_;
+  StateController *state_controller_;
 
   int frame_count_;
   int frame_cycles_;
