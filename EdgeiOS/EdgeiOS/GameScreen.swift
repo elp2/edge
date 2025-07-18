@@ -2,6 +2,7 @@ import SwiftUI
 
 struct GameScreen: View {
     let romFilename: String
+    @State private var saveStates: [Int] = []
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -35,22 +36,60 @@ struct GameScreen: View {
                     .fontWeight(.semibold)
                     .padding(.horizontal)
                 
-                // Placeholder for save states list
-                VStack {
-                    Text("No save states found")
-                        .foregroundColor(.secondary)
-                        .padding()
+                // Save states list
+                if saveStates.isEmpty {
+                    VStack {
+                        Text("No save states found")
+                            .foregroundColor(.secondary)
+                            .padding()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 8) {
+                            ForEach(saveStates, id: \.self) { slot in
+                                NavigationLink(destination: EmulatorView(romFilename: romFilename, loadSlot: slot)) {
+                                    HStack {
+                                        Text("State \(slot)")
+                                            .font(.headline)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding()
+                                    .background(Color.gray.opacity(0.1))
+                                    .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
                 }
-                .frame(maxWidth: .infinity)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(8)
-                .padding(.horizontal)
             }
             
             Spacer()
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            let bridge = EmulatorBridge.sharedInstance()
+            bridge.loadROM(romFilename)
+            loadSaveStates()
+        }
+    }
+    
+    private func loadSaveStates() {
+        let bridge = EmulatorBridge.sharedInstance()
+        let states = bridge.getSaveStates()
+        print("GameScreen: Found \(states.count) save states for \(romFilename)")
+        for state in states {
+            print("GameScreen: Save state slot \(state.intValue)")
+        }
+        saveStates = states.map { $0.intValue }
     }
 }
 

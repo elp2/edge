@@ -2,6 +2,7 @@ import SwiftUI
 
 struct EmulatorView: View {
     let romFilename: String
+    let loadSlot: Int?
     private let bridge: EmulatorBridge
     @State private var loadError: Error?
     @State private var showToast = false
@@ -10,8 +11,9 @@ struct EmulatorView: View {
     private let impactGenerator = UIImpactFeedbackGenerator(style: .light)
     @Environment(\.verticalSizeClass) var verticalSizeClass
     
-    init(romFilename: String) {
+    init(romFilename: String, loadSlot: Int? = nil) {
         self.romFilename = romFilename
+        self.loadSlot = loadSlot
         self.bridge = EmulatorBridge.sharedInstance()
     }
     
@@ -24,7 +26,10 @@ struct EmulatorView: View {
                         }
         }
             .onAppear {
-                bridge.loadROM(romFilename)
+                if let slot = loadSlot {
+                    bridge.loadState(Int32(slot))
+                }
+                bridge.startEmulator()
             }
             .onDisappear {
                 bridge.endEmulator()

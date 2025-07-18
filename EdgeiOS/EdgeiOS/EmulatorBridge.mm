@@ -5,6 +5,8 @@
 #include <SDL3/SDL_main.h>
 
 #include "system.h"
+#include "state.h"
+#include "state_controller.h"
 
 @interface EmulatorBridge () {
     std::unique_ptr<System> system_;
@@ -63,11 +65,16 @@
     NSAssert(_sdlInitialized, @"SDL Must be initialized.");
     std::string romPath([[[[self class] romsDirectory] stringByAppendingPathComponent:romName] UTF8String]);
     std::string statesPath([[[[self class] statesDirectory] stringByAppendingPathComponent:romName] UTF8String]);
+    NSLog(@"loadROM: ROM path = %s", romPath.c_str());
+    NSLog(@"loadROM: States path = %s", statesPath.c_str());
     system_ = std::make_unique<System>(romPath, statesPath);
-    _isRunning = true;
 }
 
 #pragma mark - Emulator Control
+
+- (void)startEmulator {
+    _isRunning = true;
+}
 
 - (void)advanceOneFrame {
     if (!_isRunning) {
@@ -165,6 +172,24 @@
 
 - (void)rewindState {
     system_->RewindState();
+}
+
+- (NSArray<NSNumber *> *)getSaveStates {    
+    std::vector<std::unique_ptr<State>> states = system_->GetSaveStates();
+    NSLog(@"C++ found %zu save states", states.size());
+    
+    NSMutableArray<NSNumber *> *result = [NSMutableArray array];
+    for (const auto& state : states) {
+        int slot = state->GetSlot();
+        NSLog(@"Found save state slot: %d", slot);
+        [result addObject:@(slot)];
+    }
+    
+    return [result sortedArrayUsingSelector:@selector(compare:)];
+}
+
+- (void)loadState:(int)slot {
+    system_->LoadStateSlot(slot);
 }
 
 @end 
