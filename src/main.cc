@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
   std::string rom_file = argv[1];
   std::cout << "Loading ROM " << rom_file << std::endl;
 
-  std::string state_dir = argv[2];  
+  std::string state_dir = argv[2];
   // Check if state directory exists, create if necessary.
   struct stat st = {0};
   if (stat(state_dir.c_str(), &st) == -1) {
@@ -38,7 +38,16 @@ int main(int argc, char* argv[]) {
   std::string rom_name = (last_slash != std::string::npos) ? rom_file.substr(last_slash + 1) : rom_file;
   std::string game_state_dir = state_dir + "/" + rom_name;
   std::cout << "Game state directory: " << game_state_dir << std::endl;
-  
+  if (stat(game_state_dir.c_str(), &st) == -1) {
+    std::cout << "Creating game state directory: " << game_state_dir << std::endl;
+    if (mkdir(game_state_dir.c_str(), 0700) == -1) {
+      std::cerr << "Error creating directory: " << game_state_dir << " - " << strerror(errno) << std::endl;
+      return 1;
+    }
+  } else {
+    std::cout << "Game State directory exists: " << game_state_dir << std::endl;
+  }
+
   System *system = new System(rom_file, game_state_dir);
   if (state_number >= 0) {
     std::cout << "Loading state " << state_number << std::endl;
