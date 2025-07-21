@@ -50,7 +50,7 @@ time_t DHMS(int days, int hours, int minutes, int seconds) {
 class CartridgeTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    cartridge_ = new Cartridge("mbc3rtc.gb", "");
+    cartridge_ = new Cartridge("mbc3rtc.gb");
   }
 
   void TearDown() override {

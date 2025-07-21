@@ -42,7 +42,7 @@ uint8_t *UnsignedCartridgeBytes(string filename) {
   return rom;
 }
 
-Cartridge::Cartridge(string filename, const string& state_dir)
+Cartridge::Cartridge(string filename)
   : rtc_previous_session_duration_(0),
     rtc_session_start_time_(time(nullptr)),
     rtc_current_time_override_(0),
@@ -51,10 +51,6 @@ Cartridge::Cartridge(string filename, const string& state_dir)
   ram_ = new uint8_t[RAMSize()];
   // TODO: MBC1 uses a special addressing for large ROMS.
   assert(ROMSize() <= 524288 || GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT);
-
-  if (HasBattery() && state_dir.size() != 0) {
-    InitializeRAMFile(state_dir);
-  }
 }
 
 void Cartridge::PrintDebugInfo() {
@@ -70,14 +66,7 @@ void Cartridge::PrintDebugInfo() {
 }
 
 Cartridge::~Cartridge() {
-  if (ram_ != nullptr && ram_ != MAP_FAILED) {
-    SyncRAM();
-    munmap(ram_, RAMSize());
-    free(ram_);
-  }
-  if (ram_fd_ != -1) {
-    close(ram_fd_);
-  }
+  free(ram_);
   free(rom_);
 }
 
@@ -391,49 +380,6 @@ bool Cartridge::IsMBC3() {
          GetCartridgeType() == CartridgeType_ROM_MBC3_RAM_BATT;
 }
 
-std::string Cartridge::GetRAMPath() const {
-  return state_dir_ + "/" + CARTRIDGE_RAM_FILENAME;
-}
-
-void Cartridge::InitializeRAMFile(const std::string& state_dir) {
-  if (!HasBattery() || RAMSize() == 0) {
-    return;
-  }
-
-  state_dir_ = state_dir;
-  std::string ram_path = GetRAMPath();
-  std::cout << "Using RAM: " << ram_path << std::endl;
-
-  ram_fd_ = open(ram_path.c_str(), O_RDWR | O_CREAT, 0644);
-  if (ram_fd_ == -1) {
-    throw std::runtime_error("Failed to open RAM file: " + ram_path);
-  }
-
-  if (ftruncate(ram_fd_, RAMSize()) == -1) {
-    close(ram_fd_);
-    throw std::runtime_error("Failed to resize RAM file");
-  }
-
-  // Map the file into memory
-  ram_ = static_cast<uint8_t*>(mmap(
-    nullptr, RAMSize(),
-    PROT_READ | PROT_WRITE,
-    MAP_SHARED,  // Changes are written back to file
-    ram_fd_, 0
-  ));
-
-  if (ram_ == MAP_FAILED) {
-    close(ram_fd_);
-    throw std::runtime_error("Failed to mmap RAM file");
-  }
-}
-
-void Cartridge::SyncRAM() {
-  if (ram_ != nullptr && ram_ != MAP_FAILED) {
-    msync(ram_, RAMSize(), MS_SYNC);
-  }
-}
-
 bool Cartridge::HasBattery() {
   return GetCartridgeType() == CartridgeType_ROM_MBC1_RAM_BATT ||
       GetCartridgeType() == CartridgeType_ROM_MBC2_BATT ||
@@ -483,6 +429,7 @@ void Cartridge::SetState(const struct CartridgeSaveState &state) {
   rtc_session_start_time_ = state.rtc_session_start_time;
   rtc_current_time_override_ = state.rtc_current_time_override;
   rtc_has_override_ = state.rtc_has_override;
+  ram_ = state.ram;
 }
 
 void Cartridge::GetState(struct CartridgeSaveState& state) {
@@ -490,41 +437,26 @@ void Cartridge::GetState(struct CartridgeSaveState& state) {
   state.rtc_session_start_time = rtc_session_start_time_;
   state.rtc_current_time_override = rtc_current_time_override_;
   state.rtc_has_override = rtc_has_override_;
+  state.ram_size = RAMSize();
+  state.ram = ram_;
 }
 
-void Cartridge::SaveRAMSnapshot(const std::string& target_dir) {
-  if (!HasBattery() || RAMSize() == 0) {
+void Cartridge::SaveRAMSnapshot(const std::string& state_dir) {
+  if (RAMSize() == 0) {
+    return;
+  }
+  std::string ram_file = state_dir + "/" + CARTRIDGE_RAM_FILENAME;
+  // TODO AI: Save the RAM to this file.
+
+  std::cout << "Saved RAM snapshot to: " << ram_file << std::endl;
+}
+
+void Cartridge::LoadRAMSnapshot(const std::string& state_dir) {
+  if (RAMSize() == 0) {
     return;
   }
 
-  SyncRAM();
+  std::string ram_file = state_dir + "/" + CARTRIDGE_RAM_FILENAME;
 
-  std::filesystem::create_directories(target_dir);
-
-  std::string source_path = GetRAMPath();
-  std::string target_path = target_dir + "/" + CARTRIDGE_RAM_FILENAME;
-
-  std::filesystem::copy_file(source_path, target_path, std::filesystem::copy_options::overwrite_existing);
-  std::cout << "Saved RAM snapshot to: " << target_path << std::endl;
-}
-
-void Cartridge::LoadRAMSnapshot(const std::string& source_dir) {
-  if (!HasBattery() || RAMSize() == 0) {
-    return;
-  }
-
-  std::string source_path = source_dir + "/" + CARTRIDGE_RAM_FILENAME;
-  std::string target_path = GetRAMPath();
-
-  if (std::filesystem::exists(source_path)) {
-    std::filesystem::copy_file(source_path, target_path, std::filesystem::copy_options::overwrite_existing);
-    std::cout << "Loaded RAM snapshot from: " << source_path << std::endl;
-    
-    // Force the memory mapping to reload from the updated file.
-    if (ram_ != nullptr && ram_ != MAP_FAILED) {
-      msync(ram_, RAMSize(), MS_INVALIDATE);
-    }
-  } else {
-    std::cout << "No RAM snapshot found at: " << source_path << std::endl;
-  }
+  // TODO AI: free ram_ if it exists, reload it from this file. MAke sure it's the expected size.
 } 

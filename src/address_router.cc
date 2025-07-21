@@ -271,14 +271,14 @@ void AddressRouter::PerformDMA(uint8_t dma_base) {
   }
 }
 
-void AddressRouter::SaveState(struct MemorySaveState &state) {
+void AddressRouter::SaveState(struct DeviceMemorySaveState &state) {
   for (int i = 0x8000; i <= 0xFFFF; i++) {
     if (!ShouldSaveLoadAddress(i)) continue;
     state.ram[i - 0x8000] = GetByteAtAddressFromOwner(ownerForAddress(i), i);
   }
 }
 
-void AddressRouter::LoadState(const struct MemorySaveState &state) {
+void AddressRouter::LoadState(const struct DeviceMemorySaveState &state) {
   for (int i = 0x8000; i <= 0xFFFF; i++) {
     if (!ShouldSaveLoadAddress(i)) continue;
     SetByteAtAddressInOwner(ownerForAddress(i), i, state.ram[i - 0x8000]);
@@ -295,7 +295,7 @@ bool AddressRouter::ShouldSaveLoadAddress(uint16_t address) {
 }
 
 void AddressRouter::SkipBootROM() {
-  struct MemorySaveState ss = {};
+  struct DeviceMemorySaveState ss = {};
 
   ss.ram[0xFF00 - 0x8000] = 0xCF;
   ss.ram[0xFF01 - 0x8000] = 0x00;

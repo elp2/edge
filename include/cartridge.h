@@ -46,12 +46,11 @@ uint8_t *UnsignedCartridgeBytes(string filename);
 
 class Cartridge {
  public:
-  Cartridge(string filename, const string& state_dir);
+  Cartridge(string filename);
   ~Cartridge();
 
   bool LoadFile(string filename);
   void PrintDebugInfo();
-  void SyncRAM();
 
   uint8_t GetROMByteAt(int address);
 
@@ -102,11 +101,6 @@ class Cartridge {
   uint8_t rtc_latch_register_;
   bool rtc_latched_;
   time_t rtc_latched_time_;
-
-  string state_dir_;
-  int ram_fd_;
-  void InitializeRAMFile(const std::string& state_dir);
-  string GetRAMPath() const;
 
   uint8_t *ram_;
   uint8_t GetRAM(int address);

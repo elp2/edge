@@ -12,7 +12,7 @@ class SerialController;
 class SoundController;
 class TimerController;
 
-struct MemorySaveState;
+struct DeviceMemorySaveState;
 
 enum AddressOwner {
   AdressOwner_Unknown = 0,
@@ -45,8 +45,8 @@ class AddressRouter {
 
   void EnableDisassemblerMode(bool disassemblerMode);
 
-  void SaveState(struct MemorySaveState &state);
-  void LoadState(const struct MemorySaveState &state);
+  void SaveState(struct DeviceMemorySaveState &state);
+  void LoadState(const struct DeviceMemorySaveState &state);
   void SkipBootROM();
  private:
   MMU* mmu_;

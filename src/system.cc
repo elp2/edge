@@ -32,7 +32,7 @@ System::System(string rom_filename, string game_state_dir) {
   bool skip_boot_rom = true;
   mmu_ = GetMMU(skip_boot_rom);
 
-  cartridge_ = new Cartridge(rom_filename, game_state_dir);
+  cartridge_ = new Cartridge(rom_filename);
   cartridge_->PrintDebugInfo();
   mmu_->SetCartridge(cartridge_);
 

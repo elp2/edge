@@ -47,9 +47,12 @@ struct CartridgeSaveState {
   time_t rtc_session_start_time;
   bool rtc_has_override;
   time_t rtc_current_time_override;
+
+  uint32_t ram_size;
+  uint8_t *ram;
 };
 
-struct MemorySaveState {
+struct DeviceMemorySaveState {
   uint8_t ram[0x8000];
 };
 
@@ -70,7 +73,7 @@ struct SaveState {
 
   CPUSaveState cpu;
   CartridgeSaveState cartridge;
-  MemorySaveState memory;
+  DeviceMemorySaveState memory;
   MMUSaveState mmu;
 };
 

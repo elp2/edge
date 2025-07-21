@@ -117,11 +117,11 @@ MMU *getTestingMMU() {
 
 #if defined WIN32
   mmu->SetBootROM(UnsignedCartridgeBytes("Roms/boot.gb"));
-  Cartridge *cartridge = new Cartridge("../../gb-test-roms/cpu_instrs/cpu_instrs.gb", "");
+  Cartridge *cartridge = new Cartridge("../../gb-test-roms/cpu_instrs/cpu_instrs.gb");
   mmu->SetCartridge(cartridge);
 #else
   mmu->SetBootROM(UnsignedCartridgeBytes("Roms/boot.gb"));
-  Cartridge *cartridge = new Cartridge("../../gb-test-roms/cpu_instrs/cpu_instrs.gb", "");
+  Cartridge *cartridge = new Cartridge("../../gb-test-roms/cpu_instrs/cpu_instrs.gb");
   mmu->SetCartridge(cartridge);
 #endif
 
@@ -132,11 +132,11 @@ MMU *getTestingMMURAM() {
   MMU *mmu = new MMU();
 #if defined WIN32
   mmu->SetBootROM(UnsignedCartridgeBytes("Roms/boot.gb"));
-  Cartridge *cartridgeROM = new Cartridge("Roms/pulse1.gb", "");
+  Cartridge *cartridgeROM = new Cartridge("Roms/pulse1.gb");
   mmu->SetCartridge(cartridgeROM);
 #else
   mmu->SetBootROM(UnsignedCartridgeBytes("Roms/boot.gb"));
-  Cartridge *cartridge = new Cartridge("pulse1.gb", "");
+  Cartridge *cartridge = new Cartridge("pulse1.gb");
   mmu->SetCartridge(cartridge);
 #endif
 

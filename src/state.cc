@@ -151,6 +151,7 @@ void State::WriteState(const std::string& path, const struct SaveState& state) {
   file.write(reinterpret_cast<const char*>(&state.cpu), sizeof(state.cpu));
   file.write(reinterpret_cast<const char*>(&state.memory), sizeof(state.memory));
   file.write(reinterpret_cast<const char*>(&state.cartridge), sizeof(state.cartridge));
+  file.write(reinterpret_cast<const char*>(state.cartridge.ram), state.cartridge.ram_size);
   file.write(reinterpret_cast<const char*>(&state.mmu), sizeof(state.mmu));
 
   std::cout << "END: Saved state to " << path << std::endl;
@@ -171,6 +172,8 @@ bool State::ReadState(const std::string& path, struct SaveState& state) {
   file.read(reinterpret_cast<char*>(&state.cpu), sizeof(state.cpu));
   file.read(reinterpret_cast<char*>(&state.memory), sizeof(state.memory));
   file.read(reinterpret_cast<char*>(&state.cartridge), sizeof(state.cartridge));
+  state.cartridge.ram = (uint8_t *)malloc(state.cartridge.ram_size);
+  file.read(reinterpret_cast<char*>(state.cartridge.ram), state.cartridge.ram_size);
   file.read(reinterpret_cast<char*>(&state.mmu), sizeof(state.mmu));
 
   std::cout << "END: Loaded state from " << path << std::endl;
