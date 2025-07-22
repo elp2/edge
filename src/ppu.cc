@@ -9,6 +9,7 @@
 #include "pixel_fifo.h"
 #include "screen.h"
 #include "sprite.h"
+#include "state.h"
 #include "utils.h"
 
 using namespace std;
@@ -325,7 +326,7 @@ void PPU::SetByteAt(uint16_t address, uint8_t byte) {
     video_ram_[address - 0x8000] = byte;
   } else if (address >= 0xFE00 && address < 0xFEA0) {
     if (!CanAccessOAM()) {
-      cout << "Can not access OAM during " << hex << unsigned(state_) << endl;
+//      cout << "Can not access OAM during " << hex << unsigned(state_) << endl;
     }
     oam_ram_[address - 0xFE00] = byte;
   } else if (address >= 0xFF40 && address < 0xFF4C) {
@@ -600,4 +601,32 @@ bool PPU::WindowTileMapHigh() {
 
 bool PPU::BackgroundWindowTileDataAreaLow() {
   return bit_set(lcdc(), 4);
+}
+
+void PPU::SetState(const struct PPUSaveState& state) {
+  set_lcdc(state.lcdc);
+  set_stat(state.stat);
+  set_scy(state.scy);
+  set_scx(state.scx);
+  set_ly(state.ly);
+  set_lyc(state.lyc);
+  set_bgp(state.bgp);
+  set_obp0(state.obp0);
+  set_obp1(state.obp1);
+  set_wy(state.wy);
+  SetWXPlus7(state.wx);
+}
+
+void PPU::GetState(struct PPUSaveState& state) {
+  state.lcdc = lcdc();
+  state.stat = stat();
+  state.scy = scy();
+  state.scx = scx();
+  state.ly = ly();
+  state.lyc = lyc();
+  state.bgp = bgp();
+  state.obp0 = obp0();
+  state.obp1 = obp1();
+  state.wy = wy();
+  state.wx = GetWXPlus7();
 }

@@ -141,6 +141,7 @@ void System::SaveState() {
   cartridge_->GetState(save_state.cartridge);
   router_->SaveState(save_state.memory);
   interrupt_controller_->GetState(save_state.interrupt_controller);
+  ppu_->GetState(save_state.ppu);
 
   new_state->SaveState(save_state);
   
@@ -176,6 +177,7 @@ void System::LoadStateSlot(int slot) {
     mmu_->SetState(save_state.mmu);
     cartridge_->SetState(save_state.cartridge);
     interrupt_controller_->SetState(save_state.interrupt_controller);
+    ppu_->SetState(save_state.ppu);
     
     std::cout << "Loaded state from slot " << slot << std::endl;
   } else {

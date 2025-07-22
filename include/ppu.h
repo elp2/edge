@@ -49,6 +49,10 @@ class PPU {
 
   bool WindowEnabledAt(int x, int y);
 
+  // State restoration
+  void SetState(const struct PPUSaveState& state);
+  void GetState(struct PPUSaveState& state);
+
  private:
   uint8_t *oam_ram_ = NULL;
   uint8_t *video_ram_ = NULL;

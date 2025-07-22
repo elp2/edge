@@ -154,6 +154,7 @@ void State::WriteState(const std::string& path, const struct SaveState& state) {
   file.write(reinterpret_cast<const char*>(state.cartridge.ram), state.cartridge.ram_size);
   file.write(reinterpret_cast<const char*>(&state.mmu), sizeof(state.mmu));
   file.write(reinterpret_cast<const char*>(&state.interrupt_controller), sizeof(state.interrupt_controller));
+  file.write(reinterpret_cast<const char*>(&state.ppu), sizeof(state.ppu));
   std::cout << "GetState: " << std::hex << unsigned(state.interrupt_controller.interrupts_enabled) << std::endl;
 
   std::cout << "END: Saved state to " << path << std::endl;
@@ -178,6 +179,7 @@ bool State::ReadState(const std::string& path, struct SaveState& state) {
   file.read(reinterpret_cast<char*>(state.cartridge.ram), state.cartridge.ram_size);
   file.read(reinterpret_cast<char*>(&state.mmu), sizeof(state.mmu));
   file.read(reinterpret_cast<char*>(&state.interrupt_controller), sizeof(state.interrupt_controller));
+  file.read(reinterpret_cast<char*>(&state.ppu), sizeof(state.ppu));
   std::cout << "ReadState: " << std::hex << unsigned(state.interrupt_controller.interrupts_enabled) << std::endl;
 
 
