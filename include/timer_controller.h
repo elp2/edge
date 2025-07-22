@@ -18,6 +18,10 @@ class TimerController {
     interrupt_handler_ = handler;
   };
 
+  // State restoration
+  void SetState(const struct TimerSaveState& state);
+  void GetState(struct TimerSaveState& state);
+
   void Debugger();
 
  private:

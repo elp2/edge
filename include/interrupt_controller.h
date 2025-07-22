@@ -62,6 +62,10 @@ class InterruptController : public InterruptHandler {
   void set_interrupts_enabled(bool enabled) { interrupts_enabed_ = enabled; };
   bool interrupts_enabled() { return interrupts_enabed_; };
 
+  // State restoration
+  void SetState(const struct InterruptControllerSaveState& state);
+  void GetState(struct InterruptControllerSaveState& state);
+
  private:
   InterruptExecutor* executor_;
   bool interrupts_enabed_ = false;

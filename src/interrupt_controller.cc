@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "input_controller.h"
+#include "state.h"
 
 const int INTERRUPTS_ENABLE_DISABLE_LOOPS = 2;
 
@@ -102,7 +103,6 @@ void InterruptController::SetByteAt(uint16_t address, uint8_t byte) {
 uint8_t InterruptController::GetByteAt(uint16_t address) {
   switch (address) {
     case IF_ADDRESS:
-      std::cout << "GET IF" << std::endl;
       return interrupt_request();
     case IE_ADDRESS:
       return interrupt_enabled_flags();
@@ -113,3 +113,21 @@ uint8_t InterruptController::GetByteAt(uint16_t address) {
 }
 
 void InterruptController::HaltUntilInterrupt() { is_halted_ = true; }
+
+void InterruptController::SetState(const struct InterruptControllerSaveState& state) {
+  interrupts_enabed_ = state.interrupts_enabled;
+  interrupt_request_ = state.interrupt_request;
+  interrupt_enabled_flags_ = state.interrupt_enabled_flags;
+  disable_interrupts_in_loops_ = state.disable_interrupts_in_loops;
+  enable_interrupts_in_loops_ = state.enable_interrupts_in_loops;
+  is_halted_ = state.is_halted;
+}
+
+void InterruptController::GetState(struct InterruptControllerSaveState& state) {
+  state.interrupts_enabled = interrupts_enabed_;
+  state.interrupt_request = interrupt_request_;
+  state.interrupt_enabled_flags = interrupt_enabled_flags_;
+  state.disable_interrupts_in_loops = disable_interrupts_in_loops_;
+  state.enable_interrupts_in_loops = enable_interrupts_in_loops_;
+  state.is_halted = is_halted_;
+}

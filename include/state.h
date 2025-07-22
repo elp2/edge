@@ -47,6 +47,10 @@ struct CartridgeSaveState {
   time_t rtc_session_start_time;
   bool rtc_has_override;
   time_t rtc_current_time_override;
+  uint8_t rtc_latch_register;
+  bool rtc_latched;
+  time_t rtc_latched_time;
+  bool rtc_halted;
 
   uint32_t ram_size;
   uint8_t *ram;
@@ -64,6 +68,15 @@ struct MMUSaveState {
   uint8_t register_2000_3fff;
 };
 
+struct InterruptControllerSaveState {
+  bool interrupts_enabled;
+  uint8_t interrupt_request;
+  uint8_t interrupt_enabled_flags;
+  int disable_interrupts_in_loops;
+  int enable_interrupts_in_loops;
+  bool is_halted;
+};
+
 struct SaveState {
   static constexpr uint32_t MAGIC = 0x45444745;  // "EDGE"
   static constexpr uint32_t VERSION = 1;
@@ -75,6 +88,9 @@ struct SaveState {
   CartridgeSaveState cartridge;
   DeviceMemorySaveState memory;
   MMUSaveState mmu;
+  InterruptControllerSaveState interrupt_controller;
+  PPUSaveState ppu;
+  TimerSaveState timer;
 };
 
 class State {

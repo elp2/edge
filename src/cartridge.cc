@@ -429,6 +429,10 @@ void Cartridge::SetState(const struct CartridgeSaveState &state) {
   rtc_session_start_time_ = state.rtc_session_start_time;
   rtc_current_time_override_ = state.rtc_current_time_override;
   rtc_has_override_ = state.rtc_has_override;
+  rtc_latch_register_ = state.rtc_latch_register;
+  rtc_latched_ = state.rtc_latched;
+  rtc_latched_time_ = state.rtc_latched_time;
+  rtc_halted_ = state.rtc_halted;
   ram_ = state.ram;
 }
 
@@ -437,26 +441,11 @@ void Cartridge::GetState(struct CartridgeSaveState& state) {
   state.rtc_session_start_time = rtc_session_start_time_;
   state.rtc_current_time_override = rtc_current_time_override_;
   state.rtc_has_override = rtc_has_override_;
+  state.rtc_latch_register = rtc_latch_register_;
+  state.rtc_latched = rtc_latched_;
+  state.rtc_latched_time = rtc_latched_time_;
+  state.rtc_halted = rtc_halted_;
   state.ram_size = RAMSize();
   state.ram = ram_;
 }
 
-void Cartridge::SaveRAMSnapshot(const std::string& state_dir) {
-  if (RAMSize() == 0) {
-    return;
-  }
-  std::string ram_file = state_dir + "/" + CARTRIDGE_RAM_FILENAME;
-  // TODO AI: Save the RAM to this file.
-
-  std::cout << "Saved RAM snapshot to: " << ram_file << std::endl;
-}
-
-void Cartridge::LoadRAMSnapshot(const std::string& state_dir) {
-  if (RAMSize() == 0) {
-    return;
-  }
-
-  std::string ram_file = state_dir + "/" + CARTRIDGE_RAM_FILENAME;
-
-  // TODO AI: free ram_ if it exists, reload it from this file. MAke sure it's the expected size.
-} 

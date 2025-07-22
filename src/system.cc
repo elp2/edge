@@ -133,9 +133,6 @@ void System::SaveState() {
   
   // Create a new state in the next rotating slot
   auto new_state = state_controller_->SaveRotatingSlot();
-  
-  // Save RAM snapshot to the new state slot
-  cartridge_->SaveRAMSnapshot(new_state->GetStateDir());
 
   struct SaveState save_state = {};
   cpu_->GetState(save_state.cpu);
@@ -143,6 +140,7 @@ void System::SaveState() {
   mmu_->GetState(save_state.mmu);
   cartridge_->GetState(save_state.cartridge);
   router_->SaveState(save_state.memory);
+  interrupt_controller_->GetState(save_state.interrupt_controller);
 
   new_state->SaveState(save_state);
   
@@ -171,19 +169,18 @@ void System::LoadStateSlot(int slot) {
   // Load the state for the specific slot
   auto state = state_controller_->LoadState(slot);
   
-  // Load RAM snapshot from the state slot
-  cartridge_->LoadRAMSnapshot(state->GetStateDir());
-  
   struct SaveState save_state = {};
   if (state->LoadState(save_state)) {
     cpu_->SetState(save_state.cpu);
     router_->LoadState(save_state.memory);
     mmu_->SetState(save_state.mmu);
     cartridge_->SetState(save_state.cartridge);
+    interrupt_controller_->SetState(save_state.interrupt_controller);
     
     std::cout << "Loaded state from slot " << slot << std::endl;
   } else {
     std::cout << "Failed to load state from slot " << slot << std::endl;
+    assert(false);
   }
 }
 

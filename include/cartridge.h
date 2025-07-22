@@ -87,8 +87,6 @@ class Cartridge {
 
   void SetState(const struct CartridgeSaveState &state);
   void GetState(struct CartridgeSaveState& state);
-  void SaveRAMSnapshot(const std::string& target_dir);
-  void LoadRAMSnapshot(const std::string& source_dir);
 
  private:
   uint8_t *rom_;
