@@ -223,8 +223,9 @@ extension EmulatorView: EmulatorMetalViewDelegate {
         showToast("State Loaded")
     }
     
-    func didRequestRewind() {
-        print("TODO: Handle rewind")
+    func didRequestLoadMainState() {
+        bridge.loadMainState()
+        showToast("Main State Loaded")
     }
     
     func didRequestLoadStateScreen() {

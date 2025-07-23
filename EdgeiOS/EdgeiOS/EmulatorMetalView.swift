@@ -5,7 +5,7 @@ import UIKit
 protocol EmulatorMetalViewDelegate {
     func didSaveState()
     func didLoadState()
-    func didRequestRewind()
+    func didRequestLoadMainState()
     func didRequestLoadStateScreen()
 }
 
@@ -157,7 +157,7 @@ struct EmulatorMetalView: UIViewRepresentable {
                     delegate?.didRequestLoadStateScreen()
                 } else {
                     // Left swipe
-                    delegate?.didRequestRewind()
+                    delegate?.didRequestLoadMainState()
                 }
             }
         }

@@ -5,6 +5,13 @@
 #include <memory>
 
 class State;
+class CPU;
+class MMU;
+class Cartridge;
+class AddressRouter;
+class InterruptController;
+class PPU;
+class Screen;
 
 class StateController {
 public:
@@ -37,6 +44,14 @@ public:
 
     // Get the rotating slot with a state, or -1 if none exist
     int GetRotatingSlot() const;
+
+    int GetMainSlot() const { return 0; }
+    int GetNextRotatingSlot() const;
+
+    void SaveState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
+                   InterruptController* interrupt_controller, PPU* ppu, Screen* screen);
+    bool LoadState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
+                   InterruptController* interrupt_controller, PPU* ppu);
 
 private:
     std::string game_state_dir_;

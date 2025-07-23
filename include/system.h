@@ -40,8 +40,9 @@ class System : public ScreenshotTaker, public StateNavigator {
 
   // StateNavigator abstract class functions.
   void SaveState();
+  void SaveMainState();
   void LoadPreviouslySavedState();
-  void RewindState();
+  void LoadMainState();
   void LoadStateSlot(int slot);
 
   std::vector<std::unique_ptr<State>> GetSaveStates();

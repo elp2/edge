@@ -179,13 +179,19 @@
     system_->SaveState();
 }
 
+- (void)saveMainState {
+    system_->SaveMainState();
+}
+
 - (void)loadPreviouslySavedState {
     system_->LoadPreviouslySavedState();
 }
 
-- (void)rewindState {
-    system_->RewindState();
+- (void)loadMainState {
+    system_->LoadMainState();
 }
+
+
 
 - (NSArray<SaveStateWrapper *> *)getSaveStates {    
     std::vector<std::unique_ptr<::State>> cppStates = system_->GetSaveStates();

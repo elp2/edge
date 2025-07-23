@@ -129,61 +129,39 @@ void System::AdvanceOneFrame() {
 
 void System::SaveState() {
   assert(state_controller_ != nullptr);
-  std::cout << "Saving state..." << std::endl;
-  
-  // Create a new state in the next rotating slot
-  auto new_state = state_controller_->SaveRotatingSlot();
+  int slot = state_controller_->GetNextRotatingSlot();
+  state_controller_->SaveState(slot, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_, screen_);
+}
 
-  struct SaveState save_state = {};
-  cpu_->GetState(save_state.cpu);
-  std::cout << "CPU state saved at PC: " << std::hex << int(save_state.cpu.pc) << std::endl;
-  mmu_->GetState(save_state.mmu);
-  cartridge_->GetState(save_state.cartridge);
-  router_->SaveState(save_state.memory);
-  interrupt_controller_->GetState(save_state.interrupt_controller);
-  ppu_->GetState(save_state.ppu);
+void System::SaveMainState() {
+  assert(state_controller_ != nullptr);
+  // Save to main slot (slot 0)
+  state_controller_->SaveState(0, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_, screen_);
+}
 
-  new_state->SaveState(save_state);
-  
-  std::cout << "Taking state screenshot..." << std::endl;
-  screen_->SaveScreenshotToPath(new_state->GetScreenshotPath());
-  
-  std::cout << "Saved state to slot " << new_state->GetSlot() << std::endl;
+void System::LoadMainState() {
+  assert(state_controller_ != nullptr);
+  // Load from main slot (slot 0)
+  state_controller_->LoadState(0, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
 }
 
 void System::LoadPreviouslySavedState() {
   assert(state_controller_ != nullptr);
   std::cout << "Loading previously saved state..." << std::endl;
 
-  LoadStateSlot(state_controller_->GetRotatingSlot());
+  int slot = state_controller_->GetRotatingSlot();
+  if (slot >= 0) {
+    state_controller_->LoadState(slot, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
+  } else {
+    std::cout << "No saved state found to load" << std::endl;
+  }
 }
 
-void System::RewindState() {
-  assert(state_controller_ != nullptr);
 
-  std::cout << "Rewinding state..." << std::endl;
-}
 
 void System::LoadStateSlot(int slot) {
   assert(state_controller_ != nullptr);
-  
-  // Load the state for the specific slot
-  auto state = state_controller_->LoadState(slot);
-  
-  struct SaveState save_state = {};
-  if (state->LoadState(save_state)) {
-    cpu_->SetState(save_state.cpu);
-    router_->LoadState(save_state.memory);
-    mmu_->SetState(save_state.mmu);
-    cartridge_->SetState(save_state.cartridge);
-    interrupt_controller_->SetState(save_state.interrupt_controller);
-    ppu_->SetState(save_state.ppu);
-    
-    std::cout << "Loaded state from slot " << slot << std::endl;
-  } else {
-    std::cout << "Failed to load state from slot " << slot << std::endl;
-    assert(false);
-  }
+  state_controller_->LoadState(slot, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
 }
 
 void System::TakeScreenshot() {

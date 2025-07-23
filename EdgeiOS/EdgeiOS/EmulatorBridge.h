@@ -26,8 +26,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)advanceOneFrame;
 
 - (void)saveState;
+- (void)saveMainState;
 - (void)loadPreviouslySavedState;
-- (void)rewindState;
+- (void)loadMainState;
+
 - (NSArray<SaveStateWrapper *> *)getSaveStates;
 - (void)loadState:(int)slot;
 - (void)startEmulator;
