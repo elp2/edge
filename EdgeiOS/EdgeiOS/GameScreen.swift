@@ -7,7 +7,7 @@ struct GameScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             titleView
-            startGameButton
+            mainActionButton
             saveStatesSection
             
             Spacer()
@@ -29,21 +29,44 @@ struct GameScreen: View {
             .padding(.top)
     }
     
-    private var startGameButton: some View {
-        NavigationLink(destination: EmulatorView(romFilename: romFilename)) {
-            HStack {
-                Image(systemName: "play.fill")
-                Text("Start Game")
+    private var hasMainState: Bool {
+        return saveStates.contains { $0.getSlot() == 0 }
+    }
+    
+    private var mainActionButton: some View {
+        Group {
+            if hasMainState {
+                NavigationLink(destination: EmulatorView(romFilename: romFilename, loadSlot: 0)) {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                        Text("Resume Game")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green)
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                .buttonStyle(PlainButtonStyle())
+            } else {
+                NavigationLink(destination: EmulatorView(romFilename: romFilename)) {
+                    HStack {
+                        Image(systemName: "play.fill")
+                        Text("Start Game")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                .buttonStyle(PlainButtonStyle())
             }
-            .font(.headline)
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.blue)
-            .cornerRadius(10)
         }
-        .padding(.horizontal)
-        .buttonStyle(PlainButtonStyle())
     }
     
     private var saveStatesSection: some View {
