@@ -120,11 +120,12 @@ void System::AdvanceOneFrame() {
     std::this_thread::sleep_for(FRAME_TIME - elapsed);
   }
   last_frame_start_time_ = std::chrono::high_resolution_clock::now();
-
-  if (frame_count_ % 1000 == 0) {
-    TakeScreenshot();
-  }
 #endif
+
+  static constexpr int MAIN_SAVE_INTERVAL_FRAMES = 1 * 60;
+  if (frame_count_ % MAIN_SAVE_INTERVAL_FRAMES == 0 && frame_count_ > 0) {
+      SaveMainState();
+  }
 }
 
 void System::SaveState() {
