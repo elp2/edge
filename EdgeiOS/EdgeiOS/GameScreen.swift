@@ -138,9 +138,15 @@ struct GameScreen: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("State \(state.getSlot())")
                         .font(.headline)
-                    Text("Tap to load")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    if let saveDate = state.getSaveDate() {
+                        Text(formatDate(saveDate))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Unknown date")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Spacer()
@@ -159,6 +165,12 @@ struct GameScreen: View {
         let bridge = EmulatorBridge.sharedInstance()
         let states = bridge.getSaveStates()
         saveStates = states
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yy HH:mm:ss"
+        return formatter.string(from: date)
     }
 }
 

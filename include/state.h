@@ -105,6 +105,7 @@ class State {
   std::vector<int> GetSaveSlots() const;
   std::string GetStateDir() const;
   std::string GetScreenshotPath() const;
+  time_t GetSaveTime() const;
   void AdvanceSlot();
   void SetSlot(int slot);
   int GetLatestSlot() const;

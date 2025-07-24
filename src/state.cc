@@ -187,3 +187,15 @@ bool State::ReadState(const std::string& path, struct SaveState& state) {
 
   return true;
 }
+
+time_t State::GetSaveTime() const {
+  try {
+    auto file_time = std::filesystem::last_write_time(GetStateFile(slot_));
+    auto duration = file_time.time_since_epoch();
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+    return seconds.count();
+  } catch (const std::filesystem::filesystem_error& e) {
+    std::cout << "Warning: Could not get modification time for " << GetStateFile(slot_) << ": " << e.what() << std::endl;
+    return 0;
+  }
+}

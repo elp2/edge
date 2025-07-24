@@ -23,6 +23,9 @@ NS_ASSUME_NONNULL_BEGIN
 // Get the screenshot as a UIImage
 - (UIImage * _Nullable)getScreenshotImage;
 
+// Get the save state file creation date
+- (NSDate * _Nullable)getSaveDate;
+
 @end
 
 NS_ASSUME_NONNULL_END 

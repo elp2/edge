@@ -43,4 +43,12 @@
     return image;
 }
 
+- (NSDate *)getSaveDate {
+    time_t saveTime = cppState_->GetSaveTime();
+    if (saveTime > 0) {
+        return [NSDate dateWithTimeIntervalSince1970:saveTime];
+    }
+    return nil;
+}
+
 @end 
