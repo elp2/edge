@@ -13,8 +13,9 @@
 ✔️ Largely cycle accurate emulation
 
 ## iOS Emulator
-![Zelda Gameplay](/images/screenshot1.png)
-![Game Screen](/images/screenshot2.png)
+| Zelda Gameplay | Game Screen |
+|:---:|:---:|
+| ![Zelda Gameplay](/images/screenshot1.png) | ![Game Screen](/images/screenshot2.png) |
 
 ## Games
 
