@@ -2,11 +2,19 @@
 
 ## Features:
 
-✔️ Loads and plays major games
+✔️ Runs on macOS and iOS
 
-✔️ Pulse, Wave, and Noise Voices play in all games
+✔️ Loads and plays games
 
-✔️ Graphics pass all tests.
+✔️ Time Travel with Emulator Save/Restore
+
+✔️ Pulse, Wave, and Noise Sound Voices
+
+✔️ Largely cycle accurate emulation
+
+## iOS Emulator
+![Zelda Gameplay](/images/screenshot1.png)
+![Game Screen](/images/screenshot2.png)
 
 ## Games
 
@@ -23,7 +31,7 @@
 
 ✔️ [dmg-acid2](https://github.com/mattcurrie/dmg-acid2) passes
 
-🌓 [Blargg](https://github.com/retrio/gb-test-roms) dmg_sound - some tests
+🌓 [Blargg](https://github.com/retrio/gb-test-roms) dmg_sound - non-timing
 
 
 ## Instructions
