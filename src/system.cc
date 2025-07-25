@@ -130,8 +130,7 @@ void System::AdvanceOneFrame() {
 
 void System::SaveState() {
   assert(state_controller_ != nullptr);
-  int slot = state_controller_->GetNextRotatingSlot();
-  state_controller_->SaveState(slot, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_, screen_);
+  state_controller_->SaveRotatingSlot(cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_, screen_);
 }
 
 void System::SaveMainState() {

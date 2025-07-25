@@ -35,10 +35,7 @@ public:
     
     // Delete a state
     void DeleteState(int slot);
-    
-    // Create a new state in the next rotating slot
-    std::unique_ptr<State> SaveRotatingSlot();
-    
+        
     // Get the game state directory
     std::string GetGameStateDir() const { return game_state_dir_; }
 
@@ -54,6 +51,8 @@ public:
 
     void SaveState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
                    InterruptController* interrupt_controller, PPU* ppu, Screen* screen);
+    void SaveRotatingSlot(CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
+                         InterruptController* interrupt_controller, PPU* ppu, Screen* screen);
     bool LoadState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
                    InterruptController* interrupt_controller, PPU* ppu);
 

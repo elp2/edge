@@ -87,37 +87,45 @@ std::string StateController::GetStateFile(int slot) const {
 } 
 
 int StateController::GetRotatingSlot() const {
-    int rotating_slot = -1;
-    for (int i = 0; i < MAX_SLOTS; i++) {
+    int oldest_slot = -1;
+    std::filesystem::file_time_type oldest_time;
+    
+    for (int i = 1; i < MAX_SLOTS; i++) { // Skip slot 0 (main slot)
         if (HasState(i)) {
-            rotating_slot = i;
+            try {
+                auto state_path = GetStateFile(i);
+                auto mod_time = std::filesystem::last_write_time(state_path);
+                
+                if (oldest_slot == -1 || mod_time > oldest_time) {
+                    oldest_time = mod_time;
+                    oldest_slot = i;
+                }
+            } catch (const std::filesystem::filesystem_error& e) {
+                std::cout << "Warning: Could not get modification time for " << GetStateFile(i) << ": " << e.what() << std::endl;
+                continue;
+            }
         }
     }
-    return rotating_slot;
+    
+    return oldest_slot;
 }
 
 int StateController::GetNextRotatingSlot() const {
-    int rotating_slot = GetRotatingSlot();
+    int oldest_slot = GetRotatingSlot();
     int next_slot;
-    if (rotating_slot == -1) {
+    if (oldest_slot == -1) {
         next_slot = 1; // Start at slot 1 if no states exist
     } else {
-        next_slot = (rotating_slot + 1) % MAX_SLOTS;
-        if (next_slot == 0) next_slot = 1; // Skip slot 0
+        next_slot = (oldest_slot + 1) % MAX_SLOTS;
+        if (next_slot == GetMainSlot()) next_slot = 1;
     }
     return next_slot;
-} 
+}
 
-std::unique_ptr<State> StateController::SaveRotatingSlot() {
-    int rotating_slot = GetRotatingSlot();
-    int next_slot;
-    if (rotating_slot == -1) {
-        next_slot = 1; // Start at slot 1 if no states exist
-    } else {
-        next_slot = (rotating_slot + 1) % MAX_SLOTS;
-        if (next_slot == 0) next_slot = 1; // Skip slot 0
-    }
-    return CreateState(next_slot);
+void StateController::SaveRotatingSlot(CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
+                                      InterruptController* interrupt_controller, PPU* ppu, Screen* screen) {
+    int slot = GetNextRotatingSlot();
+    SaveState(slot, cpu, mmu, cartridge, router, interrupt_controller, ppu, screen);
 } 
 
 void StateController::SaveState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
