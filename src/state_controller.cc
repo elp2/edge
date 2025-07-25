@@ -87,34 +87,34 @@ std::string StateController::GetStateFile(int slot) const {
 } 
 
 int StateController::GetRotatingSlot() const {
-    int latest_slot = -1;
+    int rotating_slot = -1;
     for (int i = 0; i < MAX_SLOTS; i++) {
         if (HasState(i)) {
-            latest_slot = i;
+            rotating_slot = i;
         }
     }
-    return latest_slot;
+    return rotating_slot;
 }
 
 int StateController::GetNextRotatingSlot() const {
-    int latest_slot = GetRotatingSlot();
+    int rotating_slot = GetRotatingSlot();
     int next_slot;
-    if (latest_slot == -1) {
+    if (rotating_slot == -1) {
         next_slot = 1; // Start at slot 1 if no states exist
     } else {
-        next_slot = (latest_slot + 1) % MAX_SLOTS;
+        next_slot = (rotating_slot + 1) % MAX_SLOTS;
         if (next_slot == 0) next_slot = 1; // Skip slot 0
     }
     return next_slot;
 } 
 
 std::unique_ptr<State> StateController::SaveRotatingSlot() {
-    int latest_slot = GetRotatingSlot();
+    int rotating_slot = GetRotatingSlot();
     int next_slot;
-    if (latest_slot == -1) {
+    if (rotating_slot == -1) {
         next_slot = 1; // Start at slot 1 if no states exist
     } else {
-        next_slot = (latest_slot + 1) % MAX_SLOTS;
+        next_slot = (rotating_slot + 1) % MAX_SLOTS;
         if (next_slot == 0) next_slot = 1; // Skip slot 0
     }
     return CreateState(next_slot);
@@ -143,7 +143,9 @@ void StateController::SaveState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartrid
     // Take screenshot for the state
     std::cout << "Taking state screenshot..." << std::endl;
     screen->SaveScreenshotToPath(new_state->GetScreenshotPath());
-    
+    if (slot != GetMainSlot()) {
+        latest_rotating_slot_ = slot;
+    }
     std::cout << "Saved state to slot " << slot << std::endl;
 }
 
@@ -170,9 +172,21 @@ bool StateController::LoadState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartrid
         ppu->SetState(save_state.ppu);
         
         std::cout << "Loaded state from slot " << slot << std::endl;
+        if (slot != GetMainSlot()) {
+            latest_rotating_slot_ = slot;
+        }    
+
         return true;
     } else {
         std::cout << "Failed to load state from slot " << slot << std::endl;
         return false;
     }
 } 
+
+bool StateController::MaybeLoadLatestSlot(CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
+                                          InterruptController* interrupt_controller, PPU* ppu) {
+    if (latest_rotating_slot_ == -1) {
+        return false;
+    }
+    return LoadState(latest_rotating_slot_, cpu, mmu, cartridge, router, interrupt_controller, ppu);
+}

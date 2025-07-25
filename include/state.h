@@ -102,13 +102,11 @@ class State {
   bool LoadState(struct SaveState& state);
 
   void DeleteState(int slot);
-  std::vector<int> GetSaveSlots() const;
   std::string GetStateDir() const;
   std::string GetScreenshotPath() const;
   time_t GetSaveTime() const;
   void AdvanceSlot();
   void SetSlot(int slot);
-  int GetLatestSlot() const;
   int GetSlot() const { return slot_; }
 
  private:

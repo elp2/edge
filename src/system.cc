@@ -148,17 +148,8 @@ void System::LoadMainState() {
 
 void System::LoadPreviouslySavedState() {
   assert(state_controller_ != nullptr);
-  std::cout << "Loading previously saved state..." << std::endl;
-
-  int slot = state_controller_->GetRotatingSlot();
-  if (slot >= 0) {
-    state_controller_->LoadState(slot, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
-  } else {
-    std::cout << "No saved state found to load" << std::endl;
-  }
+  state_controller_->MaybeLoadLatestSlot(cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
 }
-
-
 
 void System::LoadStateSlot(int slot) {
   assert(state_controller_ != nullptr);

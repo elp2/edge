@@ -48,6 +48,10 @@ public:
     int GetMainSlot() const { return 0; }
     int GetNextRotatingSlot() const;
 
+    // Load the latest slot if it exists.
+    bool MaybeLoadLatestSlot(CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
+                   InterruptController* interrupt_controller, PPU* ppu);
+
     void SaveState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
                    InterruptController* interrupt_controller, PPU* ppu, Screen* screen);
     bool LoadState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
@@ -56,6 +60,7 @@ public:
 private:
     std::string game_state_dir_;
     static constexpr int MAX_SLOTS = 10;
+    int latest_rotating_slot_ = -1;
     
     std::string GetStateDir(int slot) const;
     std::string GetStateFile(int slot) const;

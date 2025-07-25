@@ -8,21 +8,14 @@
 
 
 State::State(const std::string& game_state_dir, int slot) : game_state_dir_(game_state_dir) {
-  assert(slot >= -1 && slot < MAX_SLOTS);
+  assert(slot >= 0 && slot < MAX_SLOTS);
 
-  if (slot == -1) {
-    slot_ = GetLatestSlot();
-    if (slot_ == -1) {
-      CreateNewSlot();
-    }
+  // If the slot doesn't exist, create it.
+  if (!HasState(slot)) {
+    slot_ = slot;
+    std::filesystem::create_directories(GetStateDir(slot_));
   } else {
-    // If the slot doesn't exist, create it
-    if (!HasState(slot)) {
-      slot_ = slot;
-      std::filesystem::create_directories(GetStateDir(slot_));
-    } else {
-      slot_ = slot;
-    }
+    slot_ = slot;
   }
   assert(slot_ != -1);
 }
@@ -45,31 +38,6 @@ void State::CreateNewSlot() {
     std::cout << "No free slots found. Please delete an existing state." << std::endl;
     assert(false);
   }
-}
-
-int State::GetLatestSlot() const {
-  int latest_slot = -1;
-  std::filesystem::file_time_type latest_time;
-  
-  for (int i = 0; i < MAX_SLOTS; i++) {
-    if (HasState(i)) {
-      auto state_path = GetStateFile(i);
-      try {
-        auto mod_time = std::filesystem::last_write_time(state_path);
-        
-        if (latest_slot == -1 || mod_time > latest_time) {
-          latest_time = mod_time;
-          latest_slot = i;
-        }
-      } catch (const std::filesystem::filesystem_error& e) {
-        // If we can't get the modification time, skip this slot
-        std::cout << "Warning: Could not get modification time for " << state_path << ": " << e.what() << std::endl;
-        continue;
-      }
-    }
-  }
-  
-  return latest_slot;
 }
 
 std::string State::GetStateDir() const {
@@ -113,16 +81,6 @@ bool State::HasState(int slot) const {
 void State::DeleteState(int slot) {
   if (slot < 0 || slot >= MAX_SLOTS) return;
   std::filesystem::remove_all(GetStateDir(slot));
-}
-
-std::vector<int> State::GetSaveSlots() const {
-  std::vector<int> slots;
-  for (int i = 0; i < MAX_SLOTS; i++) {
-    if (HasState(i)) {
-      slots.push_back(i);
-    }
-  }
-  return slots;
 }
 
 void State::AdvanceSlot() {
