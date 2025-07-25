@@ -136,7 +136,7 @@ struct GameScreen: View {
                 
                 // State info
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("State \(state.getSlot())")
+                    Text(state.getSlot() == 0 ? "Main Save" : "State \(state.getSlot())")
                         .font(.headline)
                     if let saveDate = state.getSaveDate() {
                         Text(formatDate(saveDate))
