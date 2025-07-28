@@ -142,7 +142,7 @@ void System::SaveMainState() {
 void System::LoadMainState() {
   assert(state_controller_ != nullptr);
   // Load from main slot (slot 0)
-  state_controller_->LoadState(0, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
+  state_controller_->LoadStateSlot(0, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
 }
 
 void System::LoadPreviouslySavedState() {
@@ -152,7 +152,7 @@ void System::LoadPreviouslySavedState() {
 
 void System::LoadStateSlot(int slot) {
   assert(state_controller_ != nullptr);
-  state_controller_->LoadState(slot, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
+  state_controller_->LoadStateSlot(slot, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
 }
 
 void System::TakeScreenshot() {

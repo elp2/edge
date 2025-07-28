@@ -53,7 +53,9 @@ public:
                    InterruptController* interrupt_controller, PPU* ppu, Screen* screen);
     void SaveRotatingSlot(CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
                          InterruptController* interrupt_controller, PPU* ppu, Screen* screen);
-    bool LoadState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
+    bool LoadStateSlot(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
+                          InterruptController* interrupt_controller, PPU* ppu);
+    bool LoadState(const struct SaveState& save_state, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
                    InterruptController* interrupt_controller, PPU* ppu);
 
 private:
