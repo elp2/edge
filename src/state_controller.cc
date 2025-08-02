@@ -132,10 +132,9 @@ void StateController::SaveRotatingSlot() {
 void StateController::SaveState(int slot) {
     std::cout << "Saving state to slot " << slot << "..." << std::endl;
     
-    // Create a new state for the specified slot
+    // Create a new state for the specified slot.
     auto new_state = CreateState(slot);
 
-    // Consolidate all component states
     struct SaveState save_state = {};
     cpu_->GetState(save_state.cpu);
     std::cout << "CPU state saved at PC: " << std::hex << int(save_state.cpu.pc) << std::endl;
@@ -145,10 +144,8 @@ void StateController::SaveState(int slot) {
     interrupt_controller_->GetState(save_state.interrupt_controller);
     ppu_->GetState(save_state.ppu);
 
-    // Save the consolidated state
     new_state->SaveState(save_state);
     
-    // Take screenshot for the state
     std::cout << "Taking state screenshot..." << std::endl;
     screen_->SaveScreenshotToPath(new_state->GetScreenshotPath());
     if (slot != GetMainSlot()) {
@@ -165,7 +162,6 @@ bool StateController::LoadStateSlot(int slot) {
     
     std::cout << "Loading state from slot " << slot << std::endl;
     
-    // Load the state for the specific slot
     auto state = std::make_unique<State>(game_state_dir_, slot);
     
     struct SaveState save_state = {};
@@ -197,4 +193,11 @@ bool StateController::MaybeLoadLatestSlot() {
         return false;
     }
     return LoadStateSlot(latest_rotating_slot_);
+}
+
+void StateController::FinishedFrame(int frame_count) {
+    static constexpr int MAIN_SAVE_INTERVAL_FRAMES = 1 * 60;
+    if (frame_count % MAIN_SAVE_INTERVAL_FRAMES == 0 && frame_count > 0) {
+        SaveState(GetMainSlot());
+    }
 }

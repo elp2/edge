@@ -123,10 +123,7 @@ void System::AdvanceOneFrame() {
   last_frame_start_time_ = std::chrono::high_resolution_clock::now();
 #endif
 
-  static constexpr int MAIN_SAVE_INTERVAL_FRAMES = 1 * 60;
-  if (frame_count_ % MAIN_SAVE_INTERVAL_FRAMES == 0 && frame_count_ > 0) {
-    state_controller_->SaveState(state_controller_->GetMainSlot());
-  }
+  state_controller_->FinishedFrame(frame_count_);
 }
 
 void System::SaveState() {

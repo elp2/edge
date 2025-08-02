@@ -54,6 +54,8 @@ public:
     bool LoadStateSlot(int slot);
     bool LoadState(const struct SaveState& save_state);
 
+    void FinishedFrame(int frame_count);
+
 private:
     std::string game_state_dir_;
     static constexpr int MAX_SLOTS = 10;
