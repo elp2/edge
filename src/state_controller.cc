@@ -12,8 +12,10 @@
 #include <iostream>
 #include <fstream>
 
-StateController::StateController(const std::string& game_state_dir) 
-    : game_state_dir_(game_state_dir) {
+StateController::StateController(const std::string& game_state_dir, CPU* cpu, MMU* mmu, Cartridge* cartridge, 
+                               AddressRouter* router, InterruptController* interrupt_controller, PPU* ppu, Screen* screen)
+    : game_state_dir_(game_state_dir), cpu_(cpu), mmu_(mmu), cartridge_(cartridge), router_(router), 
+      interrupt_controller_(interrupt_controller), ppu_(ppu), screen_(screen) {
 }
 
 std::vector<std::unique_ptr<State>> StateController::GetSaveStates() const {
@@ -122,14 +124,12 @@ int StateController::GetNextRotatingSlot() const {
     return next_slot;
 }
 
-void StateController::SaveRotatingSlot(CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
-                                      InterruptController* interrupt_controller, PPU* ppu, Screen* screen) {
+void StateController::SaveRotatingSlot() {
     int slot = GetNextRotatingSlot();
-    SaveState(slot, cpu, mmu, cartridge, router, interrupt_controller, ppu, screen);
-} 
+    SaveState(slot);
+}
 
-void StateController::SaveState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
-                               InterruptController* interrupt_controller, PPU* ppu, Screen* screen) {
+void StateController::SaveState(int slot) {
     std::cout << "Saving state to slot " << slot << "..." << std::endl;
     
     // Create a new state for the specified slot
@@ -137,28 +137,27 @@ void StateController::SaveState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartrid
 
     // Consolidate all component states
     struct SaveState save_state = {};
-    cpu->GetState(save_state.cpu);
+    cpu_->GetState(save_state.cpu);
     std::cout << "CPU state saved at PC: " << std::hex << int(save_state.cpu.pc) << std::endl;
-    mmu->GetState(save_state.mmu);
-    cartridge->GetState(save_state.cartridge);
-    router->SaveState(save_state.memory);
-    interrupt_controller->GetState(save_state.interrupt_controller);
-    ppu->GetState(save_state.ppu);
+    mmu_->GetState(save_state.mmu);
+    cartridge_->GetState(save_state.cartridge);
+    router_->SaveState(save_state.memory);
+    interrupt_controller_->GetState(save_state.interrupt_controller);
+    ppu_->GetState(save_state.ppu);
 
     // Save the consolidated state
     new_state->SaveState(save_state);
     
     // Take screenshot for the state
     std::cout << "Taking state screenshot..." << std::endl;
-    screen->SaveScreenshotToPath(new_state->GetScreenshotPath());
+    screen_->SaveScreenshotToPath(new_state->GetScreenshotPath());
     if (slot != GetMainSlot()) {
         latest_rotating_slot_ = slot;
     }
     std::cout << "Saved state to slot " << slot << std::endl;
 }
 
-bool StateController::LoadStateSlot(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
-                                       InterruptController* interrupt_controller, PPU* ppu) {
+bool StateController::LoadStateSlot(int slot) {
     if (!HasState(slot)) {
         std::cout << "State does not exist for slot " << slot << std::endl;
         return false;
@@ -174,30 +173,28 @@ bool StateController::LoadStateSlot(int slot, CPU* cpu, MMU* mmu, Cartridge* car
         if (slot != GetMainSlot()) {
             latest_rotating_slot_ = slot;
         }
-        return LoadState(save_state, cpu, mmu, cartridge, router, interrupt_controller, ppu);
+        return LoadState(save_state);
     } else {
         std::cout << "Failed to load state from slot " << slot << std::endl;
         return false;
     }
 }
 
-bool StateController::LoadState(const struct SaveState& save_state, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
-                               InterruptController* interrupt_controller, PPU* ppu) {
-    cpu->SetState(save_state.cpu);
-    router->LoadState(save_state.memory);
-    mmu->SetState(save_state.mmu);
-    cartridge->SetState(save_state.cartridge);
-    interrupt_controller->SetState(save_state.interrupt_controller);
-    ppu->SetState(save_state.ppu);
+bool StateController::LoadState(const struct SaveState& save_state) {
+    cpu_->SetState(save_state.cpu);
+    router_->LoadState(save_state.memory);
+    mmu_->SetState(save_state.mmu);
+    cartridge_->SetState(save_state.cartridge);
+    interrupt_controller_->SetState(save_state.interrupt_controller);
+    ppu_->SetState(save_state.ppu);
     
     std::cout << "Loaded state successfully" << std::endl;
     return true;
 } 
 
-bool StateController::MaybeLoadLatestSlot(CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
-                                          InterruptController* interrupt_controller, PPU* ppu) {
+bool StateController::MaybeLoadLatestSlot() {
     if (latest_rotating_slot_ == -1) {
         return false;
     }
-    return LoadStateSlot(latest_rotating_slot_, cpu, mmu, cartridge, router, interrupt_controller, ppu);
+    return LoadStateSlot(latest_rotating_slot_);
 }

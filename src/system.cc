@@ -26,9 +26,6 @@
 #include "utils.h"
 
 System::System(string rom_filename, string game_state_dir) {
-  state_controller_ = new StateController(game_state_dir);
-  std::cout << "Saved state count: " << state_controller_->GetSaveStates().size() << std::endl;
-
   bool skip_boot_rom = true;
   mmu_ = GetMMU(skip_boot_rom);
 
@@ -61,6 +58,10 @@ System::System(string rom_filename, string game_state_dir) {
 
   cpu_ = new CPU(router_);
   cpu_->SetInterruptController(interrupt_controller_);
+
+  state_controller_ = new StateController(game_state_dir, cpu_, mmu_, cartridge_, router_, 
+                                        interrupt_controller_, ppu_, screen_);
+  std::cout << "Saved state count: " << state_controller_->GetSaveStates().size() << std::endl;
 
   frame_cycles_ = 0;
   last_frame_start_time_ = std::chrono::high_resolution_clock::now();
@@ -130,29 +131,29 @@ void System::AdvanceOneFrame() {
 
 void System::SaveState() {
   assert(state_controller_ != nullptr);
-  state_controller_->SaveRotatingSlot(cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_, screen_);
+  state_controller_->SaveRotatingSlot();
 }
 
 void System::SaveMainState() {
   assert(state_controller_ != nullptr);
   // Save to main slot (slot 0)
-  state_controller_->SaveState(0, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_, screen_);
+  state_controller_->SaveState(0);
 }
 
 void System::LoadMainState() {
   assert(state_controller_ != nullptr);
   // Load from main slot (slot 0)
-  state_controller_->LoadStateSlot(0, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
+  state_controller_->LoadStateSlot(0);
 }
 
 void System::LoadPreviouslySavedState() {
   assert(state_controller_ != nullptr);
-  state_controller_->MaybeLoadLatestSlot(cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
+  state_controller_->MaybeLoadLatestSlot();
 }
 
 void System::LoadStateSlot(int slot) {
   assert(state_controller_ != nullptr);
-  state_controller_->LoadStateSlot(slot, cpu_, mmu_, cartridge_, router_, interrupt_controller_, ppu_);
+  state_controller_->LoadStateSlot(slot);
 }
 
 void System::TakeScreenshot() {

@@ -15,7 +15,8 @@ class Screen;
 
 class StateController {
 public:
-    StateController(const std::string& game_state_dir);
+    StateController(const std::string& game_state_dir, CPU* cpu, MMU* mmu, Cartridge* cartridge, 
+                   AddressRouter* router, InterruptController* interrupt_controller, PPU* ppu, Screen* screen);
     ~StateController() = default;
 
     // Get all available save states for this game
@@ -46,22 +47,25 @@ public:
     int GetNextRotatingSlot() const;
 
     // Load the latest slot if it exists.
-    bool MaybeLoadLatestSlot(CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
-                   InterruptController* interrupt_controller, PPU* ppu);
+    bool MaybeLoadLatestSlot();
 
-    void SaveState(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
-                   InterruptController* interrupt_controller, PPU* ppu, Screen* screen);
-    void SaveRotatingSlot(CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router, 
-                         InterruptController* interrupt_controller, PPU* ppu, Screen* screen);
-    bool LoadStateSlot(int slot, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
-                          InterruptController* interrupt_controller, PPU* ppu);
-    bool LoadState(const struct SaveState& save_state, CPU* cpu, MMU* mmu, Cartridge* cartridge, AddressRouter* router,
-                   InterruptController* interrupt_controller, PPU* ppu);
+    void SaveState(int slot);
+    void SaveRotatingSlot();
+    bool LoadStateSlot(int slot);
+    bool LoadState(const struct SaveState& save_state);
 
 private:
     std::string game_state_dir_;
     static constexpr int MAX_SLOTS = 10;
     int latest_rotating_slot_ = -1;
+    
+    CPU* cpu_;
+    MMU* mmu_;
+    Cartridge* cartridge_;
+    AddressRouter* router_;
+    InterruptController* interrupt_controller_;
+    PPU* ppu_;
+    Screen* screen_;
     
     std::string GetStateDir(int slot) const;
     std::string GetStateFile(int slot) const;
