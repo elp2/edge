@@ -132,17 +132,9 @@ void StateController::SaveRotatingSlot() {
 void StateController::SaveState(int slot) {
     std::cout << "Saving state to slot " << slot << "..." << std::endl;
     
-    // Create a new state for the specified slot.
     auto new_state = CreateState(slot);
 
-    struct SaveState save_state = {};
-    cpu_->GetState(save_state.cpu);
-    std::cout << "CPU state saved at PC: " << std::hex << int(save_state.cpu.pc) << std::endl;
-    mmu_->GetState(save_state.mmu);
-    cartridge_->GetState(save_state.cartridge);
-    router_->SaveState(save_state.memory);
-    interrupt_controller_->GetState(save_state.interrupt_controller);
-    ppu_->GetState(save_state.ppu);
+    struct SaveState save_state = GetSaveState();
 
     new_state->SaveState(save_state);
     
@@ -176,6 +168,18 @@ bool StateController::LoadStateSlot(int slot) {
     }
 }
 
+struct SaveState StateController::GetSaveState() {
+    struct SaveState save_state = {};
+    cpu_->GetState(save_state.cpu);
+    std::cout << "CPU state saved at PC: " << std::hex << int(save_state.cpu.pc) << std::endl;
+    mmu_->GetState(save_state.mmu);
+    cartridge_->GetState(save_state.cartridge);
+    router_->SaveState(save_state.memory);
+    interrupt_controller_->GetState(save_state.interrupt_controller);
+    ppu_->GetState(save_state.ppu);
+    return save_state;
+}
+
 bool StateController::LoadState(const struct SaveState& save_state) {
     cpu_->SetState(save_state.cpu);
     router_->LoadState(save_state.memory);
@@ -196,8 +200,8 @@ bool StateController::MaybeLoadLatestSlot() {
 }
 
 void StateController::FinishedFrame(int frame_count) {
-    static constexpr int MAIN_SAVE_INTERVAL_FRAMES = 1 * 60;
-    if (frame_count % MAIN_SAVE_INTERVAL_FRAMES == 0 && frame_count > 0) {
+    static constexpr int SAVE_INTERVAL_FRAMES = 1 * 60;
+    if (frame_count % SAVE_INTERVAL_FRAMES == 0 && frame_count > 0) {
         SaveState(GetMainSlot());
     }
 }

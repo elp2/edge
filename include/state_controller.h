@@ -54,6 +54,8 @@ public:
     bool LoadStateSlot(int slot);
     bool LoadState(const struct SaveState& save_state);
 
+    struct SaveState GetSaveState();
+
     void FinishedFrame(int frame_count);
 
 private:
