@@ -125,34 +125,24 @@ void System::AdvanceOneFrame() {
 
   static constexpr int MAIN_SAVE_INTERVAL_FRAMES = 1 * 60;
   if (frame_count_ % MAIN_SAVE_INTERVAL_FRAMES == 0 && frame_count_ > 0) {
-      SaveMainState();
+    state_controller_->SaveState(state_controller_->GetMainSlot());
   }
 }
 
 void System::SaveState() {
-  assert(state_controller_ != nullptr);
   state_controller_->SaveRotatingSlot();
-}
-
-void System::SaveMainState() {
-  assert(state_controller_ != nullptr);
-  // Save to main slot (slot 0)
-  state_controller_->SaveState(0);
 }
 
 void System::LoadMainState() {
   assert(state_controller_ != nullptr);
-  // Load from main slot (slot 0)
-  state_controller_->LoadStateSlot(0);
+  state_controller_->LoadStateSlot(state_controller_->GetMainSlot());
 }
 
 void System::LoadPreviouslySavedState() {
-  assert(state_controller_ != nullptr);
   state_controller_->MaybeLoadLatestSlot();
 }
 
 void System::LoadStateSlot(int slot) {
-  assert(state_controller_ != nullptr);
   state_controller_->LoadStateSlot(slot);
 }
 

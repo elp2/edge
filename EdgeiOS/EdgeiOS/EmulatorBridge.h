@@ -26,7 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)advanceOneFrame;
 
 - (void)saveState;
-- (void)saveMainState;
 - (void)loadPreviouslySavedState;
 - (void)loadMainState;
 

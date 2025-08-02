@@ -179,10 +179,6 @@
     system_->SaveState();
 }
 
-- (void)saveMainState {
-    system_->SaveMainState();
-}
-
 - (void)loadPreviouslySavedState {
     system_->LoadPreviouslySavedState();
 }

@@ -14,7 +14,6 @@ class ScreenshotTaker {
 class StateNavigator {
  public:
   virtual void SaveState() = 0;
-  virtual void SaveMainState() = 0;
   virtual void LoadPreviouslySavedState() = 0;
   virtual void LoadMainState() = 0;
 };

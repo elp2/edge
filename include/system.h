@@ -40,7 +40,6 @@ class System : public ScreenshotTaker, public StateNavigator {
 
   // StateNavigator abstract class functions.
   void SaveState();
-  void SaveMainState();
   void LoadPreviouslySavedState();
   void LoadMainState();
   void LoadStateSlot(int slot);
