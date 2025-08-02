@@ -72,6 +72,8 @@ System::System(string rom_filename, string game_state_dir) {
   }
 
   frame_count_ = 0;
+  // Ensure we capture frame 0.
+  state_controller_->FinishedFrame(frame_count_);
 }
 
 MMU *System::GetMMU(bool skip_boot_rom) {
@@ -141,6 +143,10 @@ void System::LoadPreviouslySavedState() {
 
 void System::LoadStateSlot(int slot) {
   state_controller_->LoadStateSlot(slot);
+}
+
+void System::GoBackInMemory() {
+  frame_count_ = state_controller_->GoBackInMemory();
 }
 
 void System::TakeScreenshot() {

@@ -1,6 +1,8 @@
 #include "cartridge.h"
 
+#include <algorithm>
 #include <cassert>
+#include <cstring>
 #include <iostream>
 #include <fcntl.h>
 #include <fstream>
@@ -433,7 +435,10 @@ void Cartridge::SetState(const struct CartridgeSaveState &state) {
   rtc_latched_ = state.rtc_latched;
   rtc_latched_time_ = state.rtc_latched_time;
   rtc_halted_ = state.rtc_halted;
-  ram_ = state.ram;
+  
+  if (state.ram && state.ram_size > 0) {
+    memcpy(ram_, state.ram, std::min<uint32_t>(state.ram_size, RAMSize()));
+  }
 }
 
 void Cartridge::GetState(struct CartridgeSaveState& state) {

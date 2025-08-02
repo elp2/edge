@@ -15,7 +15,7 @@ class StateNavigator {
  public:
   virtual void SaveState() = 0;
   virtual void LoadPreviouslySavedState() = 0;
-  virtual void LoadMainState() = 0;
+  virtual void GoBackInMemory() = 0;
 };
 
 class InputController {

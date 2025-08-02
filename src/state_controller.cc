@@ -9,6 +9,9 @@
 #include "screen.h"
 #include "state.h"
 
+#include <algorithm>
+#include <cassert>
+#include <filesystem>
 #include <iostream>
 #include <fstream>
 
@@ -16,6 +19,7 @@ StateController::StateController(const std::string& game_state_dir, CPU* cpu, MM
                                AddressRouter* router, InterruptController* interrupt_controller, PPU* ppu, Screen* screen)
     : game_state_dir_(game_state_dir), cpu_(cpu), mmu_(mmu), cartridge_(cartridge), router_(router), 
       interrupt_controller_(interrupt_controller), ppu_(ppu), screen_(screen) {
+    memory_states_.resize(MEMORY_SAVES_COUNT);
 }
 
 std::vector<std::unique_ptr<State>> StateController::GetSaveStates() const {
@@ -200,8 +204,36 @@ bool StateController::MaybeLoadLatestSlot() {
 }
 
 void StateController::FinishedFrame(int frame_count) {
-    static constexpr int SAVE_INTERVAL_FRAMES = 1 * 60;
-    if (frame_count % SAVE_INTERVAL_FRAMES == 0 && frame_count > 0) {
-        SaveState(GetMainSlot());
+    if (frame_count % SAVE_INTERVAL_FRAMES != 0) {
+        return;
     }
+    SaveState(GetMainSlot());
+
+    memory_current_frame_ = frame_count;
+
+    if (memory_current_frame_ > memory_end_frame_) {
+        memory_end_frame_ = memory_current_frame_;
+    }
+
+    int buffer_pos = (memory_current_frame_ / SAVE_INTERVAL_FRAMES) % MEMORY_SAVES_COUNT;
+    std::cout << "Saving memory state at frame " << frame_count << " to buffer pos " << buffer_pos << std::endl;
+    memory_states_[buffer_pos] = GetSaveState();
+
+    memory_start_frame_ = std::max(0L, memory_end_frame_ - (MEMORY_SAVES_COUNT - 1) * SAVE_INTERVAL_FRAMES);
+}
+
+long StateController::GoBackInMemory() {
+    static constexpr int BACK_FRAMES = 2 * 60;
+    long target_frame = std::max(memory_start_frame_, memory_current_frame_ - BACK_FRAMES);
+
+    int buffer_pos = (target_frame / SAVE_INTERVAL_FRAMES) % MEMORY_SAVES_COUNT;
+    std::cout << "Trying to load from frame " << target_frame << " buffer pos " << buffer_pos << std::endl;
+    std::cout << "Memory range: [" << memory_start_frame_ << ", " << memory_end_frame_ << "]" << std::endl;
+    
+    assert(buffer_pos >= 0 && buffer_pos < MEMORY_SAVES_COUNT);
+
+    std::cout << "Loading state from buffer pos " << buffer_pos << std::endl;
+    LoadState(memory_states_[buffer_pos]);
+    memory_current_frame_ = target_frame;
+    return memory_current_frame_;
 }

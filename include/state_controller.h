@@ -58,6 +58,9 @@ public:
 
     void FinishedFrame(int frame_count);
 
+    // Returns the frame number of the state that was loaded.
+    long GoBackInMemory();
+
 private:
     std::string game_state_dir_;
     static constexpr int MAX_SLOTS = 10;
@@ -73,4 +76,11 @@ private:
     
     std::string GetStateDir(int slot) const;
     std::string GetStateFile(int slot) const;
+
+    static constexpr int SAVE_INTERVAL_FRAMES = 1 * 60;
+    static constexpr int MEMORY_SAVES_COUNT = 60;
+    long memory_start_frame_ = 0;
+    long memory_current_frame_ = 0;
+    long memory_end_frame_ = 0;
+    std::vector<struct SaveState> memory_states_;
 }; 

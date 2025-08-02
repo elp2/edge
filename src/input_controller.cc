@@ -117,7 +117,7 @@ void InputController::HandleKeyboardEvent(const SDL_KeyboardEvent& event, bool p
     }
 
     if (event.scancode == SDL_SCANCODE_BACKSPACE && pressed) {
-      state_navigator_->LoadMainState();
+      state_navigator_->GoBackInMemory();
       return;
     }
 
