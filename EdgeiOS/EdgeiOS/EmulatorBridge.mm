@@ -187,7 +187,9 @@
     system_->LoadMainState();
 }
 
-
+- (void)goBackInMemory {
+    system_->GoBackInMemory();
+}
 
 - (NSArray<SaveStateWrapper *> *)getSaveStates {    
     std::vector<std::unique_ptr<::State>> cppStates = system_->GetSaveStates();

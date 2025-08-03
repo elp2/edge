@@ -223,9 +223,9 @@ extension EmulatorView: EmulatorMetalViewDelegate {
         showToast("State Loaded")
     }
     
-    func didRequestLoadMainState() {
-        bridge.loadMainState()
-        showToast("Main State Loaded")
+    func didGoBackInMemory() {
+        bridge.goBackInMemory()
+        showToast("Went Back in Memory")
     }
     
     func didRequestLoadStateScreen() {

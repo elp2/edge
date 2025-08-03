@@ -28,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)saveState;
 - (void)loadPreviouslySavedState;
 - (void)loadMainState;
+- (void)goBackInMemory;
 
 - (NSArray<SaveStateWrapper *> *)getSaveStates;
 - (void)loadState:(int)slot;
