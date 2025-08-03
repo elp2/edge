@@ -40,6 +40,6 @@ void SerialController::set_sc(uint8_t byte) {
     line->push_back((char)sb());
     cout << "**** SERIAL: [" << *line << "]" << endl;
   } else {
-    cout << "Unexpected serial sc: " << hex << unsigned(byte) << endl;
+    // Ignore.
   }
 }

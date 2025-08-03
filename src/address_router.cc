@@ -291,6 +291,8 @@ bool AddressRouter::ShouldSaveLoadAddress(uint16_t address) {
   AddressOwner owner = ownerForAddress(address);
   if (owner == AdressOwner_Unknown) return false;
   if (address >= FORBIDDEN_RAM_START && address <= FORBIDDEN_RAM_END) return false;
+  if (address >= IO_RAM_START && address <= IO_RAM_END) return false;
+
   return true;
 }
 
