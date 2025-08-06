@@ -72,8 +72,6 @@ System::System(string rom_filename, string game_state_dir) {
   }
 
   frame_count_ = 0;
-  // Ensure we capture frame 0.
-  state_controller_->FinishedFrame(frame_count_);
 }
 
 MMU *System::GetMMU(bool skip_boot_rom) {
@@ -91,6 +89,7 @@ void System::SetButtons(bool dpadUp, bool dpadDown, bool dpadLeft, bool dpadRigh
 }
 
 void System::AdvanceOneFrame() {
+  state_controller_->WillStartFrame(frame_count_);
   bool entered_vsync = false;
   while (!entered_vsync) {
     int stepped = cpu_->Step();
@@ -124,8 +123,6 @@ void System::AdvanceOneFrame() {
   }
   last_frame_start_time_ = std::chrono::high_resolution_clock::now();
 #endif
-
-  state_controller_->FinishedFrame(frame_count_);
 }
 
 void System::SaveState() {
@@ -135,14 +132,18 @@ void System::SaveState() {
 void System::LoadMainState() {
   assert(state_controller_ != nullptr);
   state_controller_->LoadStateSlot(state_controller_->GetMainSlot());
+  frame_count_ = 0;
 }
 
 void System::LoadPreviouslySavedState() {
-  state_controller_->MaybeLoadLatestSlot();
+  if (state_controller_->MaybeLoadLatestSlot()) {
+    frame_count_ = 0;    
+  };
 }
 
 void System::LoadStateSlot(int slot) {
   state_controller_->LoadStateSlot(slot);
+  frame_count_ = 0;
 }
 
 void System::GoBackInMemory() {

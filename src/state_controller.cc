@@ -203,11 +203,18 @@ bool StateController::MaybeLoadLatestSlot() {
     return LoadStateSlot(latest_rotating_slot_);
 }
 
-void StateController::FinishedFrame(int frame_count) {
+void StateController::WillStartFrame(int frame_count) {
     if (frame_count % SAVE_INTERVAL_FRAMES != 0) {
         return;
     }
     SaveState(GetMainSlot());
+
+    if (frame_count == 0) {
+        // Reset all memory caching in case we loaded.
+        memory_start_frame_ = 0;
+        memory_end_frame_ = 0;
+        memory_current_frame_ = 0;
+    }
 
     memory_current_frame_ = frame_count;
 

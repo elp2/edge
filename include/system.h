@@ -66,4 +66,5 @@ class System : public ScreenshotTaker, public StateNavigator {
   std::chrono::high_resolution_clock::time_point last_frame_start_time_;
 
   MMU *GetMMU(bool skip_boot_rom);
+  bool WillLoadState();
 };

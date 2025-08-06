@@ -56,8 +56,8 @@ public:
 
     struct SaveState GetSaveState();
 
-    void FinishedFrame(int frame_count);
-
+    void WillStartFrame(int frame_count);
+    
     // Returns the frame number of the state that was loaded.
     long GoBackInMemory();
 
