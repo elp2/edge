@@ -71,7 +71,7 @@ struct GameScreen: View {
     
     private var saveStatesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Save States")
+            Text("Manual Save States")
                 .font(.title2)
                 .fontWeight(.semibold)
                 .padding(.horizontal)
@@ -121,13 +121,13 @@ struct GameScreen: View {
                     Image(uiImage: screenshot)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 60, height: 40)
-                        .cornerRadius(4)
+                        .frame(width: 160, height: 144)
+                        .cornerRadius(6)
                 } else {
                     Rectangle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 60, height: 40)
-                        .cornerRadius(4)
+                        .fill(Color.pink.opacity(0.3))
+                        .frame(width: 160, height: 144)
+                        .cornerRadius(6)
                         .overlay(
                             Image(systemName: "photo")
                                 .foregroundColor(.gray)
@@ -136,15 +136,17 @@ struct GameScreen: View {
                 
                 // State info
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(state.getSlot() == 0 ? "Main Save" : "State \(state.getSlot())")
-                        .font(.headline)
                     if let saveDate = state.getSaveDate() {
+                        Text(formatRelativeTime(saveDate))
+                            .font(.headline)
                         Text(formatDate(saveDate))
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundColor(.secondary)
                     } else {
+                        Text(state.getSlot() == 0 ? "Main Save" : "State \(state.getSlot())")
+                            .font(.headline)
                         Text("Unknown date")
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundColor(.secondary)
                     }
                 }
@@ -171,6 +173,27 @@ struct GameScreen: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd/yy HH:mm:ss"
         return formatter.string(from: date)
+    }
+    
+    private func formatRelativeTime(_ date: Date) -> String {
+        let now = Date()
+        let timeInterval = now.timeIntervalSince(date)
+        
+        if timeInterval < 60 {
+            return "Just now"
+        } else if timeInterval < 3600 { // Less than 1 hour
+            let minutes = Int(timeInterval / 60)
+            return "\(minutes) min\(minutes == 1 ? "" : "s") ago"
+        } else if timeInterval < 86400 { // Less than 1 day
+            let hours = Int(timeInterval / 3600)
+            return "\(hours) hour\(hours == 1 ? "" : "s") ago"
+        } else if timeInterval < 2592000 { // Less than 30 days
+            let days = Int(timeInterval / 86400)
+            return "\(days) day\(days == 1 ? "" : "s") ago"
+        } else {
+            let months = Int(timeInterval / 2592000)
+            return "\(months) month\(months == 1 ? "" : "s") ago"
+        }
     }
 }
 
