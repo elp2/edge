@@ -207,7 +207,10 @@ void StateController::WillStartFrame(int frame_count) {
     if (frame_count % SAVE_INTERVAL_FRAMES != 0) {
         return;
     }
-    SaveState(GetMainSlot());
+    if (frame_count != 0) {
+        // Don't overwrite since we won't have a screenshot since rendering hasn't happened yet.
+        SaveState(GetMainSlot());
+    }
 
     if (frame_count == 0) {
         // Reset all memory caching in case we loaded.
